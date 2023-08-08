@@ -2,7 +2,7 @@
 import { Model, UUIDV4 } from "sequelize";
 import { LocationEquipmentAttributes } from "../interfaces/locat_equip.interface";
 const { sequelize, DataTypes } = require("../database/index");
-//const Equipment = require('../models/equipment');
+
 
 class LocationEquip
   extends Model<LocationEquipmentAttributes>

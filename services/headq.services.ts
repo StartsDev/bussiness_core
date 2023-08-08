@@ -39,11 +39,7 @@ const getHeadServ = async () => {
 
 const updateHeadServ = async (head: any) => {
   try {
-    // verificar si todas la sedes si su propiedad is Principal esta en false
-    // Recibir id del headquarter validar si existe en la tabla headquarters
-    // Verificar si en la propiedad isPrincipal es true o false
-    // Si es false actualizarlo a true
-   // const headquarters = await Headquarter.update();
+    //Hola serv
     return {
       //data: headquarters,
       msg:"Sede actualizada satisfactoriamente..."
