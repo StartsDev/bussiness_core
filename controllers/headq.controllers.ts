@@ -58,7 +58,7 @@ const editHeadquarter = async (req: Request, res: Response) => {
   }
 };
 
-//Delete a client
+//Delete headquarter
 const deleteHeadquarter = async (req: Request, res: Response) => {
   try {
     const head = await deleteHeadServ(req.params.id);
