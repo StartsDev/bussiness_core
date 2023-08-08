@@ -57,7 +57,6 @@ const getOneClientServ = async (client: any) => {
 
 const updateClientServ = async (id: any, client: any) => {
   try {
-    //const {numIdent,firstName, lastName, email, phone, identId, roleId} = client
     const [updateClient] = await Client.update(client, {
       where: {
         id,
