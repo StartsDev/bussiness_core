@@ -17,17 +17,7 @@ class LocationEquip
   cantidad!: number;
   status!: boolean;
 
-  static associate(equipment: any) {
-     /*  // Equipment - Location_Equipment
-      equipment.hasMany(LocationEquip, {
-        foreignKey: "equipmentId",
-        as: "locationequips",
-      });
-  
-      LocationEquip.belongsTo(equipment, {
-        foreignKey: "equipmentId",
-      }); */
-  }
+  static associate(equipment: any) {}
 }
 LocationEquip.init(
   {
@@ -52,8 +42,5 @@ LocationEquip.init(
     freezeTableName: true,
   }
 );
-
-  // aqui estoy ejecutando las relaciones
- // LocationEquip.associate(Equipment);
 
 module.exports = LocationEquip;
