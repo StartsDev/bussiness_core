@@ -1,5 +1,6 @@
 const Headquarter = require("../models/headquarter");
 import { HeadquarterAttributes } from "../interfaces/headquarter.interface";
+const Client = require("../models/client");
 
 const createHeadServ = async (head: HeadquarterAttributes) => {
   try {
@@ -28,7 +29,16 @@ const createHeadServ = async (head: HeadquarterAttributes) => {
 
 const getHeadServ = async () => {
   try {
-    const headquarters = await Headquarter.findAll();
+    const headquarters = await Headquarter.findAll({
+      where: { status: false },
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Client,
+          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+        }
+      ],
+    });
     return {
       data: headquarters,
     };
