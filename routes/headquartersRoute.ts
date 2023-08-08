@@ -1,5 +1,12 @@
 import { Router } from "express";
-import { createHeadqaurter, getHeadquarters } from "../controllers/headq.controllers";
+import {
+  createHeadqaurter,
+  getHeadquarters,
+  getOneHeadquarter,
+  getHeadqClient,
+  editHeadquarter,
+  deleteHeadquarter
+} from "../controllers/headq.controllers";
 
 const router = Router();
 
@@ -8,5 +15,17 @@ router.post("/create-headquarter", createHeadqaurter);
 
 // Get headquarters
 router.get("/get-headquarters", getHeadquarters);
+
+// Get headquarter
+router.get("/get-one-headquarter/:id", getOneHeadquarter);
+
+// Get all headquarters by client
+router.get('/get-headquarters-client/:clientId', getHeadqClient);
+
+// Update headquarter
+router.patch("/update-headquarter/:id", editHeadquarter);
+
+// Delete headquarter
+router.patch("/delete-headquarter/:id", deleteHeadquarter);
 
 export default router;

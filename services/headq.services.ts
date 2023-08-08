@@ -36,7 +36,7 @@ const getHeadServ = async () => {
         {
           model: Client,
           attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-        }
+        },
       ],
     });
     return {
@@ -47,16 +47,103 @@ const getHeadServ = async () => {
   }
 };
 
-const updateHeadServ = async (head: any) => {
+const getOneHeadServ = async (head: any) => {
   try {
-    //Hola serv
+    const findHead = await Headquarter.findOne({
+      where: { id: head },
+    });
+    if (!head) {
+      return {
+        msg: "Esta sede no existe",
+      };
+    }
     return {
-      //data: headquarters,
-      msg:"Sede actualizada satisfactoriamente..."
+      client: findHead,
     };
   } catch (e) {
     throw new Error(e as string);
   }
-}
+};
 
-export { createHeadServ, getHeadServ, updateHeadServ };
+const allHeadClientServ = async (user: any) => {
+  try {
+    const hedClient = await Headquarter.findAll({
+      where: { clientId: user },
+      attributes: { exclude: ["createdAt", "updatedAt"] },
+      include: [
+        {
+          model: Client,
+          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+        }
+      ],
+    });
+    if (!hedClient) {
+      return {
+        msg: "Sedes no hay con este cliente",
+        users: [],
+      };
+    }
+    return { data: hedClient };
+  } catch (e) {
+    throw new Error(e as string);
+  }
+};
+
+const updateHeadServ = async (id: any, head: any) => {
+  try {
+    const [updateHead] = await Headquarter.update(head, {
+      where: {
+        id,
+      },
+      returning: true,
+    });
+    if (!updateHead) {
+      return {
+        msg: "Sede no válida",
+      };
+    }
+    return {
+      msg: "Sede actualizada con exito...",
+    };
+  } catch (e) {
+    throw new Error(e as string);
+  }
+};
+
+const deleteHeadServ = async (id: any) => {
+  try {
+    const findHead = await Headquarter.findOne({ where: { id } });
+    if (findHead.status) {
+      return {
+        msg: "Sede no válida",
+      };
+    }
+    const deletedHeadquarter = await Headquarter.update(
+      { status: true },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+    if (!deletedHeadquarter) {
+      return {
+        msg: "Sede no válida",
+      };
+    }
+    return {
+      msg: "Sede eliminada con exito...",
+    };
+  } catch (e) {
+    throw new Error(e as string);
+  }
+};
+
+export {
+  createHeadServ,
+  getHeadServ,
+  updateHeadServ,
+  getOneHeadServ,
+  allHeadClientServ,
+  deleteHeadServ,
+};
