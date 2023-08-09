@@ -38,6 +38,7 @@ const getHeadServ = async () => {
   try {
     const headquarters = await Headquarter.findAll({
       where: { status: false },
+      order: [['createdAt', 'DESC']],
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
@@ -76,6 +77,7 @@ const allHeadClientServ = async (user: any) => {
   try {
     const hedClient = await Headquarter.findAll({
       where: { clientId: user },
+      order: [['createdAt', 'DESC']],
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
