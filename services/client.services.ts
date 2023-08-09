@@ -28,6 +28,7 @@ const getClientsServ = async () => {
   try {
     const clients = await Client.findAll({
       where: { status: false },
+      order: [['createdAt', 'DESC']],
     });
     return {
       data: clients,

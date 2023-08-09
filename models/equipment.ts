@@ -14,8 +14,10 @@ class Equipment
    * The `models/index` file will call this method automatically.
    */
   id!: string;
+  name!:string;
   description!: string;
   serial!: string;
+  image!:string;
   model!: string;
   brand!: string;
   status!: boolean;
@@ -41,11 +43,19 @@ Equipment.init(
       allowNull: false,
       primaryKey: true,
     },
-    description: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     serial: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    image: {
       type: DataTypes.STRING,
       allowNull: false,
     },
