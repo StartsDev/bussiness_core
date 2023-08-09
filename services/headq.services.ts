@@ -1,9 +1,16 @@
 const Headquarter = require("../models/headquarter");
-import { HeadquarterAttributes } from "../interfaces/headquarter.interface";
 const Client = require("../models/client");
 
-const createHeadServ = async (head: HeadquarterAttributes) => {
+const createHeadServ = async (head: any) => {
   try {
+    const findClient = await Client.findOne({
+      where: { id: head.clientId },
+    });
+    if (!findClient) {
+      return {
+        msg: "El Id del cliente no existe...",
+      };
+    }
     const findHead = await Headquarter.findOne({
       where: { headName: head.headName },
     });
@@ -74,7 +81,7 @@ const allHeadClientServ = async (user: any) => {
         {
           model: Client,
           attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-        }
+        },
       ],
     });
     if (!hedClient) {
@@ -91,6 +98,20 @@ const allHeadClientServ = async (user: any) => {
 
 const updateHeadServ = async (id: any, head: any) => {
   try {
+    const headFound = await Headquarter.findOne({ where: { id } });
+    if (!headFound) {
+      return {
+        msg: "Sede no válida",
+      };
+    }
+    const clientFound = await Client.findOne({
+      where: { id: head.clientId },
+    });
+    if (!clientFound) {
+      return {
+        msg: "Cliente no válido",
+      };
+    }
     const [updateHead] = await Headquarter.update(head, {
       where: {
         id,
@@ -99,7 +120,7 @@ const updateHeadServ = async (id: any, head: any) => {
     });
     if (!updateHead) {
       return {
-        msg: "Sede no válida",
+        msg: "Actualización no válida...",
       };
     }
     return {

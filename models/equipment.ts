@@ -3,7 +3,6 @@ import { Model, UUIDV4 } from "sequelize";
 import { EquipmentAttributes } from "../interfaces/equipment.interface";
 const { sequelize, DataTypes } = require("../database/index");
 const Maintenance = require("../models/maintenance");
-const LocationEquip = require("../models/locationEquip");
 
 class Equipment
   extends Model<EquipmentAttributes>
@@ -16,22 +15,12 @@ class Equipment
    */
   id!: string;
   description!: string;
-  reference!: string;
+  serial!: string;
   model!: string;
   brand!: string;
   status!: boolean;
 
-  static associate(locationequip: any, maintenance: any) {
-
-    // Equipment - Location_Equipment
-    Equipment.hasMany(locationequip, {
-      foreignKey: "equipmentId",
-      as: "locationequips",
-    });
-
-    locationequip.belongsTo(Equipment, {
-      foreignKey: "equipmentId",
-    });
+  static associate(maintenance: any) {
 
     // Equipment - Maintenance
     Equipment.hasMany(maintenance, {
@@ -56,7 +45,7 @@ Equipment.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    reference: {
+    serial: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -81,6 +70,6 @@ Equipment.init(
 );
 
 // aqui estoy ejecutando las relaciones
-Equipment.associate(LocationEquip, Maintenance);
+Equipment.associate(Maintenance);
 
 module.exports = Equipment;
