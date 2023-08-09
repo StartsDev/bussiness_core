@@ -2,7 +2,7 @@
 import { Model, UUIDV4 } from "sequelize";
 import { LoctionAttributes } from "../interfaces/location.interface";
 const { sequelize, DataTypes } = require("../database/index");
-const LocationEquip = require("../models/locationEquip");
+const Equipment = require("../models/equipment");
 
 class Location extends Model<LoctionAttributes> implements LoctionAttributes {
   /**
@@ -12,15 +12,16 @@ class Location extends Model<LoctionAttributes> implements LoctionAttributes {
    */
   id!: string;
   locationName!: string;
+  description!: string;
+  status!:boolean;
 
-  static associate(locationequip: any) {
-     // Location - Location_Equipment
-     Location.hasMany(locationequip, {
+  static associate(equipment: any) {
+
+    Location.hasMany(equipment,{
       foreignKey: 'locationId',
-      as: 'locationequips',
+      as: 'equipments',
     });
-    
-    locationequip.belongsTo(Location, {
+    equipment.belongsTo(Location, {
       foreignKey: 'locationId',
     });
   }
@@ -36,6 +37,14 @@ Location.init(
     locationName: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    status:{
+      type: DataTypes.BOOLEAN,
+      defaultValue:false,
     }
   },
   {
@@ -46,7 +55,7 @@ Location.init(
 );
 
 // aqui estoy ejecutando las relaciones
-Location.associate(LocationEquip);
+Location.associate(Equipment);
 
 
 module.exports = Location;

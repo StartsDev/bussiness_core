@@ -5,12 +5,12 @@ const cors = require("cors");
 const morgan = require("morgan");
 import headquartersRoute from "./routes/headquartersRoute";
 import clientRoute from "./routes/clientRoute";
+import locationRoute from "./routes/locationRoute";
 
 // Models
 require("./models/client");
 require("./models/headquarter");
 require("./models/equipment");
-require("./models/locationEquip");
 require("./models/location");
 require("./models/maintenance");
 require("./models/detailquot");
@@ -31,6 +31,7 @@ app.use(morgan("tiny"));
 //Routes
 app.use("/api/v1/headquarter", headquartersRoute);
 app.use("/api/v1/client", clientRoute);
+app.use("/api/v1/location", locationRoute);
 
 
 // Sync db function
