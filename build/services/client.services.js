@@ -6,8 +6,11 @@ const createClientServ = async (client) => {
     try {
         const findClient = await Client.findOne({ where: { nit: client.nit } });
         if (findClient) {
-            console.log(findClient);
-            return { error: "Este cliente ya existe", success: false };
+            return {
+                msg: "Este cliente ya existe",
+                success: false,
+                data: findClient
+            };
         }
         const newClient = await Client.create(client);
         return {
@@ -17,7 +20,6 @@ const createClientServ = async (client) => {
         };
     }
     catch (e) {
-        console.log(e);
         throw new Error(e);
     }
 };
