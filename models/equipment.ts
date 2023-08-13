@@ -17,7 +17,7 @@ class Equipment
   name!: string;
   description!: string;
   serial!: string;
-  image!: { public_id: string; secure_url: string };
+  image!: string;
   model!: string;
   brand!: string;
   status!: boolean;
@@ -55,7 +55,7 @@ Equipment.init(
       allowNull: true,
     },
     image: {
-      type: DataTypes.JSON, 
+      type: DataTypes.STRING, 
       defaultValue:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV8TrrnMZ9mo9lDemTXDLXxAJsY6hiqCKJ6w&usqp=CAU"
     },
     model: {
