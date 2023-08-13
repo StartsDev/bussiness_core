@@ -2,7 +2,7 @@ const Location = require("../models/location");
 const Equipment = require("../models/equipment");
 const Headquarters = require("../models/headquarter");
 const Client = require("../models/client");
-const { uploadImage, deleteImage } = require("../utils/cloudinary.js");
+
 
 const newEquipmentServ = async (equip: any) => {
   try {

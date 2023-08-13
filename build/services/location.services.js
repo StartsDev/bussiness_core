@@ -171,9 +171,9 @@ exports.updateLocationServ = updateLocationServ;
 const deleteLocationServ = async (id) => {
     try {
         const findLocation = await Location.findOne({ where: { id } });
-        if (findLocation.status) {
+        if (findLocation.dataValues.status) {
             return {
-                msg: "Ubicación no válida",
+                msg: "La ubicación no válida",
             };
         }
         const deletedLocation = await Location.update({ status: true }, {

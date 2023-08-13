@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { uploadImage } from "../services/image.services";
 
-const { uploadImageCloud } = require("../utils/cloudinary.js");
+const { uploadImageCloud } = require("../utils/cloudinary");
 
 const uploadControllerImg = async (req: any, res: Response) => {
   try {

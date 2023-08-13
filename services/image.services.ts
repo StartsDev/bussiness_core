@@ -2,13 +2,8 @@ const Maintenance = require("../models/maintenance");
 
 
 const uploadImage = async(image:string, id:string)=>{
- 
-    let idParsed = parseInt(id)
-    console.log(id)
-    console.log(idParsed)
     try {
- 
-    
+        let idParsed = parseInt(id)
        const findMaintenance = await Maintenance.findOne({
         where:{id:id}
        })

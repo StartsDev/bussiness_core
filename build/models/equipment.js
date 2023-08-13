@@ -45,11 +45,11 @@ Equipment.init({
     },
     serial: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     image: {
-        type: DataTypes.STRING,
-        allowNull: false,
+        type: DataTypes.JSON,
+        defaultValue: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV8TrrnMZ9mo9lDemTXDLXxAJsY6hiqCKJ6w&usqp=CAU"
     },
     model: {
         type: DataTypes.STRING,

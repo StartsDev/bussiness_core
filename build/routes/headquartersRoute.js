@@ -14,5 +14,5 @@ router.get('/get-headquarters-client/:clientId', headq_controllers_1.getHeadqCli
 // Update headquarter
 router.patch("/update-headquarter/:id", headq_controllers_1.editHeadquarter);
 // Delete headquarter
-router.patch("/delete-headquarter/:id", headq_controllers_1.deleteHeadquarter);
+router.delete("/delete-headquarter/:id", headq_controllers_1.deleteHeadquarter);
 exports.default = router;
