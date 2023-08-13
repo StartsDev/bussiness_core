@@ -22,6 +22,6 @@ router.get("/get-client/:id", getOneClient);
 router.patch("/update-client/:id", editClient);
 
 //Delete Client
-router.patch("/delete-client/:id", deleteClient);
+router.delete("/delete-client/:id", deleteClient);
 
 export default router;

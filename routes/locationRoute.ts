@@ -26,6 +26,6 @@ router.get("/get-locations-headquarter/:headquarterId", getLocationHead);
 router.patch("/update-location/:id", editLocation);
 
 // Delete location
-router.patch("/delete-location/:id", deleteLocation);
+router.delete("/delete-location/:id", deleteLocation);
 
 export default router;

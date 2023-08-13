@@ -14,16 +14,15 @@ class Equipment
    * The `models/index` file will call this method automatically.
    */
   id!: string;
-  name!:string;
+  name!: string;
   description!: string;
   serial!: string;
-  image!:string;
+  image!: { public_id: string; secure_url: string };
   model!: string;
   brand!: string;
   status!: boolean;
 
   static associate(maintenance: any) {
-
     // Equipment - Maintenance
     Equipment.hasMany(maintenance, {
       foreignKey: "equipmentId",
@@ -53,11 +52,11 @@ Equipment.init(
     },
     serial: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     image: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.JSON, 
+      defaultValue:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV8TrrnMZ9mo9lDemTXDLXxAJsY6hiqCKJ6w&usqp=CAU"
     },
     model: {
       type: DataTypes.STRING,

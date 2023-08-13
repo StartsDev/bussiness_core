@@ -5,19 +5,17 @@ const createClientServ = async (client: ClientAttributes) => {
   try {
     const findClient = await Client.findOne({ where: { nit: client.nit } });
     if (findClient) {
-      return {
-        msg: "Este cliente ya existe",
-      };
+      return { error: new Error("Este cliente ya existe"), success: false };
     }
     const newClient = await Client.create(client);
     if (newClient === null) {
-      return {
-        msg: "Error al registrar el cliente",
-      };
+      return { error: new Error("Error al registrar el cliente"), success: false };
     }
+    
     return {
       msg: "Cliente registrado satisfactoriamente...",
       data: newClient,
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
@@ -28,7 +26,7 @@ const getClientsServ = async () => {
   try {
     const clients = await Client.findAll({
       where: { status: false },
-      order: [['createdAt', 'DESC']],
+      order: [["createdAt", "DESC"]],
     });
     return {
       data: clients,
@@ -80,9 +78,9 @@ const updateClientServ = async (id: any, client: any) => {
 const deleteClientServ = async (id: any) => {
   try {
     const findClient = await Client.findOne({ where: { id } });
-    if (findClient.status) {
+    if (findClient.dataValues.status) {
       return {
-        msg: "Cliente no válido",
+        msg: "El cliente ya ha sido retirado",
       };
     }
     const deletedClient = await Client.update(

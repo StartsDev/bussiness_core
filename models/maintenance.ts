@@ -2,7 +2,7 @@
 import { Model, UUIDV4 } from "sequelize";
 import { MaintenanceAttributes } from "../interfaces/maintenance.interface";
 const { sequelize, DataTypes } = require("../database/index");
-//const Equipment = require("../models/equipment");
+
 
 class Maintenance
   extends Model<MaintenanceAttributes>
@@ -13,8 +13,7 @@ class Maintenance
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
-  id!: string;
-  serviceOrder!: string;
+  id!:number;
   activities!: string;
   voltage_on_L1L2!: number;
   voltage_on_L1L3!: number;
@@ -25,103 +24,109 @@ class Maintenance
   amp_engine_3!: number;
   discharge_pressure!: number;
   service_hour!: string;
-  serive_date!: Date;
+  service_date!: string;
   customer_sign!: string;
   tech_sign!: string;
   photos!: string[];
   techId!: string;
+  customerId!: string;
   observations!: string;
-  status!: boolean;
-
-  static associate(model:any) {} 
+  status!: string;
+  delete!: boolean;
+  static associate(model: any) {}
 }
 
 Maintenance.init(
   {
     id: {
-      type: DataTypes.UUID,
-      defaultValue: UUIDV4,
-      allowNull: false,
+      type: DataTypes.INTEGER,
+      autoIncrement:true,
       primaryKey: true,
-    },
-    serviceOrder: {
-      type: DataTypes.STRING,
-      allowNull: false,
     },
     activities: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     voltage_on_L1L2: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     voltage_on_L1L3: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     voltage_on_L2L3: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     suction_pressure: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     amp_engine_1: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     amp_engine_2: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     amp_engine_3: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     discharge_pressure: {
       type: DataTypes.FLOAT,
-      allowNull: false,
+      allowNull: true,
       defaultValue: 0.0,
     },
     service_hour: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    serive_date: {
-      type: DataTypes.DATE,
+    service_date: {
+      type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
     customer_sign: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     tech_sign: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     photos: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      allowNull: false,
-    },
+      allowNull: true,
+    }, 
     techId: {
       type: DataTypes.UUID,
       defaultValue: UUIDV4,
-      allowNull: false,
+      allowNull: true,
+    },
+    customerId: {
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4,
+      allowNull: true,
     },
     observations: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     status: {
+      type: DataTypes.STRING,
+      defaultValue: "En ejecucion",
+    },
+    delete: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
@@ -132,8 +137,5 @@ Maintenance.init(
     freezeTableName: true,
   }
 );
-
-// aqui estoy ejecutando las relaciones
-//Maintenance.associate(Equipment);
 
 module.exports = Maintenance;

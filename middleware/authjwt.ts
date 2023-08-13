@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import axios, { AxiosResponse } from "axios";
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_JWT;
@@ -47,14 +48,31 @@ export const verifyToken = async (
   }
 };
 
-// Verificamos si el rol del usuario es Administrador
-export const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
-  /* try {
-    //Use axios petition
-        const user = await User.findById(req.userId);
-        if (user.role !== "admin") return res.status(401).json({ message: ROLE_ERROR });
-        next();
-    } catch (error) {
-        return res.status(401).json({ error });
-    } */
+// Verificamos si el rol del usuario es Tecnico
+export const isTech = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const baseUrl = "http://127.0.0.1:9000/api/v1/user/get-user";
+
+    const id = req.decoded?.userId;
+
+    const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const userData: any = response.data;
+    if (!userData.success) {
+      return res.status(401).json({ message: userData.msg });
+    }
+    if (userData.user.Role.role !== "Tecnico")
+      return res
+        .status(401)
+        .json({ message: "El rol de usuario no es técnico" });
+    req.body.techId = userData.user.id;
+    req.body.techName = `${userData.user.firstName} ${userData.user.lastName}`;
+    req.body.techNumId = userData.user.numIdent;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error });
+  }
 };
