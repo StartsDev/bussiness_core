@@ -6,12 +6,10 @@ const createClientServ = async (client) => {
     try {
         const findClient = await Client.findOne({ where: { nit: client.nit } });
         if (findClient) {
-            return { error: new Error("Este cliente ya existe"), success: false };
+            console.log(findClient);
+            return { error: "Este cliente ya existe", success: false };
         }
         const newClient = await Client.create(client);
-        if (newClient === null) {
-            return { error: new Error("Error al registrar el cliente"), success: false };
-        }
         return {
             msg: "Cliente registrado satisfactoriamente...",
             data: newClient,
@@ -19,6 +17,7 @@ const createClientServ = async (client) => {
         };
     }
     catch (e) {
+        console.log(e);
         throw new Error(e);
     }
 };
