@@ -102,14 +102,12 @@ Maintenance.init({
         allowNull: true,
     },
     techId: {
-        type: DataTypes.UUID,
-        defaultValue: sequelize_1.UUIDV4,
-        allowNull: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     customerId: {
-        type: DataTypes.UUID,
-        defaultValue: sequelize_1.UUIDV4,
-        allowNull: true,
+        type: DataTypes.STRING,
+        allowNull: false,
     },
     observations: {
         type: DataTypes.STRING,
