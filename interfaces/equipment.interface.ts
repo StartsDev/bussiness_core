@@ -3,10 +3,7 @@ export interface EquipmentAttributes {
   name: string;
   description: string;
   serial: string;
-  image: {
-    public_id: string;
-    secure_url: string;
-  };
+  image: string;
   model: string;
   brand: string;
   status: boolean;
