@@ -1,6 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAdmin = exports.verifyToken = void 0;
+exports.isTech = exports.verifyToken = void 0;
+const axios_1 = __importDefault(require("axios"));
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_JWT;
@@ -29,15 +33,27 @@ const verifyToken = async (req, res, next) => {
     }
 };
 exports.verifyToken = verifyToken;
-// Verificamos si el rol del usuario es Administrador
-const isAdmin = async (req, res, next) => {
-    /* try {
-      //Use axios petition
-          const user = await User.findById(req.userId);
-          if (user.role !== "admin") return res.status(401).json({ message: ROLE_ERROR });
-          next();
-      } catch (error) {
-          return res.status(401).json({ error });
-      } */
+// Verificamos si el rol del usuario es Tecnico
+const isTech = async (req, res, next) => {
+    try {
+        const baseUrl = "http://127.0.0.1:9000/api/v1/user/get-user";
+        const id = req.decoded?.userId;
+        const response = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = response.data;
+        if (!userData.success) {
+            return res.status(401).json({ message: userData.msg });
+        }
+        if (userData.user.Role.role !== "Tecnico")
+            return res
+                .status(401)
+                .json({ message: "El rol de usuario no es técnico" });
+        req.body.techId = userData.user.id;
+        req.body.techName = `${userData.user.firstName} ${userData.user.lastName}`;
+        req.body.techNumId = userData.user.numIdent;
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error });
+    }
 };
-exports.isAdmin = isAdmin;
+exports.isTech = isTech;

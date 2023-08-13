@@ -1,6 +1,5 @@
 export interface MaintenanceAttributes {
-    id: string;
-    serviceOrder: string;
+    id: number;
     activities: string;
     voltage_on_L1L2: number;
     voltage_on_L1L3: number;
@@ -11,11 +10,13 @@ export interface MaintenanceAttributes {
     amp_engine_3 : number;
     discharge_pressure : number;
     service_hour : string;
-    serive_date: Date;
+    service_date: string;
     customer_sign : string;
     tech_sign: string;
-    photos: string[];
+    photos: any;
     techId: string;
+    customerId : string;
     observations: string;
-    status: boolean;
+    status: string;
+    delete: boolean;
   }

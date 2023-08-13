@@ -136,9 +136,9 @@ const updateHeadServ = async (id: any, head: any) => {
 const deleteHeadServ = async (id: any) => {
   try {
     const findHead = await Headquarter.findOne({ where: { id } });
-    if (findHead.status) {
+    if (findHead.dataValues.status) {
       return {
-        msg: "Sede no válida",
+        msg: "La sede ya fue retirada",
       };
     }
     const deletedHeadquarter = await Headquarter.update(

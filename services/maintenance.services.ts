@@ -1,41 +1,92 @@
-const Location = require("../models/location");
-const Headquarters = require("../models/headquarter");
-const Client = require("../models/client");
+const Equipment = require("../models/equipment");
+const Maintenance = require("../models/maintenance");
 
 // Create a location
-const createLocationServ = async (location: any) => {
+const createMaintenanceServ = async (maint: any) => {
   try {
-    const findHeadquarter = await Headquarters.findOne({
-      where: { id: location.headquarterId },
+    const {
+      activities,
+      voltage_on_L1L2,
+      voltage_on_L1L3,
+      voltage_on_L2L3,
+      suction_pressure,
+      amp_engine_1,
+      amp_engine_2,
+      amp_engine_3,
+      discharge_pressure,
+      service_hour,
+      service_date,
+      photos,
+      customer_sign,
+      tech_sign,
+      customerId,
+      observations,
+      equipmentId,
+      techId,
+      techName,
+      techNumId,
+    } = maint;
+
+    const findEquipment = await Equipment.findOne({
+      where: { id: maint.equipmentId },
     });
-    if (!findHeadquarter) {
+    if (!findEquipment.dataValues) {
       return {
-        msg: "El Id de la sede no existe...",
+        error: new Error("El Id del equipo no existe..."),
+        success: false,
       };
     }
-    const findLocation = await Location.findOne({
-      where: { locationName: location.locationName },
+
+    const findMaintenance = await Maintenance.findOne({
+      where: { service_hour: maint.service_hour },
     });
-    if (findLocation) {
+
+    if (findMaintenance) {
       return {
-        msg: "Esta ubicación ya existe",
+        error: "Ya existe un servicio registrado a esa hora...",
+        success: false,
       };
     }
-    const newLocation = await Location.create(location);
-    if (newLocation === null) {
+
+    const newMaintenance = new Maintenance({
+      activities,
+      voltage_on_L1L2,
+      voltage_on_L1L3,
+      voltage_on_L2L3,
+      suction_pressure,
+      amp_engine_1,
+      amp_engine_2,
+      amp_engine_3,
+      discharge_pressure,
+      service_hour,
+      service_date,
+      customer_sign,
+      tech_sign,
+      photos,
+      techId,
+      customerId,
+      observations,
+      equipmentId,
+    });
+    await newMaintenance.save();
+
+    if (newMaintenance === null) {
       return {
-        msg: "Error al registrar la ubicación",
+        error: new Error("Error al registrar el servicio..."),
+        success: false,
       };
     }
+    
     return {
-      msg: "Ubicación registrada satisfactoriamente...",
-      location: newLocation,
+      msg: "Servicio registrado satisfactoriamente...",
+      data: { newMaintenance, techName, techNumId },
+      success: true,
     };
-  } catch (e) {
-    throw new Error(e as string);
+  } catch (error) {
+    throw new Error(error as string);
   }
 };
-
+/* 
 // Get locations
 const getLocationsServ = async () => {
   try {
@@ -189,12 +240,12 @@ const deleteLocationServ = async (id: any) => {
     throw new Error(e as string);
   }
 };
-
+ */
 export {
-  createLocationServ,
-  getLocationsServ,
+  createMaintenanceServ,
+  /*   getLocationsServ,
   getOneLocationServ,
   allLocationsHeadServ,
   updateLocationServ,
-  deleteLocationServ,
+  deleteLocationServ, */
 };
