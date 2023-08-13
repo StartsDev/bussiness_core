@@ -124,7 +124,7 @@ Maintenance.init(
     },
     status: {
       type: DataTypes.STRING,
-      defaultValue: "En ejecucion",
+      allowNull: true,
     },
     delete: {
       type: DataTypes.BOOLEAN,
