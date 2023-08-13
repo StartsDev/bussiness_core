@@ -48,7 +48,7 @@ Equipment.init({
         allowNull: true,
     },
     image: {
-        type: DataTypes.JSON,
+        type: DataTypes.STRING,
         defaultValue: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV8TrrnMZ9mo9lDemTXDLXxAJsY6hiqCKJ6w&usqp=CAU"
     },
     model: {
