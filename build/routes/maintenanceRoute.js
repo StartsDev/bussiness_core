@@ -7,4 +7,5 @@ const router = (0, express_1.Router)();
 // Register new Maintenance
 router.post("/create-maintenance", authjwt_1.verifyToken, authjwt_1.isTech, maintenance_controllers_1.createMaintenance);
 //router.post("/create-maintenance", createMaintenance);
+router.get("/get-maintenances", maintenance_controllers_1.getMaintenances);
 exports.default = router;

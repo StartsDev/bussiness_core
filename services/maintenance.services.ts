@@ -1,7 +1,10 @@
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
+const Location = require("../models/location");
+const Headquarter = require("../models/headquarter");
+const Client = require("../models/client");
 
-// Create a location
+// Create a manteinance
 const createMaintenanceServ = async (maint: any) => {
   try {
     const {
@@ -27,10 +30,22 @@ const createMaintenanceServ = async (maint: any) => {
       techNumId,
     } = maint;
 
-    const findEquipment = await Equipment.findOne({
-      where: { id: maint.equipmentId },
+    const client = await Client.findOne({
+      where: { id: customerId },
     });
-    if (!findEquipment.dataValues) {
+
+    if (!client) {
+      return {
+        msg: "El Id del cliente no existe...",
+        success: false,
+      };
+    }
+
+    const findEquipment = await Equipment.findOne({
+      where: { id: equipmentId },
+    });
+
+    if (!findEquipment) {
       return {
         msg: "El Id del equipo no existe...",
         success: false,
@@ -38,7 +53,7 @@ const createMaintenanceServ = async (maint: any) => {
     }
 
     const findMaintenance = await Maintenance.findOne({
-      where: { service_hour: maint.service_hour },
+      where: { service_hour },
     });
 
     if (findMaintenance) {
@@ -69,47 +84,68 @@ const createMaintenanceServ = async (maint: any) => {
       equipmentId,
     });
     await newMaintenance.save();
-   
+
     return {
       msg: "Servicio registrado satisfactoriamente...",
       data: { newMaintenance, techName, techNumId },
       success: true,
     };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     throw new Error(error as string);
   }
 };
-/* 
-// Get locations
-const getLocationsServ = async () => {
+
+// Get maintenances
+const getMaintenancesServ = async () => {
   try {
-    const locations = await Location.findAll({
-      where: { status: false },
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+    const maintenances = await Maintenance.findAll({
+      where: { delete: false },
+      order: [["createdAt", "DESC"]],
+      attributes: { exclude: ["createdAt", "updatedAt", "status"] },
       include: [
         {
-          model: Headquarters,
+          model: Equipment,
           attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
           include: [
             {
-              model: Client,
+              model: Location,
               attributes: {
                 exclude: ["id", "createdAt", "updatedAt", "status"],
               },
+              include: [
+                {
+                  model: Headquarter,
+                  attributes: {
+                    exclude: ["id", "createdAt", "updatedAt", "status"],
+                  },
+                  include: [
+                    {
+                      model: Client,
+                      attributes: {
+                        exclude: ["id", "createdAt", "updatedAt", "status"],
+                      },
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
       ],
     });
     return {
-      data: locations,
+      data: maintenances,
     };
   } catch (e) {
+    console.log(e);
     throw new Error(e as string);
   }
 };
 
+// Get maintenance by tech (Home)
+
+/* 
 // Get one location
 const getOneLocationServ = async (location: any) => {
   try {
@@ -237,6 +273,7 @@ const deleteLocationServ = async (id: any) => {
  */
 export {
   createMaintenanceServ,
+  getMaintenancesServ,
   /*   getLocationsServ,
   getOneLocationServ,
   allLocationsHeadServ,

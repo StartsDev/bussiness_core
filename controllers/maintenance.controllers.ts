@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import {
     createMaintenanceServ,
+    getMaintenancesServ,
 } from "../services/maintenance.services";
 
 
@@ -15,6 +16,17 @@ const createMaintenance = async (req: Request, res: Response) => {
     }
   };
 
+  // Get all maintenances
+const getMaintenances = async (req: Request, res: Response) => {
+  try {
+    const maintenances = await getMaintenancesServ();
+    res.status(200).json(maintenances);
+  } catch (error) {
+    if (error instanceof Error) res.status(400).json({ error: error.message });
+  }
+};
+
   export {
     createMaintenance,
+    getMaintenances,
   };
