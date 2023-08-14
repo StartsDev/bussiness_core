@@ -32,7 +32,7 @@ const createMaintenanceServ = async (maint: any) => {
     });
     if (!findEquipment.dataValues) {
       return {
-        error: new Error("El Id del equipo no existe..."),
+        msg: "El Id del equipo no existe...",
         success: false,
       };
     }
@@ -69,20 +69,14 @@ const createMaintenanceServ = async (maint: any) => {
       equipmentId,
     });
     await newMaintenance.save();
-
-    if (newMaintenance === null) {
-      return {
-        error: new Error("Error al registrar el servicio..."),
-        success: false,
-      };
-    }
-    
+   
     return {
       msg: "Servicio registrado satisfactoriamente...",
       data: { newMaintenance, techName, techNumId },
       success: true,
     };
   } catch (error) {
+    console.log(error)
     throw new Error(error as string);
   }
 };

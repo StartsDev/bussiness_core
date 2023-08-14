@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const secretKey = process.env.SECRET_JWT;
@@ -55,14 +55,17 @@ export const isTech = async (
   next: NextFunction
 ) => {
   try {
-    const baseUrl = "http://127.0.0.1:9000/api/v1/user/get-user";
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+    const baseUrl = `${URL}/user/get-user`;
 
     const id = req.decoded?.userId;
 
     const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = response.data;
-    if (!userData.success) {
-      return res.status(401).json({ message: userData.msg });
+
+    if (!userData.user) {
+      return res.status(401).json({ message: "Usuario no válido" });
     }
     if (userData.user.Role.role !== "Tecnico")
       return res

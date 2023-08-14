@@ -42,6 +42,7 @@ Maintenance.init(
       type: DataTypes.INTEGER,
       autoIncrement:true,
       primaryKey: true,
+      allowNull: false,
     },
     activities: {
       type: DataTypes.STRING,
