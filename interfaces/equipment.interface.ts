@@ -5,6 +5,7 @@ export interface EquipmentAttributes {
   serial: string;
   image: string;
   model: string;
+  type: string;
   brand: string;
   status: boolean;
 }
