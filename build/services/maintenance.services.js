@@ -37,7 +37,7 @@ const createMaintenanceServ = async (maint) => {
                 success: false,
             };
         }
-        const newMaintenance = new Maintenance({
+        const newMaintenance = await Maintenance.create({
             activities,
             voltage_on_L1L2,
             voltage_on_L1L3,
@@ -57,7 +57,28 @@ const createMaintenanceServ = async (maint) => {
             observations,
             equipmentId,
         });
-        await newMaintenance.save();
+        /*
+        const newMaintenance = new Maintenance({
+          activities,
+          voltage_on_L1L2,
+          voltage_on_L1L3,
+          voltage_on_L2L3,
+          suction_pressure,
+          amp_engine_1,
+          amp_engine_2,
+          amp_engine_3,
+          discharge_pressure,
+          service_hour,
+          service_date,
+          customer_sign,
+          tech_sign,
+          photos,
+          techId,
+          customerId,
+          observations,
+          equipmentId,
+        });
+        await newMaintenance.save(); */
         return {
             msg: "Servicio registrado satisfactoriamente...",
             data: { newMaintenance, techName, techNumId },
@@ -65,11 +86,9 @@ const createMaintenanceServ = async (maint) => {
         };
     }
     catch (error) {
-        console.log(error);
         throw new Error(error);
     }
 };
-
 exports.createMaintenanceServ = createMaintenanceServ;
 // Get maintenances
 const getMaintenancesServ = async () => {
