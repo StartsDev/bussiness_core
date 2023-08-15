@@ -69,6 +69,7 @@ const createMaintenanceServ = async (maint) => {
         throw new Error(error);
     }
 };
+
 exports.createMaintenanceServ = createMaintenanceServ;
 // Get maintenances
 const getMaintenancesServ = async () => {
