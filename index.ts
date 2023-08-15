@@ -51,7 +51,7 @@ app.use("/api/v1/image", imageRoute);
 // Sync db function
 async function syncDatabase() {
   try {
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ force : true });
     console.log("Sincronización de la base de datos exitosa.");
   } catch (error) {
     console.error("Error al sincronizar la base de datos:", error);
