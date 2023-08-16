@@ -1,4 +1,7 @@
 const Client = require("../models/client");
+const Headquarter = require("../models/headquarter");
+const Location = require("../models/location");
+const Equipment = require("../models/equipment");
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
@@ -8,7 +11,7 @@ const createClientServ = async (client: ClientAttributes) => {
       return {
         msg: "Este cliente ya existe",
         success: false,
-        data: findClient
+        data: findClient,
       };
     }
 
@@ -29,10 +32,27 @@ const getClientsServ = async () => {
     const clients = await Client.findAll({
       where: { status: false },
       order: [["createdAt", "DESC"]],
+      attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+      include: {
+        model:Headquarter,
+        as:"headquarters",
+        order: [["createdAt", "DESC"]],
+        attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+        include: {
+          model:Location,
+          as:"locations",
+          order: [["createdAt", "DESC"]],
+          attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+          include: {
+            model:Equipment,
+            as:"equipments",
+            order: [["createdAt", "DESC"]],
+            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+          }
+        }
+      }
     });
-    return {
-      data: clients,
-    };
+    return clients;
   } catch (e) {
     throw new Error(e as string);
   }
