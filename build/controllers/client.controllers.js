@@ -18,7 +18,7 @@ exports.createClient = createClient;
 const getClients = async (req, res) => {
     try {
         const clients = await (0, client_services_1.getClientsServ)();
-        res.status(200).json(clients);
+        res.status(200).json({ clients, success: true });
     }
     catch (error) {
         if (error instanceof Error)

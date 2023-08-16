@@ -7,7 +7,7 @@ const Headquarters = require("../models/headquarter");
 const Client = require("../models/client");
 const newEquipmentServ = async (equip) => {
     try {
-        const { name, description, serial, model, brand, locationId } = equip;
+        const { name, description, serial, model, type, brand, locationId } = equip;
         const findLocation = await Location.findOne({
             where: { id: equip.locationId },
         });
@@ -29,6 +29,7 @@ const newEquipmentServ = async (equip) => {
             description,
             serial,
             model,
+            type,
             brand,
             locationId,
         });
@@ -74,7 +75,7 @@ const getEquipmentServ = async () => {
             ],
         });
         return {
-            data: equipments,
+            data: equipments
         };
     }
     catch (e) {
