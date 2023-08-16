@@ -21,7 +21,7 @@ const createClient = async (req: Request, res: Response) => {
 const getClients = async (req: Request, res: Response) => {
   try {
     const clients = await getClientsServ();
-    res.status(200).json({clients, success:true});
+    res.status(200).json(clients);
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message })
   }
