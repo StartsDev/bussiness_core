@@ -226,6 +226,7 @@ const getMaintByTechServ = async (tech: any) => {
   }
 };
 
+
 /* 
 // Get one maintenance
 const getOneLocationServ = async (location: any) => {
