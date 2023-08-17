@@ -76,9 +76,9 @@ const getOneClientServ = async (client: any) => {
   }
 };
 
-const updateClientServ = async (id: any, client: any) => {
+const updateClientServ = async (id: any, cli: any) => {
   try {
-    const [updateClient] = await Client.update(client, {
+    const [updateClient] = await Client.update(cli, {
       where: {
         id,
       },
@@ -89,8 +89,17 @@ const updateClientServ = async (id: any, client: any) => {
         msg: "Cliente no válido",
       };
     }
+    if (updateClient <= 0) {
+      return {
+        msg: "Actualización no realizada...",
+        success: false,
+      };
+    }
+    const client = await Client.findOne({ where: { id } });
     return {
       msg: "Cliente actualizado con exito...",
+      client,
+      success: true
     };
   } catch (e) {
     throw new Error(e as string);

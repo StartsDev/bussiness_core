@@ -94,7 +94,7 @@ const allHeadClientServ = async (user: any) => {
   }
 };
 
-const updateHeadServ = async (id: any, head: any) => {
+const updateHeadServ = async (id: any, headq: any) => {
   try {
     const headFound = await Headquarter.findOne({ where: { id } });
     if (!headFound) {
@@ -103,26 +103,30 @@ const updateHeadServ = async (id: any, head: any) => {
       };
     }
     const clientFound = await Client.findOne({
-      where: { id: head.clientId },
+      where: { id: headq.clientId },
     });
     if (!clientFound) {
       return {
         msg: "Cliente no válido",
       };
     }
-    const [updateHead] = await Headquarter.update(head, {
+    const [updateHead] = await Headquarter.update(headq, {
       where: {
         id,
       },
       returning: true,
     });
-    if (!updateHead) {
+    if (updateHead <= 0) {
       return {
-        msg: "Actualización no válida...",
+        msg: "Actualización no realizada...",
+        success: false,
       };
     }
+    const head = await Headquarter.findOne({ where: { id } });
     return {
       msg: "Sede actualizada con exito...",
+      head,
+      success:true
     };
   } catch (e) {
     throw new Error(e as string);

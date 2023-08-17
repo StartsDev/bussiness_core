@@ -121,7 +121,7 @@ const allLocationsHeadServ = async (location: any) => {
 };
 
 // Update location
-const updateLocationServ = async (id: any, location: any) => {
+const updateLocationServ = async (id: any, locat: any) => {
   try {
     const locationFound = await Location.findOne({ where: { id } });
     if (!locationFound) {
@@ -130,26 +130,30 @@ const updateLocationServ = async (id: any, location: any) => {
       };
     }
     const headFound = await Headquarters.findOne({
-      where: { id: location.headquarterId },
+      where: { id: locat.headquarterId },
     });
     if (!headFound) {
       return {
         msg: "Sede no válida",
       };
     }
-    const [updateLocation] = await Location.update(location, {
+    const [updateLocation] = await Location.update(locat, {
       where: {
         id,
       },
       returning: true,
     });
-    if (!updateLocation) {
+    if (updateLocation <= 0) {
       return {
-        msg: "Actualización no es correcta",
+        msg: "Actualización no realizada...",
+        success: false,
       };
     }
+    const location = await Location.findOne({ where: { id } });
     return {
       msg: "Sede actualizada con exito...",
+      location,
+      success: true
     };
   } catch (e) {
     throw new Error(e as string);

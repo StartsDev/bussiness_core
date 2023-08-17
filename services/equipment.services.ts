@@ -184,10 +184,10 @@ const updateEquipmentServ = async (id: any, equip: any) => {
         success: false,
       };
     }
-    const updatedEquip = await Equipment.findOne({ where: { id } });
+    const equipment = await Equipment.findOne({ where: { id } });
     return {
       msg: "Equipo actualizado con exito...",
-      data: updatedEquip,
+      data: equipment,
       success: true,
     };
   } catch (e) {
