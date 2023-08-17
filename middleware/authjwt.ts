@@ -48,6 +48,7 @@ export const verifyToken = async (
   }
 };
 
+//ROLES DE USUARIO
 // Verificamos si el rol del usuario es Tecnico
 export const isTech = async (
   req: CustomRequest,
@@ -74,6 +75,67 @@ export const isTech = async (
     req.body.techId = userData.user.id;
     req.body.techName = `${userData.user.firstName} ${userData.user.lastName}`;
     req.body.techNumId = userData.user.numIdent;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error });
+  }
+};
+
+//Verificamos si el rol del usuario es administrador
+export const isAdmin = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+    const baseUrl = `${URL}/user/get-user`;
+
+    const id = req.decoded?.userId;
+
+    const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const userData: any = response.data;
+
+    if (!userData.user) {
+      return res.status(401).json({ message: "Usuario no válido" });
+    }
+    if (userData.user.Role.role !== "Administrador")
+      return res
+        .status(401)
+        .json({ message: "El rol de usuario no es administrador" });
+    req.body.userId = userData.user.id;
+    req.body.userName = `${userData.user.firstName} ${userData.user.lastName}`;
+    req.body.numIdent = userData.user.numIdent;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error });
+  }
+};
+
+//Verificamos si el rol del usuario es super usuario
+export const isSuperUser = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+    const baseUrl = `${URL}/user/get-user`;
+
+    const id = req.decoded?.userId;
+
+    const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const userData: any = response.data;
+
+    if (!userData.user) {
+      return res.status(401).json({ message: "Usuario no válido" });
+    }
+    if (userData.user.Role.role !== "Super_Usuario")
+      return res
+        .status(401)
+        .json({ message: "El rol de usuario no es super usuario" });
     next();
   } catch (error) {
     return res.status(401).json({ error });

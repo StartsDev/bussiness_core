@@ -226,102 +226,207 @@ const getMaintByTechServ = async (tech: any) => {
   }
 };
 
-
-/* 
-// Get one maintenance
-const getOneLocationServ = async (location: any) => {
+// Get maintenance by client
+const getMaintByClientServ = async (client: any) => {
   try {
-    const findHead = await Location.findOne({
-      where: { id: location },
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+    const clientFound = await Client.findOne({
+      where: { id: client.customId },
+    });
+    if (!clientFound) {
+      return {
+        msg: "El cliente no esta registrado...",
+        success: false,
+      };
+    }
+    const maintClient = await Maintenance.findAll({
+      where: { customerId: clientFound.dataValues.id },
+      order: [["createdAt", "DESC"]],
+      attributes: { exclude: ["createdAt", "updatedAt", "delete"] },
       include: [
         {
-          model: Headquarters,
+          model: Equipment,
           attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
           include: [
             {
-              model: Client,
+              model: Location,
               attributes: {
                 exclude: ["id", "createdAt", "updatedAt", "status"],
               },
+              include: [
+                {
+                  model: Headquarter,
+                  attributes: {
+                    exclude: ["id", "createdAt", "updatedAt", "status"],
+                  },
+                  include: [
+                    {
+                      model: Client,
+                      attributes: {
+                        exclude: ["id", "createdAt", "updatedAt", "status"],
+                      },
+                    },
+                  ],
+                },
+              ],
             },
           ],
         },
       ],
     });
-    if (!location) {
+    if (!maintClient) {
       return {
-        msg: "Esta ubicación no existe",
+        msg: "No hay mantenimientos registrados para este cliente...",
+        success: false,
       };
     }
+
     return {
-      client: findHead,
+      maintClient,
+      success: true,
     };
+  } catch (error) {
+    throw new Error(error as string);
+  }
+};
+
+// Get maintenance by equipment
+const getMainByEquipment = async (equip: any) => {
+  try {
+    const equipment = await Equipment.findOne({
+      where: { id: equip.equipmentId },
+      order: [["createdAt", "DESC"]],
+      attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+      include: {
+        model: Maintenance,
+        as: "maintenances",
+        order: [["createdAt", "DESC"]],
+        attributes: { exclude: ["createdAt", "updatedAt", "delete"] },
+      },
+    });
+    if (!equipment) {
+      return {
+        msg: "El equipo no esta registrado...",
+        success: false,
+      };
+    }
+    return { equipment, success: true };
   } catch (e) {
+    console.log(e);
     throw new Error(e as string);
   }
 };
 
-//Get locations by headquarter
-const allLocationsHeadServ = async (location: any) => {
+// Get one maintenance by id
+const getMaintByIdServ = async (maint: any) => {
   try {
-    const locationHead = await Location.findAll({
-      where: { headquarterId: location },
+    const maintenance = await Maintenance.findOne({
+      where: { id: maint.id },
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
-          model: Headquarters,
+          model: Equipment,
           attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+          include: [
+            {
+              model: Location,
+              attributes: {
+                exclude: ["id", "createdAt", "updatedAt", "status"],
+              },
+              include: [
+                {
+                  model: Headquarter,
+                  attributes: {
+                    exclude: ["id", "createdAt", "updatedAt", "status"],
+                  },
+                  include: [
+                    {
+                      model: Client,
+                      attributes: {
+                        exclude: ["id", "createdAt", "updatedAt", "status"],
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     });
-    if (!locationHead) {
+    if (!maintenance) {
       return {
-        msg: "Lugares no hay con esta sede",
-        users: [],
+        msg: "Mantenimiento no registrado",
+        success: false,
       };
     }
-    return { data: locationHead };
+    return { maintenance, succes: true };
   } catch (e) {
     throw new Error(e as string);
   }
 };
 
-// Update location
-const updateLocationServ = async (id: any, location: any) => {
+// Update maintenance
+const updateMaintenanceServ = async (id: any, maint: any) => {
   try {
-    const locationFound = await Location.findOne({ where: { id } });
-    if (!locationFound) {
+    const maintFound = await Maintenance.findOne({ where: { id } });
+    if (!maintFound) {
       return {
-        msg: "Ubicación no válida",
+        msg: "Mantenimiento no válido",
+        success: false,
       };
     }
-    const headFound = await Headquarters.findOne({
-      where: { id: location.headquarterId },
+    const clientFound = await Client.findOne({
+      where: { id: maint.customerId },
     });
-    if (!headFound) {
+    if (!clientFound) {
       return {
-        msg: "Sede no válida",
+        msg: "Cliente no registado",
+        success: false,
       };
     }
-    const [updateLocation] = await Location.update(location, {
+    const equipFound = await Equipment.findOne({
+      where: { id: maint.equipmentId },
+    });
+    if (!equipFound) {
+      return {
+        msg: "Equipo no registado",
+        success: false,
+      };
+    }
+    const [updateMaintenance] = await Maintenance.update(maint, {
       where: {
         id,
       },
       returning: true,
     });
-    if (!updateLocation) {
+    if (updateMaintenance <= 0) {
+      return {
+        msg: "Actualización no realizada...",
+        success: false,
+      };
+    }
+    const maintenance = await Maintenance.findOne({ where: { id } });
+    if (!updateMaintenance) {
       return {
         msg: "Actualización no es correcta",
+        success: false
       };
     }
     return {
-      msg: "Sede actualizada con exito...",
+      msg: "Mantenimiento actualizado...",
+      maintenance,
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
   }
 };
+
+// Delete maintenance
+
+
+/* 
+
 
 // Delete location
 const deleteLocationServ = async (id: any) => {
@@ -357,8 +462,10 @@ export {
   createMaintenanceServ,
   getMaintenancesServ,
   getMaintByTechServ,
+  getMaintByClientServ,
+  getMainByEquipment,
+  getMaintByIdServ,
+  updateMaintenanceServ,
   /* 
-  getOneLocationServ,
-  updateLocationServ,
   deleteLocationServ, */
 };
