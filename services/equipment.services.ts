@@ -6,16 +6,15 @@ const Client = require("../models/client");
 
 const newEquipmentServ = async (equip: any) => {
   try {
-    const { name, description, serial, model, type, brand, locationId } = equip;
+    const { name, description, serial, model, type, brand, locationId} = equip;
     const findLocation = await Location.findOne({
       where: { id: equip.locationId },
     });
     if (!findLocation) {
       return {
-        msg: "El Id del lugar no existe...",
+        msg: "La ubicación no existe...",
       };
     }
-
     const findEquipment = await Equipment.findOne({
       where: { serial: equip.serial },
     });
@@ -24,7 +23,6 @@ const newEquipmentServ = async (equip: any) => {
         msg: "Este quipo ya esta registrado",
       };
     }
-
     const newEquipment = await Equipment.create({
       name,
       description,
@@ -32,7 +30,7 @@ const newEquipmentServ = async (equip: any) => {
       model,
       type,
       brand,
-      locationId,
+      locationId
     });
 
     if (!newEquipment) {

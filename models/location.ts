@@ -17,6 +17,7 @@ class Location extends Model<LoctionAttributes> implements LoctionAttributes {
 
   static associate(equipment: any) {
 
+    
     Location.hasMany(equipment,{
       foreignKey: 'locationId',
       as: 'equipments',

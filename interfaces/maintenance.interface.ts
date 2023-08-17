@@ -14,7 +14,11 @@ export interface MaintenanceAttributes {
     customer_sign : string;
     tech_sign: string;
     photos: any;
-    techId: string;
+    tech: {
+      techId: string;
+      techName: string;
+      techNumId: string;
+    };
     customerId : string;
     observations: string;
     status: string;

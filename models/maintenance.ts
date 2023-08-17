@@ -3,7 +3,6 @@ import { Model, UUIDV4 } from "sequelize";
 import { MaintenanceAttributes } from "../interfaces/maintenance.interface";
 const { sequelize, DataTypes } = require("../database/index");
 
-
 class Maintenance
   extends Model<MaintenanceAttributes>
   implements MaintenanceAttributes
@@ -13,7 +12,7 @@ class Maintenance
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
-  id!:number;
+  id!: number;
   activities!: string;
   voltage_on_L1L2!: number;
   voltage_on_L1L3!: number;
@@ -28,7 +27,7 @@ class Maintenance
   customer_sign!: string;
   tech_sign!: string;
   photos!: string[];
-  techId!: string;
+  tech!: { techId: string; techName: string; techNumId: string };
   customerId!: string;
   observations!: string;
   status!: string;
@@ -40,7 +39,7 @@ Maintenance.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement:true,
+      autoIncrement: true,
       primaryKey: true,
       allowNull: false,
     },
@@ -108,9 +107,9 @@ Maintenance.init(
     photos: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
-    }, 
-    techId: {
-      type: DataTypes.STRING,
+    },
+    tech: {
+      type: DataTypes.JSON,
       allowNull: false,
     },
     customerId: {

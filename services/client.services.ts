@@ -34,25 +34,25 @@ const getClientsServ = async () => {
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["createdAt", "updatedAt", "status"] },
       include: {
-        model:Headquarter,
-        as:"headquarters",
+        model: Headquarter,
+        as: "headquarters",
         order: [["createdAt", "DESC"]],
         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
         include: {
-          model:Location,
-          as:"locations",
+          model: Location,
+          as: "locations",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
-            model:Equipment,
-            as:"equipments",
+            model: Equipment,
+            as: "equipments",
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
-          }
-        }
-      }
+            attributes: { exclude: ["createdAt", "updatedAt", "status", "locationId"] },
+          },
+        },
+      },
     });
-    return clients;
+    return { clients, success: true };
   } catch (e) {
     throw new Error(e as string);
   }

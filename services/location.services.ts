@@ -22,11 +22,7 @@ const createLocationServ = async (location: any) => {
       };
     }
     const newLocation = await Location.create(location);
-    if (newLocation === null) {
-      return {
-        msg: "Error al registrar la ubicación",
-      };
-    }
+   
     return {
       msg: "Ubicación registrada satisfactoriamente...",
       location: newLocation,

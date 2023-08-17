@@ -4,6 +4,7 @@ import { ClientAttributes } from "../interfaces/client.interface";
 const { sequelize, DataTypes } = require("../database/index");
 const Quotation = require("../models/quotation");
 
+
 class Client extends Model<ClientAttributes> implements ClientAttributes {
   /**
    * Helper method for defining associations.

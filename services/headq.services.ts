@@ -20,11 +20,7 @@ const createHeadServ = async (head: any) => {
       };
     }
     const newHead = await Headquarter.create(head);
-    if (newHead === null) {
-      return {
-        msg: "Error al registrar la sede",
-      };
-    }
+  
     return {
       msg: "Sede registrada satisfactoriamente...",
       data: newHead,

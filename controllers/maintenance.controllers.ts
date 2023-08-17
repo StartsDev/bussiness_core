@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
     createMaintenanceServ,
     getMaintenancesServ,
+    getMaintByTechServ,
 } from "../services/maintenance.services";
 
 
@@ -11,7 +12,6 @@ const createMaintenance = async (req: Request, res: Response) => {
       const maintenance = await createMaintenanceServ(req.body);
       res.status(200).json(maintenance);
     } catch (error) {
-        console.log(error)
       if (error instanceof Error) res.status(400).json({ error: error.message });
     }
   };
@@ -26,7 +26,18 @@ const getMaintenances = async (req: Request, res: Response) => {
   }
 };
 
+// Get All maintenance by tech
+const getMaintenanceTech = async (req:Request , res:Response) => {
+  try {
+    const maintech = await getMaintByTechServ(req.body);
+    res.status(200).json(maintech);
+  } catch (error) {
+    if (error instanceof Error) res.status(400).json({ error: error.message });
+  }
+}
+
   export {
     createMaintenance,
     getMaintenances,
+    getMaintenanceTech,
   };
