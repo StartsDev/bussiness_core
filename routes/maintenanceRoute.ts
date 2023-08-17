@@ -31,7 +31,7 @@ router.get("/get-main-equipment/:equipmentId", getMaintenanceEquipment);
 router.get("/detail-main/:id", getMaintenanceById);
 
 // Update maintenance (tech)
-router.patch("/update-main/:id", updateMaintenance);
+router.patch("/update-main/:id", verifyToken, isTech, updateMaintenance);
 
 // Delete maintenance (admin & super_user)
 router.delete("/delete-main/:id");
