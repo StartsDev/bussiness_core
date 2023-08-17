@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isTech = exports.verifyToken = void 0;
+exports.isSuperUser = exports.isAdmin = exports.isTech = exports.verifyToken = void 0;
 const axios_1 = __importDefault(require("axios"));
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -33,6 +33,7 @@ const verifyToken = async (req, res, next) => {
     }
 };
 exports.verifyToken = verifyToken;
+//ROLES DE USUARIO
 // Verificamos si el rol del usuario es Tecnico
 const isTech = async (req, res, next) => {
     try {
@@ -58,3 +59,50 @@ const isTech = async (req, res, next) => {
     }
 };
 exports.isTech = isTech;
+//Verificamos si el rol del usuario es administrador
+const isAdmin = async (req, res, next) => {
+    try {
+        const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+        const baseUrl = `${URL}/user/get-user`;
+        const id = req.decoded?.userId;
+        const response = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = response.data;
+        if (!userData.user) {
+            return res.status(401).json({ message: "Usuario no válido" });
+        }
+        if (userData.user.Role.role !== "Administrador")
+            return res
+                .status(401)
+                .json({ message: "El rol de usuario no es administrador" });
+        req.body.userId = userData.user.id;
+        req.body.userName = `${userData.user.firstName} ${userData.user.lastName}`;
+        req.body.numIdent = userData.user.numIdent;
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error });
+    }
+};
+exports.isAdmin = isAdmin;
+//Verificamos si el rol del usuario es super usuario
+const isSuperUser = async (req, res, next) => {
+    try {
+        const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+        const baseUrl = `${URL}/user/get-user`;
+        const id = req.decoded?.userId;
+        const response = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = response.data;
+        if (!userData.user) {
+            return res.status(401).json({ message: "Usuario no válido" });
+        }
+        if (userData.user.Role.role !== "Super_Usuario")
+            return res
+                .status(401)
+                .json({ message: "El rol de usuario no es super usuario" });
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error });
+    }
+};
+exports.isSuperUser = isSuperUser;
