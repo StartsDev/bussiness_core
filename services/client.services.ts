@@ -78,17 +78,19 @@ const getOneClientServ = async (client: any) => {
 
 const updateClientServ = async (id: any, cli: any) => {
   try {
+    const clientFound = await Client.findOne({where:{id}})
+    console.log(clientFound)
+    if (!clientFound) {
+      return {
+        msg: "Cliente no encontrado",
+      };
+    }
     const [updateClient] = await Client.update(cli, {
       where: {
         id,
       },
       returning: true,
     });
-    if (!updateClient) {
-      return {
-        msg: "Cliente no válido",
-      };
-    }
     if (updateClient <= 0) {
       return {
         msg: "Actualización no realizada...",
