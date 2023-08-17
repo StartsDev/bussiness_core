@@ -1,3 +1,9 @@
+export enum StatusOption {
+  inProcess = 'En proceso',
+  confirmed = 'Confirmado',
+  autorized = 'Autorizado'
+}
+
 export interface MaintenanceAttributes {
     id: number;
     activities: string;
@@ -21,6 +27,6 @@ export interface MaintenanceAttributes {
     };
     customerId : string;
     observations: string;
-    status: string;
+    status: StatusOption;
     delete: boolean;
   }

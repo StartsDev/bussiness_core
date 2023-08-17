@@ -1,6 +1,6 @@
 "use strict";
-import { Model, UUIDV4 } from "sequelize";
-import { MaintenanceAttributes } from "../interfaces/maintenance.interface";
+import { Model } from "sequelize";
+import { MaintenanceAttributes, StatusOption } from "../interfaces/maintenance.interface";
 const { sequelize, DataTypes } = require("../database/index");
 
 class Maintenance
@@ -30,7 +30,7 @@ class Maintenance
   tech!: { techId: string; techName: string; techNumId: string };
   customerId!: string;
   observations!: string;
-  status!: string;
+  status!: StatusOption;
   delete!: boolean;
   static associate(model: any) {}
 }
@@ -121,8 +121,9 @@ Maintenance.init(
       allowNull: true,
     },
     status: {
-      type: DataTypes.STRING,
-      allowNull: true,
+    type: DataTypes.ENUM(...Object.values(StatusOption)),
+    allowNull: false,
+    defaultValue: StatusOption.inProcess
     },
     delete: {
       type: DataTypes.BOOLEAN,
