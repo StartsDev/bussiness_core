@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const sequelize_1 = require("sequelize");
+const maintenance_interface_1 = require("../interfaces/maintenance.interface");
 const { sequelize, DataTypes } = require("../database/index");
 class Maintenance extends sequelize_1.Model {
     /**
@@ -115,8 +116,9 @@ Maintenance.init({
         allowNull: true,
     },
     status: {
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: DataTypes.ENUM(...Object.values(maintenance_interface_1.StatusOption)),
+        allowNull: false,
+        defaultValue: maintenance_interface_1.StatusOption.inProcess
     },
     delete: {
         type: DataTypes.BOOLEAN,

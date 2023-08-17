@@ -101,7 +101,7 @@ const getMaintenancesServ = async () => {
         const maintenances = await Maintenance.findAll({
             where: { delete: false },
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+            attributes: { exclude: ["createdAt", "updatedAt"] },
             include: [
                 {
                     model: Equipment,
@@ -149,7 +149,7 @@ const getMaintByTechServ = async (tech) => {
         const maintenanceTech = await Maintenance.findAll({
             where: { "tech.techId": tech.techId },
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt", "status", "tech"] },
+            attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
             include: [
                 {
                     model: Equipment,
