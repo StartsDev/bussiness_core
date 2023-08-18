@@ -1,4 +1,4 @@
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -9,15 +9,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadImageCloud = async (filePath:any) => {
-  const {secure_url}= await cloudinary.uploader.upload(filePath)
-  return secure_url;
-/*   return await cloudinary.uploader.upload(filePath, {
+const uploadImageCloud = async (filePath: any) => {
+  const { secure_url } = await cloudinary.uploader.upload(filePath, {
     folder: "aires",
-  }); */
+  });
+  return secure_url;
 };
 
-const deleteImage = async (publicId:any) => {
+const deleteImage = async (publicId: any) => {
   return await cloudinary.uploader.destroy(publicId);
 };
 

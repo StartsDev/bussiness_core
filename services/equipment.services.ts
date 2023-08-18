@@ -6,6 +6,7 @@ const Client = require("../models/client");
 
 const newEquipmentServ = async (equip: any) => {
   try {
+
     const { name, description, serial, model, type, brand, locationId} = equip;
     const findLocation = await Location.findOne({
       where: { id: equip.locationId },
@@ -23,6 +24,7 @@ const newEquipmentServ = async (equip: any) => {
         msg: "Este quipo ya esta registrado",
       };
     }
+
     const newEquipment = await Equipment.create({
       name,
       description,
