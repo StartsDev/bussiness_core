@@ -11,12 +11,12 @@ const { Sequelize, DataTypes, Op } = require("sequelize");
 const sequelize = new Sequelize(DATABASE_URL, {
     logging: false,
     native: false,
-    dialectOptions: {
+   /*  dialectOptions: {
         ssl: {
             require: true,
             rejectUnauthorized: false,
         },
-    },
+    }, */
 });
 sequelize
     .authenticate()

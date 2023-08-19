@@ -27,44 +27,79 @@ const createClientServ = async (client: ClientAttributes) => {
   }
 };
 
-const getClientsServ = async (page: number, pageSize: number) => {
+const getClientsServ = async (page?: number, pageSize?: number) => {
   try {
-    const offset = (page - 1) * pageSize;
-
-    const clients = await Client.findAll({
-      offset,
-      limit: pageSize,
-      where: { status: false },
-      attributes: { exclude: ["updatedAt", "status"] },
-      order: [["createdAt", "DESC"]],
-      include: {
-        model: Headquarter,
-        as: "headquarters",
+    let clients;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      clients = await Client.findAll({
+        offset,
+        limit: pageSize,
+        where: { status: false },
+        attributes: { exclude: ["updatedAt", "status"] },
         order: [["createdAt", "DESC"]],
-        attributes: { exclude: ["createdAt", "updatedAt", "status"] },
         include: {
-          model: Location,
-          as: "locations",
+          model: Headquarter,
+          as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
-            model: Equipment,
-            as: "equipments",
+            model: Location,
+            as: "locations",
             order: [["createdAt", "DESC"]],
-            attributes: {
-              exclude: ["createdAt", "updatedAt", "status", "locationId"],
+            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+            include: {
+              model: Equipment,
+              as: "equipments",
+              order: [["createdAt", "DESC"]],
+              attributes: {
+                exclude: ["createdAt", "updatedAt", "status", "locationId"],
+              },
             },
           },
         },
-      },
-    });
-    const totalCount = await Client.count({ where: { status: false } });
+      });
+      const totalCount = await Client.count({ where: { status: false } });
 
-    return {
-      clients,
-      totalCount,
-      success: true,
-    };
+      return {
+        clients,
+        totalCount,
+        success: true,
+      };
+    } else {
+      clients = await Client.findAll({
+        where: { status: false },
+        attributes: { exclude: ["updatedAt", "status"] },
+        order: [["createdAt", "DESC"]],
+        include: {
+          model: Headquarter,
+          as: "headquarters",
+          order: [["createdAt", "DESC"]],
+          attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+          include: {
+            model: Location,
+            as: "locations",
+            order: [["createdAt", "DESC"]],
+            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+            include: {
+              model: Equipment,
+              as: "equipments",
+              order: [["createdAt", "DESC"]],
+              attributes: {
+                exclude: ["createdAt", "updatedAt", "status", "locationId"],
+              },
+            },
+          },
+        },
+      });
+      const totalCount = await Client.count({ where: { status: false } });
+
+      return {
+        clients,
+        totalCount,
+        success: true,
+      };
+    }
   } catch (e) {
     throw new Error(e as string);
   }

@@ -19,21 +19,26 @@ const createLocation = async (req: Request, res: Response) => {
 };
 
 // Get all locations
-const getLotaions = async (req: Request, res: Response) => {
+const getLocations = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
-    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+    const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
 
     const { locations, totalCount } = await getLocationsServ(page, pageSize);
-
-    const totalPages = Math.ceil(totalCount / pageSize);
-
-    res.status(200).json({
-      locations,
-      totalItems: totalCount,
-      currentPage: page,
-      totalPages,
-    });
+    if (!page && !pageSize) {
+      res.status(200).json({
+        locations,
+        numItmes: totalCount,
+      });
+    } else {
+      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+      res.status(200).json({
+        locations,
+        numItmes: totalCount,
+        currentPage: page,
+        totalPages,
+      });
+    }
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -52,22 +57,28 @@ const getOneLocation = async (req: Request, res: Response) => {
 // Get locations by headquarters
 const getLocationHead = async (req: Request, res: Response) => {
   try {
-    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
-    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+    const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
 
     const { locations, totalCount } = await allLocationsHeadServ(
       req.params.headquarterId,
       page,
       pageSize
     );
-
-    const totalPages = Math.ceil(totalCount / pageSize);
-
-    res.status(200).json({
-      locations,
-      currentPage: page,
-      totalPages,
-    });
+    if (!page && !pageSize) {
+      res.status(200).json({
+        locations,
+        numItmes: totalCount,
+      });
+    } else {
+      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+      res.status(200).json({
+        locations,
+        numItmes: totalCount,
+        currentPage: page,
+        totalPages,
+      });
+    }
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -97,7 +108,7 @@ const deleteLocation = async (req: Request, res: Response) => {
 
 export {
   createLocation,
-  getLotaions,
+  getLocations,
   getOneLocation,
   getLocationHead,
   editLocation,

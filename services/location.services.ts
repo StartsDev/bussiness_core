@@ -33,36 +33,65 @@ const createLocationServ = async (location: any) => {
 };
 
 // Get locations
-const getLocationsServ = async (page: number, pageSize: number) => {
+const getLocationsServ = async (page?: number, pageSize?: number) => {
   try {
-    const offset = (page - 1) * pageSize;
-    const locations = await Location.findAll({
-      offset,
-      limit: pageSize,
-      where: { status: false },
-      attributes: { exclude: ["updatedAt"] },
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: Headquarters,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Client,
-              attributes: {
-                exclude: ["id", "createdAt", "updatedAt", "status"],
+    let locations;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      locations = await Location.findAll({
+        offset,
+        limit: pageSize,
+        where: { status: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Headquarters,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Client,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
+                },
               },
-            },
-          ],
-        },
-      ],
-    });
-    const totalCount = await Location.count({ where: { status: false } });
-    return {
-      locations,
-      totalCount,
-      success: true,
-    };
+            ],
+          },
+        ],
+      });
+      const totalCount = await Location.count({ where: { status: false } });
+      return {
+        locations,
+        totalCount,
+        success: true,
+      };
+    } else {
+      locations = await Location.findAll({
+        where: { status: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Headquarters,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Client,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const totalCount = await Location.count({ where: { status: false } });
+      return {
+        locations,
+        totalCount,
+        success: true,
+      };
+    }
   } catch (e) {
     throw new Error(e as string);
   }
@@ -71,7 +100,7 @@ const getLocationsServ = async (page: number, pageSize: number) => {
 // Get one location
 const getOneLocationServ = async (location: any) => {
   try {
-    const findHead = await Location.findOne({
+    const locationFound = await Location.findOne({
       where: { id: location },
       attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
@@ -89,13 +118,15 @@ const getOneLocationServ = async (location: any) => {
         },
       ],
     });
-    if (!location) {
+    if (!locationFound) {
       return {
         msg: "Esta ubicación no existe",
+        success: false
       };
     }
     return {
-      client: findHead,
+      locationFound,
+      success: true
     };
   } catch (e) {
     throw new Error(e as string);
@@ -105,37 +136,65 @@ const getOneLocationServ = async (location: any) => {
 //Get locations by headquarter
 const allLocationsHeadServ = async (
   location: any,
-  page: number,
-  pageSize: number
+  page?: number,
+  pageSize?: number
 ) => {
   try {
-    const offset = (page - 1) * pageSize;
-    const locations= await Location.findAll({
-      offset,
-      limit: pageSize,
-      where: { headquarterId: location },
-      attributes: { exclude: ["updatedAt"] },
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: Headquarters,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-        },
-      ],
-    });
-    if (!locations) {
+    let locations;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      locations = await Location.findAll({
+        offset,
+        limit: pageSize,
+        where: { headquarterId: location },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Headquarters,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+          },
+        ],
+      });
+      if (!locations) {
+        return {
+          msg: "Lugares no hay con esta sede",
+          success: false,
+        };
+      }
+      const totalCount = await Client.count();
+
       return {
-        msg: "Lugares no hay con esta sede",
-        success: false,
+        locations,
+        totalCount,
+        success: true,
+      };
+    } else {
+      locations = await Location.findAll({
+        where: { headquarterId: location },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Headquarters,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+          },
+        ],
+      });
+      if (!locations) {
+        return {
+          msg: "Lugares no hay con esta sede",
+          success: false,
+        };
+      }
+      const totalCount = await Client.count();
+
+      return {
+        locations,
+        totalCount,
+        success: true,
       };
     }
-    const totalCount = await Client.count();
-
-    return {
-      locations,
-      totalCount,
-      success: true,
-    };
   } catch (e) {
     throw new Error(e as string);
   }

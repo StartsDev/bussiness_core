@@ -1,3 +1,4 @@
+import { MaintenanceAttributes } from './../interfaces/maintenance.interface';
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
@@ -40,7 +41,7 @@ const createMaintenanceServ = async (maint: any) => {
         success: false,
       };
     }
-  // Validation equipment belong to client
+    // Validation equipment belong to client
     const client = await Client.findByPk(customerId, {
       include: {
         model: Headquarter,
@@ -127,106 +128,208 @@ const createMaintenanceServ = async (maint: any) => {
 };
 
 // Get maintenances
-const getMaintenancesServ = async (page: number, pageSize: number) => {
+const getMaintenancesServ = async (page?: number, pageSize?: number) => {
   try {
-    const offset = (page - 1) * pageSize;
-    const maintenances = await Maintenance.findAll({
-      offset,
-      limit: pageSize,
-      where: { delete: false },
-      attributes: { exclude: ["updatedAt"] },
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: Equipment,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Location,
-              attributes: {
-                exclude: ["id", "createdAt", "updatedAt", "status"],
-              },
-              include: [
-                {
-                  model: Headquarter,
-                  attributes: {
-                    exclude: ["id", "createdAt", "updatedAt", "status"],
-                  },
-                  include: [
-                    {
-                      model: Client,
-                      attributes: {
-                        exclude: ["id", "createdAt", "updatedAt", "status"],
-                      },
-                    },
-                  ],
+    let maintenances;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      maintenances = await Maintenance.findAll({
+        offset,
+        limit: pageSize,
+        where: { delete: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Equipment,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Location,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
                 },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    const totalCount = await Maintenance.count({ where: { delete: false } });
-    return {
-      maintenances,
-      totalCount,
-      success: true,
-    };
+                include: [
+                  {
+                    model: Headquarter,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                    include: [
+                      {
+                        model: Client,
+                        attributes: {
+                          exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const totalCount = await Maintenance.count({ where: { delete: false } });
+      return {
+        maintenances,
+        totalCount,
+        success: true,
+      };
+    } else {
+      maintenances = await Maintenance.findAll({
+        where: { delete: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Equipment,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Location,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
+                },
+                include: [
+                  {
+                    model: Headquarter,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                    include: [
+                      {
+                        model: Client,
+                        attributes: {
+                          exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const totalCount = await Maintenance.count({ where: { delete: false } });
+      return {
+        maintenances,
+        totalCount,
+        success: true,
+      };
+    }
   } catch (e) {
     console.log(e);
     throw new Error(e as string);
   }
 };
 
-// Get maintenance by tech (Home)
-const getMaintByTechServ = async (tech: any) => {
+// Get maintenances by tech (Home)
+const getMaintByTechServ = async (tech: any, page?: number, pageSize?: number) => {
   try {
-    const maintenanceTech = await Maintenance.findAll({
-      where: { "tech.techId": tech.techId, delete: false },
-      order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
-      include: [
-        {
-          model: Equipment,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Location,
-              attributes: {
-                exclude: ["id", "createdAt", "updatedAt", "status"],
-              },
-              include: [
-                {
-                  model: Headquarter,
-                  attributes: {
-                    exclude: ["id", "createdAt", "updatedAt", "status"],
-                  },
-                  include: [
-                    {
-                      model: Client,
-                      attributes: {
-                        exclude: ["id", "createdAt", "updatedAt", "status"],
-                      },
-                    },
-                  ],
+    let maintenanceTech;
+    if(page && pageSize){
+      const offset = (page - 1) * pageSize;
+      maintenanceTech = await Maintenance.findAll({
+        offset,
+        limit: pageSize,
+        where: { "tech.techId": tech.techId, delete: false },
+        attributes: { exclude: ["updatedAt", "tech"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Equipment,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Location,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
                 },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    if (!maintenanceTech) {
+                include: [
+                  {
+                    model: Headquarter,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                    include: [
+                      {
+                        model: Client,
+                        attributes: {
+                          exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      if (!maintenanceTech) {
+        return {
+          msg: "No hay mantenimientos registrados para este usuario...",
+          success: false,
+        };
+      }
+      const totalCount = await Maintenance.count({ where: { delete: false } });
       return {
-        msg: "No hay mantenimientos registrados para este usuario...",
-        success: false,
+        maintenanceTech,
+        totalCount,
+        success: true,
+      };
+    }else{
+      maintenanceTech = await Maintenance.findAll({
+        where: { "tech.techId": tech.techId, delete: false },
+        order: [["createdAt", "DESC"]],
+        attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
+        include: [
+          {
+            model: Equipment,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Location,
+                attributes: {
+                  exclude: ["id", "createdAt", "updatedAt", "status"],
+                },
+                include: [
+                  {
+                    model: Headquarter,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                    include: [
+                      {
+                        model: Client,
+                        attributes: {
+                          exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      if (!maintenanceTech) {
+        return {
+          msg: "No hay mantenimientos registrados para este usuario...",
+          success: false,
+        };
+      }
+      const totalCount = await Maintenance.count({ where: { delete: false } });
+      return {
+        maintenanceTech,
+        totalCount,
+        success: true,
       };
     }
-    return {
-      maintenanceTech,
-      success: true,
-    };
+    
   } catch (error) {
     throw new Error(error as string);
   }
@@ -372,7 +475,7 @@ const getMaintByIdServ = async (maint: any) => {
 };
 
 // Update maintenance
-const updateMaintenanceServ = async (id: any, maint: any) => {
+const updateMaintenanceServ = async (id: number, maint: any) => {
   try {
     // Validate maintenance
     const maintFound = await Maintenance.findOne({ where: { id } });
@@ -473,6 +576,12 @@ const deleteMaintenanceServ = async (id: any) => {
     if (findMaint.dataValues.delete) {
       return {
         msg: "Mantenimiento no registrado",
+        success: false,
+      };
+    }
+    if(!findMaint){
+      return {
+        msg: "Mantenimiento desconocido...",
         success: false,
       };
     }
