@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   createLocation,
   getLocationHead,
-  getLotaions,
+  getLocations,
   getOneLocation,
   editLocation,
   deleteLocation,
@@ -14,7 +14,7 @@ const router = Router();
 router.post("/create-location", createLocation);
 
 // Get all locations
-router.get("/get-all-locations", getLotaions);
+router.get("/get-all-locations", getLocations);
 
 // Get one location
 router.get("/get-one-location/:id", getOneLocation);

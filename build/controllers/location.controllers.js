@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLocation = exports.editLocation = exports.getLocationHead = exports.getOneLocation = exports.getLotaions = exports.createLocation = void 0;
+exports.deleteLocation = exports.editLocation = exports.getLocationHead = exports.getOneLocation = exports.getLocations = exports.createLocation = void 0;
 const location_services_1 = require("../services/location.services");
 // Create new Location
 const createLocation = async (req, res) => {
@@ -15,25 +15,33 @@ const createLocation = async (req, res) => {
 };
 exports.createLocation = createLocation;
 // Get all locations
-const getLotaions = async (req, res) => {
+const getLocations = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
-        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { locations, totalCount } = await (0, location_services_1.getLocationsServ)(page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            locations,
-            totalItems: totalCount,
-            currentPage: page,
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                locations,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                locations,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)
             res.status(400).json({ error: error.message });
     }
 };
-exports.getLotaions = getLotaions;
+exports.getLocations = getLocations;
 // Get one location
 const getOneLocation = async (req, res) => {
     try {
@@ -49,15 +57,24 @@ exports.getOneLocation = getOneLocation;
 // Get locations by headquarters
 const getLocationHead = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
-        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { locations, totalCount } = await (0, location_services_1.allLocationsHeadServ)(req.params.headquarterId, page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            locations,
-            currentPage: page,
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                locations,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                locations,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)

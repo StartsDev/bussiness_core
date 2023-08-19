@@ -17,16 +17,24 @@ exports.createClient = createClient;
 // Get all clients
 const getClients = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
-        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { clients, totalCount } = await (0, client_services_1.getClientsServ)(page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            clients,
-            numItmes: totalCount,
-            currentPage: page,
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                clients,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                clients,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)

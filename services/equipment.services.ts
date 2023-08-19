@@ -3,11 +3,9 @@ const Equipment = require("../models/equipment");
 const Headquarters = require("../models/headquarter");
 const Client = require("../models/client");
 
-
 const newEquipmentServ = async (equip: any) => {
   try {
-
-    const { name, description, serial, model, type, brand, locationId} = equip;
+    const { name, description, serial, model, type, brand, locationId } = equip;
     const findLocation = await Location.findOne({
       where: { id: equip.locationId },
     });
@@ -32,7 +30,7 @@ const newEquipmentServ = async (equip: any) => {
       model,
       type,
       brand,
-      locationId
+      locationId,
     });
 
     if (!newEquipment) {
@@ -51,41 +49,93 @@ const newEquipmentServ = async (equip: any) => {
   }
 };
 
-const getEquipmentServ = async (page: number, pageSize: number) => {
+const getEquipmentServ = async (page?: number, pageSize?: number) => {
   try {
-    const offset = (page - 1) * pageSize;
-    const equipments = await Equipment.findAll({
-      offset,
-      limit: pageSize,
-      where: { status: false }, 
-      attributes: { exclude: ["updatedAt"] },
-      order: [["createdAt", "DESC"]],
-      include: [
-        {
-          model: Location,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Headquarters,
-              attributes: { exclude: ["id", "createdAt", "updatedAt", "status","isPrincipal"],},
-              include: [
-                {
-                  model: Client,
-                  attributes: { exclude: ["id", "createdAt", "updatedAt", "status"]},
+    let equipments;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      equipments = await Equipment.findAll({
+        offset,
+        limit: pageSize,
+        where: { status: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Location,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Headquarters,
+                attributes: {
+                  exclude: [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "status",
+                    "isPrincipal",
+                  ],
                 },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    const totalCount = await Equipment.count({ where: { status: false } });
-    
-    return {
-      equipments,
-      totalCount,
-      success: true,
-    };
+                include: [
+                  {
+                    model: Client,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const totalCount = await Equipment.count({ where: { status: false } });
+      return {
+        equipments,
+        totalCount,
+        success: true,
+      };
+    } else {
+      equipments = await Equipment.findAll({
+        where: { status: false },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Location,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Headquarters,
+                attributes: {
+                  exclude: [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "status",
+                    "isPrincipal",
+                  ],
+                },
+                include: [
+                  {
+                    model: Client,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const totalCount = await Equipment.count({ where: { status: false } });
+      return {
+        equipments,
+        totalCount,
+        success: true,
+      };
+    }
   } catch (e) {
     throw new Error(e as string);
   }
@@ -103,11 +153,21 @@ const getOneEquipmentServ = async (equip: any) => {
           include: [
             {
               model: Headquarters,
-              attributes: { exclude: ["id", "createdAt", "updatedAt", "status","isPrincipal"],},
+              attributes: {
+                exclude: [
+                  "id",
+                  "createdAt",
+                  "updatedAt",
+                  "status",
+                  "isPrincipal",
+                ],
+              },
               include: [
                 {
                   model: Client,
-                  attributes: { exclude: ["id", "createdAt", "updatedAt", "status"]},
+                  attributes: {
+                    exclude: ["id", "createdAt", "updatedAt", "status"],
+                  },
                 },
               ],
             },
@@ -118,48 +178,113 @@ const getOneEquipmentServ = async (equip: any) => {
     if (!findEquipment) {
       return {
         msg: "Esta equipo no existe",
+        success: false,
       };
     }
     return {
-      client: findEquipment,
+      findEquipment,
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
   }
 };
 
-const allEquipmentsLocationServ = async (user: any) => {
+const allEquipmentsLocationServ = async (
+  user: any,
+  page?: number,
+  pageSize?: number
+) => {
   try {
-    const equipLocation = await Equipment.findAll({
-      where: { locationId: user },
-      order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["createdAt", "updatedAt"] },
-      include: [
-        {
-          model: Location,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Headquarters,
-              attributes: { exclude: ["id", "createdAt", "updatedAt", "status","isPrincipal"],},
-              include: [
-                {
-                  model: Client,
-                  attributes: { exclude: ["id", "createdAt", "updatedAt", "status"]},
+    let equipLocation;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      equipLocation = await Equipment.findAll({
+        offset,
+        limit: pageSize,
+        where: { locationId: user },
+        attributes: { exclude: ["updatedAt"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+          {
+            model: Location,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Headquarters,
+                attributes: {
+                  exclude: [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "status",
+                    "isPrincipal",
+                  ],
                 },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    if (!equipLocation) {
-      return {
-        msg: "Equipos no hay con este espacio",
-        users: [],
-      };
+                include: [
+                  {
+                    model: Client,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      if (!equipLocation) {
+        return {
+          msg: "Equipos no hay con este espacio",
+          succes: false,
+        };
+      }
+      const totalCount = await Equipment.count({ where: { status: false } });
+      return { equipLocation, totalCount, success: true };
+    } else {
+      equipLocation = await Equipment.findAll({
+        where: { locationId: user },
+        order: [["createdAt", "DESC"]],
+        attributes: { exclude: ["createdAt", "updatedAt"] },
+        include: [
+          {
+            model: Location,
+            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            include: [
+              {
+                model: Headquarters,
+                attributes: {
+                  exclude: [
+                    "id",
+                    "createdAt",
+                    "updatedAt",
+                    "status",
+                    "isPrincipal",
+                  ],
+                },
+                include: [
+                  {
+                    model: Client,
+                    attributes: {
+                      exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      if (!equipLocation) {
+        return {
+          msg: "Equipos no hay con este espacio",
+          success:false
+        };
+      }
+      const totalCount = await Equipment.count({ where: { status: false } });
+      return { equipLocation, totalCount, success: true };
     }
-    return { data: equipLocation, success: true };
   } catch (e) {
     throw new Error(e as string);
   }

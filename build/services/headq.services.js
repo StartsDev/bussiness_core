@@ -34,26 +34,48 @@ const createHeadServ = async (head) => {
 exports.createHeadServ = createHeadServ;
 const getHeadServ = async (page, pageSize) => {
     try {
-        const offset = (page - 1) * pageSize;
-        const headquarters = await Headquarter.findAll({
-            offset,
-            limit: pageSize,
-            where: { status: false },
-            attributes: { exclude: ["updatedAt"] },
-            order: [["createdAt", "DESC"]],
-            include: [
-                {
-                    model: Client,
-                    attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-                },
-            ],
-        });
-        const totalCount = await Headquarter.count({ where: { status: false } });
-        return {
-            headquarters,
-            totalCount,
-            success: true,
-        };
+        let headquarters;
+        if (page && pageSize) {
+            const offset = (page - 1) * pageSize;
+            headquarters = await Headquarter.findAll({
+                offset,
+                limit: pageSize,
+                where: { status: false },
+                attributes: { exclude: ["updatedAt"] },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: Client,
+                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+                    },
+                ],
+            });
+            const totalCount = await Headquarter.count({ where: { status: false } });
+            return {
+                headquarters,
+                totalCount,
+                success: true,
+            };
+        }
+        else {
+            headquarters = await Headquarter.findAll({
+                where: { status: false },
+                attributes: { exclude: ["updatedAt"] },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: Client,
+                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+                    },
+                ],
+            });
+            const totalCount = await Headquarter.count({ where: { status: false } });
+            return {
+                headquarters,
+                totalCount,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);
@@ -81,32 +103,60 @@ const getOneHeadServ = async (head) => {
 exports.getOneHeadServ = getOneHeadServ;
 const allHeadClientServ = async (user, page, pageSize) => {
     try {
-        const offset = (page - 1) * pageSize;
-        const hedClient = await Headquarter.findAll({
-            offset,
-            limit: pageSize,
-            where: { clientId: user },
-            attributes: { exclude: ["updatedAt"] },
-            order: [["createdAt", "DESC"]],
-            include: [
-                {
-                    model: Client,
-                    attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-                },
-            ],
-        });
-        if (!hedClient) {
+        let hedClient;
+        if (page && pageSize) {
+            const offset = (page - 1) * pageSize;
+            hedClient = await Headquarter.findAll({
+                offset,
+                limit: pageSize,
+                where: { clientId: user },
+                attributes: { exclude: ["updatedAt"] },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: Client,
+                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+                    },
+                ],
+            });
+            if (!hedClient) {
+                return {
+                    msg: "Sedes no hay con este cliente",
+                    success: false,
+                };
+            }
+            const totalCount = await Headquarter.count();
             return {
-                msg: "Sedes no hay con este cliente",
-                success: false
+                hedClient,
+                totalCount,
+                success: true,
             };
         }
-        const totalCount = await Headquarter.count();
-        return {
-            hedClient,
-            totalCount,
-            success: true,
-        };
+        else {
+            hedClient = await Headquarter.findAll({
+                where: { clientId: user },
+                attributes: { exclude: ["updatedAt"] },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: Client,
+                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+                    },
+                ],
+            });
+            if (!hedClient) {
+                return {
+                    msg: "Sedes no hay con este cliente",
+                    success: false,
+                };
+            }
+            const totalCount = await Headquarter.count();
+            return {
+                hedClient,
+                totalCount,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);

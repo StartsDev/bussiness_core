@@ -44,7 +44,7 @@ Maintenance.init(
       allowNull: false,
     },
     activities: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(2000),
       allowNull: true,
     },
     voltage_on_L1L2: {
