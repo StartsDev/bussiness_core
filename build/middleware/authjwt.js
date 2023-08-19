@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isSuperUser = exports.isAdmin = exports.isTech = exports.verifyToken = void 0;
+exports.isAdmin_isTech_isSuperU = exports.isSuperUser_isAdmin = exports.isSuperUser = exports.isAdmin = exports.isTech = exports.verifyToken = void 0;
 const axios_1 = __importDefault(require("axios"));
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -106,3 +106,47 @@ const isSuperUser = async (req, res, next) => {
     }
 };
 exports.isSuperUser = isSuperUser;
+const isSuperUser_isAdmin = async (req, res, next) => {
+    try {
+        const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+        const baseUrl = `${URL}/user/get-user`;
+        const id = req.decoded?.userId;
+        const response = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = response.data;
+        if (!userData.user) {
+            return res.status(401).json({ message: "Usuario no válido" });
+        }
+        if (userData.user.Role.role !== "Super_Usuario" &&
+            userData.user.Role.role !== "Administrador")
+            return res.status(401).json({
+                message: "El rol de usuario no es super usuario o administrador",
+            });
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error });
+    }
+};
+exports.isSuperUser_isAdmin = isSuperUser_isAdmin;
+const isAdmin_isTech_isSuperU = async (req, res, next) => {
+    try {
+        const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+        const baseUrl = `${URL}/user/get-user`;
+        const id = req.decoded?.userId;
+        const response = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = response.data;
+        if (!userData.user) {
+            return res.status(401).json({ message: "Usuario no válido" });
+        }
+        if (userData.user.Role.role !== "Super_Usuario" &&
+            userData.user.Role.role !== "Administrador" &&
+            userData.user.Role.role !== "Tecnico")
+            return res.status(401).json({ message: "Este rol no es permitido" });
+        req.body.rolName = userData.user.Role.role;
+        next();
+    }
+    catch (error) {
+        return res.status(401).json({ error });
+    }
+};
+exports.isAdmin_isTech_isSuperU = isAdmin_isTech_isSuperU;

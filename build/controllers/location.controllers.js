@@ -17,8 +17,16 @@ exports.createLocation = createLocation;
 // Get all locations
 const getLotaions = async (req, res) => {
     try {
-        const locations = await (0, location_services_1.getLocationsServ)();
-        res.status(200).json(locations);
+        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const { locations, totalCount } = await (0, location_services_1.getLocationsServ)(page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            locations,
+            totalItems: totalCount,
+            currentPage: page,
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)
@@ -41,8 +49,15 @@ exports.getOneLocation = getOneLocation;
 // Get locations by headquarters
 const getLocationHead = async (req, res) => {
     try {
-        const locationshead = await (0, location_services_1.allLocationsHeadServ)(req.params.headquarterId);
-        res.status(200).json(locationshead);
+        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const { locations, totalCount } = await (0, location_services_1.allLocationsHeadServ)(req.params.headquarterId, page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            locations,
+            currentPage: page,
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)

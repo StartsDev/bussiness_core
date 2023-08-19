@@ -4,6 +4,6 @@ exports.StatusOption = void 0;
 var StatusOption;
 (function (StatusOption) {
     StatusOption["inProcess"] = "En proceso";
+    StatusOption["completed"] = "Completado";
     StatusOption["confirmed"] = "Confirmado";
-    StatusOption["autorized"] = "Autorizado";
 })(StatusOption || (exports.StatusOption = StatusOption = {}));

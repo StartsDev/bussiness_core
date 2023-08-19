@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByClientServ = exports.getMaintByTechServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
+exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByClientServ = exports.getMaintByTechServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
@@ -96,12 +96,15 @@ const createMaintenanceServ = async (maint) => {
 };
 exports.createMaintenanceServ = createMaintenanceServ;
 // Get maintenances
-const getMaintenancesServ = async () => {
+const getMaintenancesServ = async (page, pageSize) => {
     try {
+        const offset = (page - 1) * pageSize;
         const maintenances = await Maintenance.findAll({
+            offset,
+            limit: pageSize,
             where: { delete: false },
+            attributes: { exclude: ["updatedAt"] },
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt"] },
             include: [
                 {
                     model: Equipment,
@@ -133,8 +136,11 @@ const getMaintenancesServ = async () => {
                 },
             ],
         });
+        const totalCount = await Maintenance.count({ where: { delete: false } });
         return {
-            data: maintenances,
+            maintenances,
+            totalCount,
+            success: true,
         };
     }
     catch (e) {
@@ -147,7 +153,7 @@ exports.getMaintenancesServ = getMaintenancesServ;
 const getMaintByTechServ = async (tech) => {
     try {
         const maintenanceTech = await Maintenance.findAll({
-            where: { "tech.techId": tech.techId },
+            where: { "tech.techId": tech.techId, delete: false },
             order: [["createdAt", "DESC"]],
             attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
             include: [
@@ -341,6 +347,7 @@ exports.getMaintByIdServ = getMaintByIdServ;
 // Update maintenance
 const updateMaintenanceServ = async (id, maint) => {
     try {
+        // Validate maintenance
         const maintFound = await Maintenance.findOne({ where: { id } });
         if (!maintFound) {
             return {
@@ -348,6 +355,30 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: false,
             };
         }
+        // Validate Maintenance state & user autorization role
+        if (maintFound.dataValues.status === "En proceso" &&
+            maint.rolName != "Tecnico" &&
+            maint.rolName != "Super_Usuario") {
+            return {
+                msg: "El administrador no puede modificar un mantenimiento en proceso",
+                success: false,
+            };
+        }
+        if (maintFound.dataValues.status === "Completado" &&
+            maint.rolName != "Administrador" &&
+            maint.rolName != "Super_Usuario") {
+            return {
+                msg: "El técnico no puede modificar un mantenimiento completado",
+                success: false,
+            };
+        }
+        if (maintFound.dataValues.status === "Confirmado") {
+            return {
+                msg: "No es posible actualizar un mantenimiento confirmado",
+                success: false,
+            };
+        }
+        // Validate client
         const clientFound = await Client.findOne({
             where: { id: maint.customerId },
         });
@@ -357,6 +388,7 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: false,
             };
         }
+        // Validate equipment
         const equipFound = await Equipment.findOne({
             where: { id: maint.equipmentId },
         });
@@ -366,6 +398,7 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: false,
             };
         }
+        // Update maintenance
         const [updateMaintenance] = await Maintenance.update(maint, {
             where: {
                 id,
@@ -378,11 +411,12 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: false,
             };
         }
+        // Return maintenace updated
         const maintenance = await Maintenance.findOne({ where: { id } });
         if (!updateMaintenance) {
             return {
                 msg: "Actualización no es correcta",
-                success: false
+                success: false,
             };
         }
         return {
@@ -396,3 +430,40 @@ const updateMaintenanceServ = async (id, maint) => {
     }
 };
 exports.updateMaintenanceServ = updateMaintenanceServ;
+// Delete maintenance
+const deleteMaintenanceServ = async (id) => {
+    try {
+        const findMaint = await Maintenance.findOne({ where: { id } });
+        if (findMaint.dataValues.delete) {
+            return {
+                msg: "Mantenimiento no registrado",
+                success: false,
+            };
+        }
+        if (findMaint.dataValues.status === "Confirmado") {
+            return {
+                msg: "No es posible eliminar un mantenimiento confirmado",
+                success: false,
+            };
+        }
+        const deletedMaintenance = await Maintenance.update({ delete: true }, {
+            where: {
+                id,
+            },
+        });
+        if (!deletedMaintenance) {
+            return {
+                msg: "No se pudo eliminar el mantenimiento",
+                success: false,
+            };
+        }
+        return {
+            msg: "Mantenimiento eliminado con exito...",
+            success: true,
+        };
+    }
+    catch (e) {
+        throw new Error(e);
+    }
+};
+exports.deleteMaintenanceServ = deleteMaintenanceServ;

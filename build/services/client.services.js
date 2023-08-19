@@ -27,12 +27,15 @@ const createClientServ = async (client) => {
     }
 };
 exports.createClientServ = createClientServ;
-const getClientsServ = async () => {
+const getClientsServ = async (page, pageSize) => {
     try {
+        const offset = (page - 1) * pageSize;
         const clients = await Client.findAll({
+            offset,
+            limit: pageSize,
             where: { status: false },
+            attributes: { exclude: ["updatedAt", "status"] },
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt", "status"] },
             include: {
                 model: Headquarter,
                 as: "headquarters",
@@ -47,12 +50,19 @@ const getClientsServ = async () => {
                         model: Equipment,
                         as: "equipments",
                         order: [["createdAt", "DESC"]],
-                        attributes: { exclude: ["createdAt", "updatedAt", "status", "locationId"] },
+                        attributes: {
+                            exclude: ["createdAt", "updatedAt", "status", "locationId"],
+                        },
                     },
                 },
             },
         });
-        return { clients, success: true };
+        const totalCount = await Client.count({ where: { status: false } });
+        return {
+            clients,
+            totalCount,
+            success: true,
+        };
     }
     catch (e) {
         throw new Error(e);
@@ -103,7 +113,7 @@ const updateClientServ = async (id, cli) => {
         return {
             msg: "Cliente actualizado con exito...",
             client,
-            success: true
+            success: true,
         };
     }
     catch (e) {

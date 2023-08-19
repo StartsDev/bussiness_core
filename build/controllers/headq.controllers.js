@@ -17,8 +17,16 @@ exports.createHeadqaurter = createHeadqaurter;
 // Get all headquarters
 const getHeadquarters = async (req, res) => {
     try {
-        const headquarters = await (0, headq_services_1.getHeadServ)();
-        res.status(200).json(headquarters);
+        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const { headquarters, totalCount } = await (0, headq_services_1.getHeadServ)(page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            headquarters,
+            numItmes: totalCount,
+            currentPage: page,
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)
@@ -41,8 +49,16 @@ exports.getOneHeadquarter = getOneHeadquarter;
 // Get headquarters by client
 const getHeadqClient = async (req, res) => {
     try {
-        const headersq = await (0, headq_services_1.allHeadClientServ)(req.params.clientId);
-        res.status(200).json(headersq);
+        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const { hedClient, totalCount } = await (0, headq_services_1.allHeadClientServ)(req.params.clientId, page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            hedClient,
+            totalItems: totalCount,
+            currentPage: page,
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateMaintenance = exports.getMaintenanceById = exports.getMaintenanceEquipment = exports.getMaintenanceClient = exports.getMaintenanceTech = exports.getMaintenances = exports.createMaintenance = void 0;
+exports.deleteMaintenance = exports.updateMaintenance = exports.getMaintenanceById = exports.getMaintenanceEquipment = exports.getMaintenanceClient = exports.getMaintenanceTech = exports.getMaintenances = exports.createMaintenance = void 0;
 const maintenance_services_1 = require("../services/maintenance.services");
 //Register new maintenance
 const createMaintenance = async (req, res) => {
@@ -17,8 +17,16 @@ exports.createMaintenance = createMaintenance;
 // Get all maintenances
 const getMaintenances = async (req, res) => {
     try {
-        const maintenances = await (0, maintenance_services_1.getMaintenancesServ)();
-        res.status(200).json(maintenances);
+        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const { maintenances, totalCount } = await (0, maintenance_services_1.getMaintenancesServ)(page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            maintenances,
+            numItmes: totalCount,
+            currentPage: page,
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)
@@ -86,3 +94,15 @@ const updateMaintenance = async (req, res) => {
     }
 };
 exports.updateMaintenance = updateMaintenance;
+// Delete maintenance
+const deleteMaintenance = async (req, res) => {
+    try {
+        const maintenance = await (0, maintenance_services_1.deleteMaintenanceServ)(req.params.id);
+        res.status(200).json(maintenance);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            res.status(400).json({ error: error.message });
+    }
+};
+exports.deleteMaintenance = deleteMaintenance;

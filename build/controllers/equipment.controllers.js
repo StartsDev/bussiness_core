@@ -16,9 +16,18 @@ const createEquipment = async (req, res) => {
 exports.createEquipment = createEquipment;
 //Get All Equipments
 const getAllEquipments = async (req, res) => {
+    const { page, pageSize } = req.query;
     try {
-        const equipments = await (0, equipment_services_1.getEquipmentServ)();
-        res.status(200).json(equipments);
+        // const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+        // const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+        const { equipments, totalCount } = await (0, equipment_services_1.getEquipmentServ)(page, pageSize);
+        const totalPages = Math.ceil(totalCount / pageSize);
+        res.status(200).json({
+            equipments,
+            numItmes: totalCount,
+            currentPage: parseInt(page),
+            totalPages,
+        });
     }
     catch (error) {
         if (error instanceof Error)

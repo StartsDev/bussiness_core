@@ -35,11 +35,15 @@ const createLocationServ = async (location) => {
 };
 exports.createLocationServ = createLocationServ;
 // Get locations
-const getLocationsServ = async () => {
+const getLocationsServ = async (page, pageSize) => {
     try {
+        const offset = (page - 1) * pageSize;
         const locations = await Location.findAll({
+            offset,
+            limit: pageSize,
             where: { status: false },
-            attributes: { exclude: ["createdAt", "updatedAt"] },
+            attributes: { exclude: ["updatedAt"] },
+            order: [["createdAt", "DESC"]],
             include: [
                 {
                     model: Headquarters,
@@ -55,8 +59,11 @@ const getLocationsServ = async () => {
                 },
             ],
         });
+        const totalCount = await Location.count({ where: { status: false } });
         return {
-            data: locations,
+            locations,
+            totalCount,
+            success: true,
         };
     }
     catch (e) {
@@ -100,11 +107,15 @@ const getOneLocationServ = async (location) => {
 };
 exports.getOneLocationServ = getOneLocationServ;
 //Get locations by headquarter
-const allLocationsHeadServ = async (location) => {
+const allLocationsHeadServ = async (location, page, pageSize) => {
     try {
-        const locationHead = await Location.findAll({
+        const offset = (page - 1) * pageSize;
+        const locations = await Location.findAll({
+            offset,
+            limit: pageSize,
             where: { headquarterId: location },
-            attributes: { exclude: ["createdAt", "updatedAt"] },
+            attributes: { exclude: ["updatedAt"] },
+            order: [["createdAt", "DESC"]],
             include: [
                 {
                     model: Headquarters,
@@ -112,13 +123,18 @@ const allLocationsHeadServ = async (location) => {
                 },
             ],
         });
-        if (!locationHead) {
+        if (!locations) {
             return {
                 msg: "Lugares no hay con esta sede",
-                users: [],
+                success: false,
             };
         }
-        return { data: locationHead };
+        const totalCount = await Client.count();
+        return {
+            locations,
+            totalCount,
+            success: true,
+        };
     }
     catch (e) {
         throw new Error(e);
@@ -158,7 +174,7 @@ const updateLocationServ = async (id, locat) => {
         return {
             msg: "Sede actualizada con exito...",
             location,
-            success: true
+            success: true,
         };
     }
     catch (e) {

@@ -16,8 +16,8 @@ router.get("/get-main-client/:customId", maintenance_controllers_1.getMaintenanc
 router.get("/get-main-equipment/:equipmentId", maintenance_controllers_1.getMaintenanceEquipment);
 // Get one maintenance by id
 router.get("/detail-main/:id", maintenance_controllers_1.getMaintenanceById);
-// Update maintenance (tech)
-router.patch("/update-main/:id", authjwt_1.verifyToken, authjwt_1.isTech, maintenance_controllers_1.updateMaintenance);
+// Update maintenance (tech & admin & super_user)
+router.patch("/update-main/:id", authjwt_1.verifyToken, authjwt_1.isAdmin_isTech_isSuperU, maintenance_controllers_1.updateMaintenance);
 // Delete maintenance (admin & super_user)
-router.delete("/delete-main/:id");
+router.delete("/delete-main/:id", authjwt_1.verifyToken, authjwt_1.isSuperUser_isAdmin, maintenance_controllers_1.deleteMaintenance);
 exports.default = router;

@@ -49,12 +49,15 @@ const newEquipmentServ = async (equip) => {
     }
 };
 exports.newEquipmentServ = newEquipmentServ;
-const getEquipmentServ = async () => {
+const getEquipmentServ = async (page, pageSize) => {
     try {
+        const offset = (page - 1) * pageSize;
         const equipments = await Equipment.findAll({
+            offset,
+            limit: pageSize,
             where: { status: false },
+            attributes: { exclude: ["updatedAt"] },
             order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt"] },
             include: [
                 {
                     model: Location,
@@ -74,8 +77,11 @@ const getEquipmentServ = async () => {
                 },
             ],
         });
+        const totalCount = await Equipment.count({ where: { status: false } });
         return {
-            data: equipments
+            equipments,
+            totalCount,
+            success: true,
         };
     }
     catch (e) {
