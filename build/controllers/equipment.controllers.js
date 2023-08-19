@@ -16,18 +16,26 @@ const createEquipment = async (req, res) => {
 exports.createEquipment = createEquipment;
 //Get All Equipments
 const getAllEquipments = async (req, res) => {
-    const { page, pageSize } = req.query;
+    //const { page, pageSize }:any = req.query;
     try {
-        // const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
-        // const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { equipments, totalCount } = await (0, equipment_services_1.getEquipmentServ)(page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            equipments,
-            numItmes: totalCount,
-            currentPage: parseInt(page),
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                equipments,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                equipments,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)
@@ -50,8 +58,24 @@ exports.getOneEquipment = getOneEquipment;
 //Get equipments by location
 const getEquipmentsLocation = async (req, res) => {
     try {
-        const equipmentsLoc = await (0, equipment_services_1.allEquipmentsLocationServ)(req.params.locationId);
-        res.status(200).json(equipmentsLoc);
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
+        const { equipLocation, totalCount } = await (0, equipment_services_1.allEquipmentsLocationServ)(req.params.locationId, page, pageSize);
+        if (!page && !pageSize) {
+            res.status(200).json({
+                equipLocation,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                equipLocation,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)

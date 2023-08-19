@@ -17,16 +17,24 @@ exports.createHeadqaurter = createHeadqaurter;
 // Get all headquarters
 const getHeadquarters = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
-        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { headquarters, totalCount } = await (0, headq_services_1.getHeadServ)(page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            headquarters,
-            numItmes: totalCount,
-            currentPage: page,
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                headquarters,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                headquarters,
+                numItmes: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)
@@ -49,16 +57,24 @@ exports.getOneHeadquarter = getOneHeadquarter;
 // Get headquarters by client
 const getHeadqClient = async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; // Get the requested page from query parameter
-        const pageSize = parseInt(req.query.pageSize) || 10; // Get the requested page size from query parameter
+        const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
+        const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const { hedClient, totalCount } = await (0, headq_services_1.allHeadClientServ)(req.params.clientId, page, pageSize);
-        const totalPages = Math.ceil(totalCount / pageSize);
-        res.status(200).json({
-            hedClient,
-            totalItems: totalCount,
-            currentPage: page,
-            totalPages,
-        });
+        if (!page && !pageSize) {
+            res.status(200).json({
+                hedClient,
+                numItmes: totalCount,
+            });
+        }
+        else {
+            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            res.status(200).json({
+                hedClient,
+                totalItems: totalCount,
+                currentPage: page,
+                totalPages,
+            });
+        }
     }
     catch (error) {
         if (error instanceof Error)

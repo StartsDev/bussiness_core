@@ -6,7 +6,7 @@ const router = (0, express_1.Router)();
 // Register new location
 router.post("/create-location", location_controllers_1.createLocation);
 // Get all locations
-router.get("/get-all-locations", location_controllers_1.getLotaions);
+router.get("/get-all-locations", location_controllers_1.getLocations);
 // Get one location
 router.get("/get-one-location/:id", location_controllers_1.getOneLocation);
 // Get all locations by headquarters
