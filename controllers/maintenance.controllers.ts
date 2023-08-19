@@ -7,6 +7,7 @@ import {
   getMainByEquipment,
   getMaintByIdServ,
   updateMaintenanceServ,
+  deleteMaintenanceServ,
 } from "../services/maintenance.services";
 
 //Register new maintenance
@@ -22,8 +23,19 @@ const createMaintenance = async (req: Request, res: Response) => {
 // Get all maintenances
 const getMaintenances = async (req: Request, res: Response) => {
   try {
-    const maintenances = await getMaintenancesServ();
-    res.status(200).json(maintenances);
+    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+
+    const {maintenances, totalCount} = await getMaintenancesServ(page, pageSize);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+    
+    res.status(200).json({
+      maintenances,
+      numItmes : totalCount,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -77,8 +89,17 @@ const updateMaintenance = async (req: Request, res: Response) => {
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
-}
+};
+
 // Delete maintenance
+const deleteMaintenance = async (req: Request, res: Response) => {
+  try {
+    const maintenance = await deleteMaintenanceServ(req.params.id);
+    res.status(200).json(maintenance);
+  } catch (error) {
+    if (error instanceof Error) res.status(400).json({ error: error.message });
+  }
+};
 
 export {
   createMaintenance,
@@ -88,4 +109,5 @@ export {
   getMaintenanceEquipment,
   getMaintenanceById,
   updateMaintenance,
+  deleteMaintenance,
 };

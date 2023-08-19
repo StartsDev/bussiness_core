@@ -127,12 +127,15 @@ const createMaintenanceServ = async (maint: any) => {
 };
 
 // Get maintenances
-const getMaintenancesServ = async () => {
+const getMaintenancesServ = async (page: number, pageSize: number) => {
   try {
+    const offset = (page - 1) * pageSize;
     const maintenances = await Maintenance.findAll({
+      offset,
+      limit: pageSize,
       where: { delete: false },
+      attributes: { exclude: ["updatedAt"] },
       order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["createdAt", "updatedAt"] },
       include: [
         {
           model: Equipment,
@@ -164,8 +167,11 @@ const getMaintenancesServ = async () => {
         },
       ],
     });
+    const totalCount = await Maintenance.count({ where: { delete: false } });
     return {
-      data: maintenances,
+      maintenances,
+      totalCount,
+      success: true,
     };
   } catch (e) {
     console.log(e);
@@ -177,7 +183,7 @@ const getMaintenancesServ = async () => {
 const getMaintByTechServ = async (tech: any) => {
   try {
     const maintenanceTech = await Maintenance.findAll({
-      where: { "tech.techId": tech.techId },
+      where: { "tech.techId": tech.techId, delete: false },
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
       include: [
@@ -368,6 +374,7 @@ const getMaintByIdServ = async (maint: any) => {
 // Update maintenance
 const updateMaintenanceServ = async (id: any, maint: any) => {
   try {
+    // Validate maintenance
     const maintFound = await Maintenance.findOne({ where: { id } });
     if (!maintFound) {
       return {
@@ -375,6 +382,37 @@ const updateMaintenanceServ = async (id: any, maint: any) => {
         success: false,
       };
     }
+    // Validate Maintenance state & user autorization role
+    if (
+      maintFound.dataValues.status === "En proceso" &&
+      maint.rolName != "Tecnico" &&
+      maint.rolName != "Super_Usuario"
+    ) {
+      return {
+        msg: "El administrador no puede modificar un mantenimiento en proceso",
+        success: false,
+      };
+    }
+
+    if (
+      maintFound.dataValues.status === "Completado" &&
+      maint.rolName != "Administrador" &&
+      maint.rolName != "Super_Usuario"
+    ) {
+      return {
+        msg: "El técnico no puede modificar un mantenimiento completado",
+        success: false,
+      };
+    }
+
+    if (maintFound.dataValues.status === "Confirmado") {
+      return {
+        msg: "No es posible actualizar un mantenimiento confirmado",
+        success: false,
+      };
+    }
+
+    // Validate client
     const clientFound = await Client.findOne({
       where: { id: maint.customerId },
     });
@@ -384,6 +422,8 @@ const updateMaintenanceServ = async (id: any, maint: any) => {
         success: false,
       };
     }
+
+    // Validate equipment
     const equipFound = await Equipment.findOne({
       where: { id: maint.equipmentId },
     });
@@ -393,6 +433,8 @@ const updateMaintenanceServ = async (id: any, maint: any) => {
         success: false,
       };
     }
+
+    // Update maintenance
     const [updateMaintenance] = await Maintenance.update(maint, {
       where: {
         id,
@@ -405,11 +447,13 @@ const updateMaintenanceServ = async (id: any, maint: any) => {
         success: false,
       };
     }
+
+    // Return maintenace updated
     const maintenance = await Maintenance.findOne({ where: { id } });
     if (!updateMaintenance) {
       return {
         msg: "Actualización no es correcta",
-        success: false
+        success: false,
       };
     }
     return {
@@ -423,41 +467,44 @@ const updateMaintenanceServ = async (id: any, maint: any) => {
 };
 
 // Delete maintenance
-
-
-/* 
-
-
-// Delete location
-const deleteLocationServ = async (id: any) => {
+const deleteMaintenanceServ = async (id: any) => {
   try {
-    const findLocation = await Location.findOne({ where: { id } });
-    if (findLocation.dataValues.status) {
+    const findMaint = await Maintenance.findOne({ where: { id } });
+    if (findMaint.dataValues.delete) {
       return {
-        msg: "La ubicación no válida",
+        msg: "Mantenimiento no registrado",
+        success: false,
       };
     }
-    const deletedLocation = await Location.update(
-      { status: true },
+    if (findMaint.dataValues.status === "Confirmado") {
+      return {
+        msg: "No es posible eliminar un mantenimiento confirmado",
+        success: false,
+      };
+    }
+    const deletedMaintenance = await Maintenance.update(
+      { delete: true },
       {
         where: {
           id,
         },
       }
     );
-    if (!deletedLocation) {
+    if (!deletedMaintenance) {
       return {
-        msg: "Ubicación no válida",
+        msg: "No se pudo eliminar el mantenimiento",
+        success: false,
       };
     }
     return {
-      msg: "Ubicación eliminada con exito...",
+      msg: "Mantenimiento eliminado con exito...",
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
   }
 };
- */
+
 export {
   createMaintenanceServ,
   getMaintenancesServ,
@@ -466,6 +513,5 @@ export {
   getMainByEquipment,
   getMaintByIdServ,
   updateMaintenanceServ,
-  /* 
-  deleteLocationServ, */
+  deleteMaintenanceServ,
 };

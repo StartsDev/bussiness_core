@@ -1,7 +1,7 @@
 export enum StatusOption {
   inProcess = 'En proceso',
-  confirmed = 'Confirmado',
-  autorized = 'Autorizado'
+  completed = 'Completado',
+  confirmed = 'Confirmado'
 }
 
 export interface MaintenanceAttributes {

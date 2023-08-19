@@ -22,7 +22,7 @@ const createLocationServ = async (location: any) => {
       };
     }
     const newLocation = await Location.create(location);
-   
+
     return {
       msg: "Ubicación registrada satisfactoriamente...",
       location: newLocation,
@@ -33,11 +33,15 @@ const createLocationServ = async (location: any) => {
 };
 
 // Get locations
-const getLocationsServ = async () => {
+const getLocationsServ = async (page: number, pageSize: number) => {
   try {
+    const offset = (page - 1) * pageSize;
     const locations = await Location.findAll({
+      offset,
+      limit: pageSize,
       where: { status: false },
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["updatedAt"] },
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Headquarters,
@@ -53,8 +57,11 @@ const getLocationsServ = async () => {
         },
       ],
     });
+    const totalCount = await Location.count({ where: { status: false } });
     return {
-      data: locations,
+      locations,
+      totalCount,
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
@@ -96,11 +103,19 @@ const getOneLocationServ = async (location: any) => {
 };
 
 //Get locations by headquarter
-const allLocationsHeadServ = async (location: any) => {
+const allLocationsHeadServ = async (
+  location: any,
+  page: number,
+  pageSize: number
+) => {
   try {
-    const locationHead = await Location.findAll({
+    const offset = (page - 1) * pageSize;
+    const locations= await Location.findAll({
+      offset,
+      limit: pageSize,
       where: { headquarterId: location },
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["updatedAt"] },
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Headquarters,
@@ -108,13 +123,19 @@ const allLocationsHeadServ = async (location: any) => {
         },
       ],
     });
-    if (!locationHead) {
+    if (!locations) {
       return {
         msg: "Lugares no hay con esta sede",
-        users: [],
+        success: false,
       };
     }
-    return { data: locationHead };
+    const totalCount = await Client.count();
+
+    return {
+      locations,
+      totalCount,
+      success: true,
+    };
   } catch (e) {
     throw new Error(e as string);
   }
@@ -153,7 +174,7 @@ const updateLocationServ = async (id: any, locat: any) => {
     return {
       msg: "Sede actualizada con exito...",
       location,
-      success: true
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);

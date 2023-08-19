@@ -13,17 +13,28 @@ const createClient = async (req: Request, res: Response) => {
     const client = await createClientServ(req.body);
     res.status(200).json(client);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 
 // Get all clients
 const getClients = async (req: Request, res: Response) => {
   try {
-    const clients = await getClientsServ();
-    res.status(200).json(clients);
+    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+
+    const { clients, totalCount } = await getClientsServ(page, pageSize);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    res.status(200).json({
+      clients,
+      numItmes : totalCount,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 
@@ -33,7 +44,7 @@ const getOneClient = async (req: Request, res: Response) => {
     const clients = await getOneClientServ(req.params.id);
     res.status(200).json(clients);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 
@@ -43,7 +54,7 @@ const editClient = async (req: Request, res: Response) => {
     const client = await updateClientServ(req.params.id, req.body);
     res.status(200).json(client);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 
@@ -53,7 +64,7 @@ const deleteClient = async (req: Request, res: Response) => {
     const client = await deleteClientServ(req.params.id);
     res.status(200).json(client);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 

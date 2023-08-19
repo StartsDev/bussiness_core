@@ -5,7 +5,7 @@ import {
   getOneHeadServ,
   allHeadClientServ,
   updateHeadServ,
-  deleteHeadServ
+  deleteHeadServ,
 } from "../services/headq.services";
 
 //Register new headquarter
@@ -21,8 +21,19 @@ const createHeadqaurter = async (req: Request, res: Response) => {
 // Get all headquarters
 const getHeadquarters = async (req: Request, res: Response) => {
   try {
-    const headquarters = await getHeadServ();
-    res.status(200).json(headquarters);
+    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+
+    const { headquarters, totalCount } = await getHeadServ(page, pageSize);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    res.status(200).json({
+      headquarters,
+      numItmes : totalCount,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -39,14 +50,29 @@ const getOneHeadquarter = async (req: Request, res: Response) => {
 };
 
 // Get headquarters by client
-const getHeadqClient = async(req: Request, res: Response)=>{
+const getHeadqClient = async (req: Request, res: Response) => {
   try {
-    const headersq = await allHeadClientServ(req.params.clientId);
-    res.status(200).json(headersq);
+    const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+    const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+
+    const { hedClient, totalCount } = await allHeadClientServ(
+      req.params.clientId,
+      page,
+      pageSize
+    );
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    res.status(200).json({
+      hedClient,
+      totalItems: totalCount,
+      currentPage: page,
+      totalPages,
+    });
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
-}
+};
 
 // Update headquarter
 const editHeadquarter = async (req: Request, res: Response) => {
@@ -64,7 +90,7 @@ const deleteHeadquarter = async (req: Request, res: Response) => {
     const head = await deleteHeadServ(req.params.id);
     res.status(200).json(head);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 
@@ -74,5 +100,5 @@ export {
   getOneHeadquarter,
   getHeadqClient,
   editHeadquarter,
-  deleteHeadquarter
+  deleteHeadquarter,
 };

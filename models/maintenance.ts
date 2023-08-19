@@ -96,6 +96,7 @@ Maintenance.init(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
+    //Base64
     customer_sign: {
       type: DataTypes.STRING,
       allowNull: true,

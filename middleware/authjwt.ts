@@ -141,3 +141,65 @@ export const isSuperUser = async (
     return res.status(401).json({ error });
   }
 };
+
+export const isSuperUser_isAdmin = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+    const baseUrl = `${URL}/user/get-user`;
+
+    const id = req.decoded?.userId;
+
+    const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const userData: any = response.data;
+
+    if (!userData.user) {
+      return res.status(401).json({ message: "Usuario no válido" });
+    }
+    if (
+      userData.user.Role.role !== "Super_Usuario" &&
+      userData.user.Role.role !== "Administrador"
+    )
+      return res.status(401).json({
+        message: "El rol de usuario no es super usuario o administrador",
+      });
+    next();
+  } catch (error) {
+    return res.status(401).json({ error });
+  }
+};
+
+export const isAdmin_isTech_isSuperU = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+    const baseUrl = `${URL}/user/get-user`;
+
+    const id = req.decoded?.userId;
+
+    const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const userData: any = response.data;
+
+    if (!userData.user) {
+      return res.status(401).json({ message: "Usuario no válido" });
+    }
+    if (
+      userData.user.Role.role !== "Super_Usuario" &&
+      userData.user.Role.role !== "Administrador" &&
+      userData.user.Role.role !== "Tecnico"
+    )
+      return res.status(401).json({ message: "Este rol no es permitido" });
+    req.body.rolName = userData.user.Role.role;
+    next();
+  } catch (error) {
+    return res.status(401).json({ error });
+  }
+};

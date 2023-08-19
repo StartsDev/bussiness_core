@@ -5,7 +5,7 @@ import {
   getOneEquipmentServ,
   allEquipmentsLocationServ,
   updateEquipmentServ,
-  deleteEquipmentServ
+  deleteEquipmentServ,
 } from "../services/equipment.services";
 
 //Register new equipment
@@ -20,9 +20,21 @@ const createEquipment = async (req: Request, res: Response) => {
 
 //Get All Equipments
 const getAllEquipments = async (req: Request, res: Response) => {
+  const { page, pageSize }:any = req.query;
   try {
-    const equipments = await getEquipmentServ();
-    res.status(200).json(equipments);
+    // const page = parseInt(req.query.page as string) || 1; // Get the requested page from query parameter
+    // const pageSize = parseInt(req.query.pageSize as string) || 10; // Get the requested page size from query parameter
+
+    const { equipments, totalCount } = await getEquipmentServ(page, pageSize);
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    res.status(200).json({
+      equipments,
+      numItmes: totalCount,
+      currentPage: parseInt(page),
+      totalPages,
+    });
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -66,7 +78,7 @@ const deleteEquipment = async (req: Request, res: Response) => {
     const equipment = await deleteEquipmentServ(req.params.id);
     res.status(200).json(equipment);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message })
+    if (error instanceof Error) res.status(400).json({ error: error.message });
   }
 };
 

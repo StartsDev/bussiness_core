@@ -20,7 +20,7 @@ const createHeadServ = async (head: any) => {
       };
     }
     const newHead = await Headquarter.create(head);
-  
+
     return {
       msg: "Sede registrada satisfactoriamente...",
       data: newHead,
@@ -30,12 +30,15 @@ const createHeadServ = async (head: any) => {
   }
 };
 
-const getHeadServ = async () => {
+const getHeadServ = async (page: number, pageSize: number) => {
   try {
+    const offset = (page - 1) * pageSize;
     const headquarters = await Headquarter.findAll({
+      offset,
+      limit: pageSize,
       where: { status: false },
-      order: [['createdAt', 'DESC']],
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["updatedAt"] },
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Client,
@@ -43,8 +46,11 @@ const getHeadServ = async () => {
         },
       ],
     });
+    const totalCount = await Headquarter.count({ where: { status: false } });
     return {
-      data: headquarters,
+      headquarters,
+      totalCount,
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);
@@ -69,12 +75,15 @@ const getOneHeadServ = async (head: any) => {
   }
 };
 
-const allHeadClientServ = async (user: any) => {
+const allHeadClientServ = async (user: any, page: number, pageSize: number) => {
   try {
+    const offset = (page - 1) * pageSize;
     const hedClient = await Headquarter.findAll({
+      offset,
+      limit: pageSize,
       where: { clientId: user },
-      order: [['createdAt', 'DESC']],
-      attributes: { exclude: ["createdAt", "updatedAt"] },
+      attributes: { exclude: ["updatedAt"] },
+      order: [["createdAt", "DESC"]],
       include: [
         {
           model: Client,
@@ -85,10 +94,16 @@ const allHeadClientServ = async (user: any) => {
     if (!hedClient) {
       return {
         msg: "Sedes no hay con este cliente",
-        users: [],
+        success: false
       };
     }
-    return { data: hedClient };
+    const totalCount = await Headquarter.count();
+
+    return {
+      hedClient,
+      totalCount,
+      success: true,
+    };
   } catch (e) {
     throw new Error(e as string);
   }
@@ -126,7 +141,7 @@ const updateHeadServ = async (id: any, headq: any) => {
     return {
       msg: "Sede actualizada con exito...",
       head,
-      success:true
+      success: true,
     };
   } catch (e) {
     throw new Error(e as string);

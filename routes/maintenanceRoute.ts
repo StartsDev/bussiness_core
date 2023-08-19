@@ -7,8 +7,14 @@ import {
   getMaintenanceEquipment,
   getMaintenanceById,
   updateMaintenance,
+  deleteMaintenance,
 } from "../controllers/maintenance.controllers";
-import { verifyToken, isTech } from "../middleware/authjwt";
+import {
+  verifyToken,
+  isTech,
+  isSuperUser_isAdmin,
+  isAdmin_isTech_isSuperU,
+} from "../middleware/authjwt";
 
 const router = Router();
 
@@ -30,10 +36,20 @@ router.get("/get-main-equipment/:equipmentId", getMaintenanceEquipment);
 // Get one maintenance by id
 router.get("/detail-main/:id", getMaintenanceById);
 
-// Update maintenance (tech)
-router.patch("/update-main/:id", verifyToken, isTech, updateMaintenance);
+// Update maintenance (tech & admin & super_user)
+router.patch(
+  "/update-main/:id",
+  verifyToken,
+  isAdmin_isTech_isSuperU,
+  updateMaintenance
+);
 
 // Delete maintenance (admin & super_user)
-router.delete("/delete-main/:id");
+router.delete(
+  "/delete-main/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  deleteMaintenance
+);
 
 export default router;
