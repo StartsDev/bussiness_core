@@ -102,7 +102,7 @@ Maintenance.init({
     },
     photos: {
         type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: true,
+        defaultValue: []
     },
     tech: {
         type: DataTypes.JSON,

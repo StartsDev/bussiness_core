@@ -19,6 +19,7 @@ const createMaintenanceServ = async (maint) => {
                 success: false,
             };
         }
+        // Validation equipment belong to client
         const client = await Client.findByPk(customerId, {
             include: {
                 model: Headquarter,
