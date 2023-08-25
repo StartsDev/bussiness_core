@@ -54,7 +54,7 @@ const getClients = async (req, res) => {
         else {
             const { clients, totalCount } = await (0, client_services_1.getClientsServ)(businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand);
             res.status(200).json({
-                locations: clients,
+                clients,
                 numItmes: totalCount,
             });
         }

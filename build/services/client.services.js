@@ -192,18 +192,21 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 order: [["createdAt", "DESC"]],
                 include: {
                     model: Headquarter,
+                    required: false,
                     where: optionh,
                     as: "headquarters",
                     order: [["createdAt", "DESC"]],
                     attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                     include: {
                         model: Location,
+                        required: false,
                         where: optionsl,
                         as: "locations",
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                         include: {
                             model: Equipment,
+                            required: false,
                             where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
@@ -243,29 +246,6 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 }
                 linearDatap.push(clientData);
             }
-            // Counter
-            /*  console.log('COUNTER PPAL',options)
-             console.log('COUNTER HEAD',optionh)
-             console.log('COUNTER LOCAT',optionsl)
-             console.log('COUNTER EQUIP',optionse) */
-            totalCount = await Client.count({
-                where: options,
-                include: {
-                    model: Headquarter,
-                    as: "headquarters",
-                    where: optionh,
-                    include: {
-                        model: Location,
-                        as: "locations",
-                        where: optionsl,
-                        include: {
-                            model: Equipment,
-                            as: "equipments",
-                            where: optionse,
-                        },
-                    },
-                },
-            });
             if (!clients) {
                 return {
                     msg: "No existen clientes registrados...",
@@ -275,8 +255,8 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             }
         }
         return {
-            clients: linearDatap,
-            totalCount,
+            clients,
+            totalCount: clients.length,
             success: true,
         };
     }
@@ -441,20 +421,21 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
             where: options,
             attributes: { exclude: ["updatedAt", "status", "headquarters"] },
             order: [["createdAt", "DESC"]],
+            all: true,
             include: [
                 {
                     model: Headquarter,
                     where: optionh,
+                    required: false,
                     as: "headquarters",
-                    order: [["createdAt", "DESC"]],
                     attributes: {
                         exclude: ["createdAt", "updatedAt", "status", "clientId"],
                     },
                     include: {
                         model: Location,
                         where: optionsl,
+                        required: false,
                         as: "locations",
-                        order: [["createdAt", "DESC"]],
                         attributes: {
                             exclude: [
                                 "createdAt",
@@ -467,8 +448,8 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                         include: {
                             model: Equipment,
                             where: optionse,
+                            required: false,
                             as: "equipments",
-                            order: [["createdAt", "DESC"]],
                             attributes: {
                                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
                             },
@@ -476,7 +457,9 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                     },
                 },
             ],
+            required: false,
         });
+        Sequelize.options.logging = false;
         if (!clients) {
             return {
                 msg: "No existen clientes registrados...",
@@ -513,32 +496,9 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
             }
             linearDatap.push(clientData);
         }
-        // Counter
-        /*  console.log('COUNTER PPAL',options)
-         console.log('COUNTER HEAD',optionh)
-         console.log('COUNTER LOCAT',optionsl)
-         console.log('COUNTER EQUIP',optionse) */
-        totalCount = await Client.count({
-            where: options,
-            include: {
-                model: Headquarter,
-                as: "headquarters",
-                where: optionh,
-                include: {
-                    model: Location,
-                    as: "locations",
-                    where: optionsl,
-                    include: {
-                        model: Equipment,
-                        as: "equipments",
-                        where: optionse,
-                    },
-                },
-            },
-        });
         return {
             clients: linearDatap,
-            totalCount,
+            totalCount: clients.length,
             success: true,
         };
     }
