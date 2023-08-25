@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByClientServ = exports.getMaintByTechServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
+const maintenance_interface_1 = require("./../interfaces/maintenance.interface");
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
@@ -9,7 +10,7 @@ const Client = require("../models/client");
 // Create a manteinance
 const createMaintenanceServ = async (maint) => {
     try {
-        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, discharge_pressure, service_hour, service_date, photos, customer_sign, tech_sign, customerId, observations, equipmentId, techId, techName, techNumId, } = maint;
+        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, voltage_control, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, amp_engine_4, amp_engine_evap, compressor_1_amp_L1, compressor_1_amp_L2, compressor_1_amp_L3, compressor_2_amp_L1, compressor_2_amp_L2, compressor_2_amp_L3, supply_temp, return_temp, ater_in_temp, water_out_temp, sprinkler_state, float_state, discharge_pressure, service_hour, service_date, photos, customer_sign, tech_sign, customerId, observations, additional_remarks, equipmentId, techId, techName, techNumId, } = maint;
         const findEquipment = await Equipment.findOne({
             where: { id: equipmentId },
         });
@@ -60,15 +61,44 @@ const createMaintenanceServ = async (maint) => {
                 success: false,
             };
         }
+        // Validation quantiy maintenances status "En proceso"
+        const maintCount = await Maintenance.count({
+            where: {
+                delete: false,
+                "tech.techId": techId,
+                status: maintenance_interface_1.StatusOption.inProcess,
+            },
+        });
+        if (maintCount === 5) {
+            return {
+                msg: "Sr. Técnico, tiene 5 servicios en estado en proceso, por favor firme y confirme al menos uno para poder registrar otro servicio...",
+                success: false,
+            };
+        }
         const maintenance = await Maintenance.create({
             activities,
             voltage_on_L1L2,
             voltage_on_L1L3,
             voltage_on_L2L3,
+            voltage_control,
             suction_pressure,
             amp_engine_1,
             amp_engine_2,
             amp_engine_3,
+            amp_engine_4,
+            amp_engine_evap,
+            compressor_1_amp_L1,
+            compressor_1_amp_L2,
+            compressor_1_amp_L3,
+            compressor_2_amp_L1,
+            compressor_2_amp_L2,
+            compressor_2_amp_L3,
+            supply_temp,
+            return_temp,
+            ater_in_temp,
+            water_out_temp,
+            sprinkler_state,
+            float_state,
             discharge_pressure,
             service_hour,
             service_date,
@@ -82,6 +112,7 @@ const createMaintenanceServ = async (maint) => {
                 techNumId,
             },
             observations,
+            additional_remarks,
             equipmentId,
         });
         return {

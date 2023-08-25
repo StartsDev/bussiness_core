@@ -16,26 +16,17 @@ const createEquipment = async (req, res) => {
 exports.createEquipment = createEquipment;
 //Get All Equipments
 const getAllEquipments = async (req, res) => {
-    //const { page, pageSize }:any = req.query;
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { equipments, totalCount } = await (0, equipment_services_1.getEquipmentServ)(page, pageSize);
-        if (!page && !pageSize) {
-            res.status(200).json({
-                equipments,
-                numItmes: totalCount,
-            });
-        }
-        else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-            res.status(200).json({
-                equipments,
-                numItmes: totalCount,
-                currentPage: page,
-                totalPages,
-            });
-        }
+        const locationName = req.query.locationName || undefined;
+        const headName = req.query.headName || undefined;
+        const businessName = req.query.businessName || undefined;
+        const { equipments, totalCount } = await (0, equipment_services_1.getEquipmentServ)(locationName, headName, businessName);
+        res.status(200).json({
+            equipments,
+            numItmes: totalCount,
+        });
     }
     catch (error) {
         if (error instanceof Error)

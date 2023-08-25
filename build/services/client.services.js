@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteClientServ = exports.updateClientServ = exports.getOneClientServ = exports.getClientsServ = exports.createClientServ = void 0;
+exports.deleteClientServ = exports.updateClientServ = exports.getOneClientServ = exports.getClientsServ = exports.getClientServPag = exports.createClientServ = void 0;
+const Sequelize = require("sequelize");
 const Client = require("../models/client");
 const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
@@ -27,29 +28,183 @@ const createClientServ = async (client) => {
     }
 };
 exports.createClientServ = createClientServ;
-const getClientsServ = async (page, pageSize) => {
+const getClientServPag = async (page, pageSize, businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
     try {
         let clients;
+        let totalCount = 0;
+        //Filters
+        let options = {};
+        let optionh = {};
+        let optionsl = {};
+        let optionse = {};
+        // Filter client propeties
+        if (businessName != undefined) {
+            options = {
+                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                status: false,
+            };
+        }
+        if (nit != undefined) {
+            options = {
+                nit: { [Sequelize.Op.like]: `${nit}%` },
+                status: false,
+            };
+        }
+        if (address != undefined) {
+            options = {
+                address: { [Sequelize.Op.like]: `${address}%` },
+                status: false,
+            };
+        }
+        if (email != undefined) {
+            options = {
+                email: { [Sequelize.Op.like]: `${email}%` },
+                status: false,
+            };
+        }
+        if (phone != undefined) {
+            options = {
+                phone: { [Sequelize.Op.like]: `${phone}%` },
+                status: false,
+            };
+        }
+        if (city != undefined) {
+            options = {
+                city: { [Sequelize.Op.like]: `${city}%` },
+                status: false,
+            };
+        }
+        if (contact != undefined) {
+            options = {
+                contact: { [Sequelize.Op.like]: `${contact}%` },
+                status: false,
+            };
+        }
+        // Filter heaquarters propeties
+        if (headName != undefined) {
+            optionh = {
+                headName: { [Sequelize.Op.like]: `${headName}%` },
+                status: false,
+            };
+        }
+        if (addressh != undefined) {
+            optionh = {
+                address: { [Sequelize.Op.like]: `${addressh}%` },
+                status: false,
+            };
+        }
+        if (emailh != undefined) {
+            optionh = {
+                email: { [Sequelize.Op.like]: `${emailh}%` },
+                status: false,
+            };
+        }
+        if (phoneh != undefined) {
+            optionh = {
+                phone: { [Sequelize.Op.like]: `${phoneh}%` },
+                status: false,
+            };
+        }
+        const whereConditions = {};
+        if (isPrincipal === "true") {
+            whereConditions.isPrincipal = true;
+            optionh = {
+                isPrincipal: whereConditions.isPrincipal,
+                status: false,
+            };
+        }
+        else if (isPrincipal === "false") {
+            whereConditions.isPrincipal = false;
+            optionh = {
+                isPrincipal: whereConditions.isPrincipal,
+                status: false,
+            };
+        }
+        // Filter location propeties
+        if (locationName != undefined) {
+            optionsl = {
+                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                status: false,
+            };
+        }
+        // Filter equipment propeties
+        if (name != undefined) {
+            optionse = {
+                name: { [Sequelize.Op.like]: `${name}%` },
+                status: false,
+            };
+        }
+        if (serial != undefined) {
+            optionse = {
+                serial: { [Sequelize.Op.like]: `${serial}%` },
+                status: false,
+            };
+        }
+        if (model != undefined) {
+            optionse = {
+                model: { [Sequelize.Op.like]: `${model}%` },
+                status: false,
+            };
+        }
+        if (type != undefined) {
+            optionse = {
+                type: { [Sequelize.Op.like]: `${type}%` },
+                status: false,
+            };
+        }
+        if (brand != undefined) {
+            optionse = {
+                brand: { [Sequelize.Op.like]: `${brand}%` },
+                status: false,
+            };
+        }
+        // Filter none params
+        if (!page &&
+            !pageSize &&
+            !businessName &&
+            !nit &&
+            !address &&
+            !email &&
+            !phone &&
+            !addressh &&
+            !emailh &&
+            !phoneh &&
+            !city &&
+            !contact &&
+            !headName &&
+            !isPrincipal &&
+            !locationName &&
+            !name &&
+            !serial &&
+            !model &&
+            !type &&
+            !brand) {
+            options = { status: false };
+        }
+        const linearDatap = [];
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
             clients = await Client.findAll({
                 offset,
                 limit: pageSize,
-                where: { status: false },
+                where: options,
                 attributes: { exclude: ["updatedAt", "status"] },
                 order: [["createdAt", "DESC"]],
                 include: {
                     model: Headquarter,
+                    where: optionh,
                     as: "headquarters",
                     order: [["createdAt", "DESC"]],
                     attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                     include: {
                         model: Location,
+                        where: optionsl,
                         as: "locations",
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                         include: {
                             model: Equipment,
+                            where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
                             attributes: {
@@ -59,30 +214,259 @@ const getClientsServ = async (page, pageSize) => {
                     },
                 },
             });
-            const totalCount = await Client.count({ where: { status: false } });
-            return {
-                clients,
-                totalCount,
-                success: true,
-            };
-        }
-        else {
-            clients = await Client.findAll({
-                where: { status: false },
-                attributes: { exclude: ["updatedAt", "status"] },
-                order: [["createdAt", "DESC"]],
+            //Hide properties heardquartes and locations
+            const propertiesToHide = ["locations"];
+            const propToHideLoc = ["equipments"];
+            // Customization data clients (serialization) hide some properties
+            for (const client of clients) {
+                const clientData = client.get({ plain: true });
+                clientData.headquarters = [];
+                for (const headquarter of client.headquarters) {
+                    const sanitizedObject = { ...headquarter.get({ plain: true }) };
+                    propertiesToHide.forEach((property) => {
+                        delete sanitizedObject[property];
+                    });
+                    clientData.locations = [];
+                    for (const location of headquarter.locations) {
+                        const sanitizedObjectLoc = { ...location.get({ plain: true }) };
+                        propToHideLoc.forEach((property) => {
+                            delete sanitizedObjectLoc[property];
+                        });
+                        clientData.equipments = [];
+                        for (const equipment of location.equipments) {
+                            const equipData = equipment.get({ plain: true });
+                            clientData.equipments.push(equipData);
+                        }
+                        clientData.locations.push(sanitizedObjectLoc);
+                    }
+                    clientData.headquarters.push(sanitizedObject);
+                }
+                linearDatap.push(clientData);
+            }
+            // Counter
+            /*  console.log('COUNTER PPAL',options)
+             console.log('COUNTER HEAD',optionh)
+             console.log('COUNTER LOCAT',optionsl)
+             console.log('COUNTER EQUIP',optionse) */
+            totalCount = await Client.count({
+                where: options,
                 include: {
                     model: Headquarter,
                     as: "headquarters",
-                    order: [["createdAt", "DESC"]],
-                    attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+                    where: optionh,
                     include: {
                         model: Location,
                         as: "locations",
-                        order: [["createdAt", "DESC"]],
-                        attributes: { exclude: ["createdAt", "updatedAt", "status"] },
+                        where: optionsl,
                         include: {
                             model: Equipment,
+                            as: "equipments",
+                            where: optionse,
+                        },
+                    },
+                },
+            });
+            if (!clients) {
+                return {
+                    msg: "No existen clientes registrados...",
+                    clients: linearDatap,
+                    success: false,
+                };
+            }
+        }
+        return {
+            clients: linearDatap,
+            totalCount,
+            success: true,
+        };
+    }
+    catch (e) {
+        throw new Error(e);
+    }
+};
+exports.getClientServPag = getClientServPag;
+const getClientsServ = async (businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
+    try {
+        //Filters
+        let totalCount = 0;
+        let options = {};
+        let optionh = {};
+        let optionsl = {};
+        let optionse = {};
+        // Filter client propeties
+        if (businessName != undefined) {
+            options = {
+                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                status: false,
+            };
+        }
+        if (nit != undefined) {
+            options = {
+                nit: { [Sequelize.Op.like]: `${nit}%` },
+                status: false,
+            };
+        }
+        if (address != undefined) {
+            options = {
+                address: { [Sequelize.Op.like]: `${address}%` },
+                status: false,
+            };
+        }
+        if (email != undefined) {
+            options = {
+                email: { [Sequelize.Op.like]: `${email}%` },
+                status: false,
+            };
+        }
+        if (phone != undefined) {
+            options = {
+                phone: { [Sequelize.Op.like]: `${phone}%` },
+                status: false,
+            };
+        }
+        if (city != undefined) {
+            options = {
+                city: { [Sequelize.Op.like]: `${city}%` },
+                status: false,
+            };
+        }
+        if (contact != undefined) {
+            options = {
+                contact: { [Sequelize.Op.like]: `${contact}%` },
+                status: false,
+            };
+        }
+        // Filter heaquarters propeties
+        if (headName != undefined) {
+            optionh = {
+                headName: { [Sequelize.Op.like]: `${headName}%` },
+                status: false,
+            };
+        }
+        if (addressh != undefined) {
+            optionh = {
+                address: { [Sequelize.Op.like]: `${addressh}%` },
+                status: false,
+            };
+        }
+        if (emailh != undefined) {
+            optionh = {
+                email: { [Sequelize.Op.like]: `${emailh}%` },
+                status: false,
+            };
+        }
+        if (phoneh != undefined) {
+            optionh = {
+                phone: { [Sequelize.Op.like]: `${phoneh}%` },
+                status: false,
+            };
+        }
+        const whereConditions = {};
+        if (isPrincipal === "true") {
+            whereConditions.isPrincipal = true;
+            optionh = {
+                isPrincipal: whereConditions.isPrincipal,
+                status: false,
+            };
+        }
+        else if (isPrincipal === "false") {
+            whereConditions.isPrincipal = false;
+            optionh = {
+                isPrincipal: whereConditions.isPrincipal,
+                status: false,
+            };
+        }
+        // Filter location propeties
+        if (locationName != undefined) {
+            optionsl = {
+                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                status: false,
+            };
+        }
+        // Filter equipment propeties
+        if (name != undefined) {
+            optionse = {
+                name: { [Sequelize.Op.like]: `${name}%` },
+                status: false,
+            };
+        }
+        if (serial != undefined) {
+            optionse = {
+                serial: { [Sequelize.Op.like]: `${serial}%` },
+                status: false,
+            };
+        }
+        if (model != undefined) {
+            optionse = {
+                model: { [Sequelize.Op.like]: `${model}%` },
+                status: false,
+            };
+        }
+        if (type != undefined) {
+            optionse = {
+                type: { [Sequelize.Op.like]: `${type}%` },
+                status: false,
+            };
+        }
+        if (brand != undefined) {
+            optionse = {
+                brand: { [Sequelize.Op.like]: `${brand}%` },
+                status: false,
+            };
+        }
+        // Filter none params
+        if (!businessName &&
+            !nit &&
+            !address &&
+            !email &&
+            !phone &&
+            !addressh &&
+            !emailh &&
+            !phoneh &&
+            !city &&
+            !contact &&
+            !headName &&
+            !isPrincipal &&
+            !locationName &&
+            !name &&
+            !serial &&
+            !model &&
+            !type &&
+            !brand) {
+            options = { status: false };
+        }
+        // All query clients
+        const linearDatap = [];
+        const clients = await Client.findAll({
+            where: options,
+            attributes: { exclude: ["updatedAt", "status", "headquarters"] },
+            order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: Headquarter,
+                    where: optionh,
+                    as: "headquarters",
+                    order: [["createdAt", "DESC"]],
+                    attributes: {
+                        exclude: ["createdAt", "updatedAt", "status", "clientId"],
+                    },
+                    include: {
+                        model: Location,
+                        where: optionsl,
+                        as: "locations",
+                        order: [["createdAt", "DESC"]],
+                        attributes: {
+                            exclude: [
+                                "createdAt",
+                                "updatedAt",
+                                "status",
+                                "headquarterId",
+                                "description",
+                            ],
+                        },
+                        include: {
+                            model: Equipment,
+                            where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
                             attributes: {
@@ -91,14 +475,72 @@ const getClientsServ = async (page, pageSize) => {
                         },
                     },
                 },
-            });
-            const totalCount = await Client.count({ where: { status: false } });
+            ],
+        });
+        if (!clients) {
             return {
+                msg: "No existen clientes registrados...",
                 clients,
-                totalCount,
-                success: true,
+                success: false,
             };
         }
+        //Hide properties heardquartes and locations
+        const propertiesToHide = ["locations"];
+        const propToHideLoc = ["equipments"];
+        // Customization data clients (serialization) hide some properties
+        for (const client of clients) {
+            const clientData = client.get({ plain: true });
+            clientData.headquarters = [];
+            for (const headquarter of client.headquarters) {
+                const sanitizedObject = { ...headquarter.get({ plain: true }) };
+                propertiesToHide.forEach((property) => {
+                    delete sanitizedObject[property];
+                });
+                clientData.locations = [];
+                for (const location of headquarter.locations) {
+                    const sanitizedObjectLoc = { ...location.get({ plain: true }) };
+                    propToHideLoc.forEach((property) => {
+                        delete sanitizedObjectLoc[property];
+                    });
+                    clientData.equipments = [];
+                    for (const equipment of location.equipments) {
+                        const equipData = equipment.get({ plain: true });
+                        clientData.equipments.push(equipData);
+                    }
+                    clientData.locations.push(sanitizedObjectLoc);
+                }
+                clientData.headquarters.push(sanitizedObject);
+            }
+            linearDatap.push(clientData);
+        }
+        // Counter
+        /*  console.log('COUNTER PPAL',options)
+         console.log('COUNTER HEAD',optionh)
+         console.log('COUNTER LOCAT',optionsl)
+         console.log('COUNTER EQUIP',optionse) */
+        totalCount = await Client.count({
+            where: options,
+            include: {
+                model: Headquarter,
+                as: "headquarters",
+                where: optionh,
+                include: {
+                    model: Location,
+                    as: "locations",
+                    where: optionsl,
+                    include: {
+                        model: Equipment,
+                        as: "equipments",
+                        where: optionse,
+                    },
+                },
+            },
+        });
+        return {
+            clients: linearDatap,
+            totalCount,
+            success: true,
+        };
     }
     catch (e) {
         throw new Error(e);
@@ -116,7 +558,8 @@ const getOneClientServ = async (client) => {
             };
         }
         return {
-            client: findClient,
+            findClient,
+            success: true,
         };
     }
     catch (e) {
@@ -127,7 +570,6 @@ exports.getOneClientServ = getOneClientServ;
 const updateClientServ = async (id, cli) => {
     try {
         const clientFound = await Client.findOne({ where: { id } });
-        console.log(clientFound);
         if (!clientFound) {
             return {
                 msg: "Cliente no encontrado",

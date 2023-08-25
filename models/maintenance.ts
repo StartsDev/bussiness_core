@@ -7,20 +7,30 @@ class Maintenance
   extends Model<MaintenanceAttributes>
   implements MaintenanceAttributes
 {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
   id!: number;
   activities!: string;
   voltage_on_L1L2!: number;
   voltage_on_L1L3!: number;
   voltage_on_L2L3!: number;
+  voltage_control! : number;
   suction_pressure!: number;
   amp_engine_1!: number;
   amp_engine_2!: number;
   amp_engine_3!: number;
+  amp_engine_4! : number;
+  amp_engine_evap! : number;
+  compressor_1_amp_L1!: number;
+  compressor_1_amp_L2!: number;
+  compressor_1_amp_L3!: number;
+  compressor_2_amp_L1!: number;
+  compressor_2_amp_L2!: number;
+  compressor_2_amp_L3!: number;
+  supply_temp!: number;
+  return_temp! : number;
+  water_in_temp! : number;
+  water_out_temp! : number;
+  sprinkler_state!: string;
+  float_state!: string;
   discharge_pressure!: number;
   service_hour!: string;
   service_date!: string;
@@ -30,6 +40,7 @@ class Maintenance
   tech!: { techId: string; techName: string; techNumId: string };
   customerId!: string;
   observations!: string;
+  additional_remarks!:string;
   status!: StatusOption;
   delete!: boolean;
   static associate(model: any) {}
@@ -62,6 +73,11 @@ Maintenance.init(
       allowNull: true,
       defaultValue: 0.0,
     },
+    voltage_control: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
     suction_pressure: {
       type: DataTypes.FLOAT,
       allowNull: true,
@@ -82,6 +98,76 @@ Maintenance.init(
       allowNull: true,
       defaultValue: 0.0,
     },
+    amp_engine_4: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    amp_engine_evap: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_1_amp_L1: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_1_amp_L2: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_1_amp_L3: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_2_amp_L1: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_2_amp_L2: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    compressor_2_amp_L3: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    supply_temp: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    return_temp: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    water_in_temp: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    water_out_temp: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    sprinkler_state: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
+    float_state: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: 0.0,
+    },
     discharge_pressure: {
       type: DataTypes.FLOAT,
       allowNull: true,
@@ -96,13 +182,12 @@ Maintenance.init(
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-    //Base64
-    customer_sign: {
-      type: DataTypes.STRING,
+    customer_sign: {          //Base64 - Text
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     tech_sign: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     photos: {
@@ -118,7 +203,11 @@ Maintenance.init(
       allowNull: false,
     },
     observations: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    additional_remarks: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     status: {

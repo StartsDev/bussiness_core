@@ -5,13 +5,19 @@ import {
   getOneHeadquarter,
   getHeadqClient,
   editHeadquarter,
-  deleteHeadquarter
+  deleteHeadquarter,
 } from "../controllers/headq.controllers";
+import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 
 const router = Router();
 
 // Register new headquarter
-router.post("/create-headquarter", createHeadqaurter);
+router.post(
+  "/create-headquarter",
+  verifyToken,
+  isSuperUser_isAdmin,
+  createHeadqaurter
+);
 
 // Get headquarters
 router.get("/get-headquarters", getHeadquarters);
@@ -20,12 +26,22 @@ router.get("/get-headquarters", getHeadquarters);
 router.get("/get-one-headquarter/:id", getOneHeadquarter);
 
 // Get all headquarters by client
-router.get('/get-headquarters-client/:clientId', getHeadqClient);
+router.get("/get-headquarters-client/:clientId", getHeadqClient);
 
 // Update headquarter
-router.patch("/update-headquarter/:id", editHeadquarter);
+router.patch(
+  "/update-headquarter/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  editHeadquarter
+);
 
 // Delete headquarter
-router.delete("/delete-headquarter/:id", deleteHeadquarter);
+router.delete(
+  "/delete-headquarter/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  deleteHeadquarter
+);
 
 export default router;

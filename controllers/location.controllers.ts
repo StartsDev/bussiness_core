@@ -6,6 +6,7 @@ import {
   getOneLocationServ,
   updateLocationServ,
   deleteLocationServ,
+  getLocationServPag,
 } from "../services/location.services";
 
 // Create new Location
@@ -23,18 +24,29 @@ const getLocations = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
     const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
-
-    const { locations, totalCount } = await getLocationsServ(page, pageSize);
+    const headName = (req.query.headName as string) || undefined;
+    const businessName = (req.query.businessName as string) || undefined;
+    
     if (!page && !pageSize) {
+      const { linearData, totalCount } = await getLocationsServ(
+        headName,
+        businessName
+      );
       res.status(200).json({
-        locations,
+        locations: linearData,
         numItmes: totalCount,
       });
     } else {
-      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+      const { linearDatap, totalCountp } = await getLocationServPag(
+        page,
+        pageSize,
+        headName,
+        businessName
+      );
+      const totalPages = Math.ceil(totalCountp / (pageSize ?? totalCountp));
       res.status(200).json({
-        locations,
-        numItmes: totalCount,
+        locations: linearDatap,
+        numItmes: totalCountp,
         currentPage: page,
         totalPages,
       });

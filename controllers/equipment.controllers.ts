@@ -20,26 +20,22 @@ const createEquipment = async (req: Request, res: Response) => {
 
 //Get All Equipments
 const getAllEquipments = async (req: Request, res: Response) => {
-  //const { page, pageSize }:any = req.query;
   try {
     const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
     const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
+    const locationName = (req.query.locationName as string) || undefined;
+    const headName = (req.query.headName as string) || undefined;
+    const businessName = (req.query.businessName as string) || undefined;
 
-    const { equipments, totalCount } = await getEquipmentServ(page, pageSize);
-    if (!page && !pageSize) {
-      res.status(200).json({
-        equipments,
-        numItmes: totalCount,
-      });
-    } else {
-      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-      res.status(200).json({
-        equipments,
-        numItmes: totalCount,
-        currentPage: page,
-        totalPages,
-      });
-    }
+    const { equipments, totalCount } = await getEquipmentServ(
+      locationName,
+      headName,
+      businessName
+    );
+    res.status(200).json({
+      equipments,
+      numItmes: totalCount,
+    });
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
