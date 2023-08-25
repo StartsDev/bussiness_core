@@ -4,17 +4,14 @@ const sequelize_1 = require("sequelize");
 const { sequelize, DataTypes } = require("../database/index");
 const Quotation = require("../models/quotation");
 class Client extends sequelize_1.Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     id;
     businessName;
     nit;
     address;
     email;
     phone;
+    city;
+    contact;
     status;
     static associate(quotations) {
         // Client - Quotations
@@ -51,6 +48,14 @@ Client.init({
         allowNull: false,
     },
     phone: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    city: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    contact: {
         type: DataTypes.STRING,
         allowNull: false,
     },

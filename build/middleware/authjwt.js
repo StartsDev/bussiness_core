@@ -42,16 +42,16 @@ const isTech = async (req, res, next) => {
         const id = req.decoded?.userId;
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        if (!userData.user) {
+        if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.user.Role.role !== "Tecnico")
+        if (userData.findUser.Role.role !== "Tecnico")
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es técnico" });
-        req.body.techId = userData.user.id;
-        req.body.techName = `${userData.user.firstName} ${userData.user.lastName}`;
-        req.body.techNumId = userData.user.numIdent;
+        req.body.techId = userData.findUser.id;
+        req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+        req.body.techNumId = userData.findUser.numIdent;
         next();
     }
     catch (error) {
@@ -67,16 +67,16 @@ const isAdmin = async (req, res, next) => {
         const id = req.decoded?.userId;
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        if (!userData.user) {
+        if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.user.Role.role !== "Administrador")
+        if (userData.findUser.Role.role !== "Administrador")
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es administrador" });
-        req.body.userId = userData.user.id;
-        req.body.userName = `${userData.user.firstName} ${userData.user.lastName}`;
-        req.body.numIdent = userData.user.numIdent;
+        req.body.userId = userData.findUseruser.id;
+        req.body.userName = `${userData.findUseruser.firstName} ${userData.findUseruser.lastName}`;
+        req.body.numIdent = userData.findUseruser.numIdent;
         next();
     }
     catch (error) {
@@ -92,10 +92,10 @@ const isSuperUser = async (req, res, next) => {
         const id = req.decoded?.userId;
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        if (!userData.user) {
+        if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.user.Role.role !== "Super_Usuario")
+        if (userData.findUser.Role.role !== "Super_Usuario")
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es super usuario" });
@@ -113,11 +113,11 @@ const isSuperUser_isAdmin = async (req, res, next) => {
         const id = req.decoded?.userId;
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        if (!userData.user) {
-            return res.status(401).json({ message: "Usuario no válido" });
+        if (!userData.findUser) {
+            return res.status(401).json({ message: "Usuario no válido revisar..." });
         }
-        if (userData.user.Role.role !== "Super_Usuario" &&
-            userData.user.Role.role !== "Administrador")
+        if (userData.findUser.Role.role !== "Super_Usuario" &&
+            userData.findUser.Role.role !== "Administrador")
             return res.status(401).json({
                 message: "El rol de usuario no es super usuario o administrador",
             });
@@ -135,12 +135,12 @@ const isAdmin_isTech_isSuperU = async (req, res, next) => {
         const id = req.decoded?.userId;
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        if (!userData.user) {
+        if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.user.Role.role !== "Super_Usuario" &&
-            userData.user.Role.role !== "Administrador" &&
-            userData.user.Role.role !== "Tecnico")
+        if (userData.findUser.Role.role !== "Super_Usuario" &&
+            userData.findUser.Role.role !== "Administrador" &&
+            userData.findUser.Role.role !== "Tecnico")
             return res.status(401).json({ message: "Este rol no es permitido" });
         req.body.rolName = userData.user.Role.role;
         next();

@@ -5,11 +5,6 @@ const { sequelize, DataTypes } = require("../database/index");
 const Maintenance = require("../models/maintenance");
 const Client = require("../models/client");
 class Equipment extends sequelize_1.Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     id;
     name;
     description;
@@ -42,7 +37,7 @@ Equipment.init({
         allowNull: false,
     },
     description: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(2000),
         allowNull: true,
     },
     serial: {

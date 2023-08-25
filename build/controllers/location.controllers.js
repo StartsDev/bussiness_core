@@ -19,18 +19,21 @@ const getLocations = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { locations, totalCount } = await (0, location_services_1.getLocationsServ)(page, pageSize);
+        const headName = req.query.headName || undefined;
+        const businessName = req.query.businessName || undefined;
         if (!page && !pageSize) {
+            const { linearData, totalCount } = await (0, location_services_1.getLocationsServ)(headName, businessName);
             res.status(200).json({
-                locations,
+                locations: linearData,
                 numItmes: totalCount,
             });
         }
         else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+            const { linearDatap, totalCountp } = await (0, location_services_1.getLocationServPag)(page, pageSize, headName, businessName);
+            const totalPages = Math.ceil(totalCountp / (pageSize ?? totalCountp));
             res.status(200).json({
-                locations,
-                numItmes: totalCount,
+                locations: linearDatap,
+                numItmes: totalCountp,
                 currentPage: page,
                 totalPages,
             });

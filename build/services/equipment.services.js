@@ -1,19 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteEquipmentServ = exports.updateEquipmentServ = exports.allEquipmentsLocationServ = exports.getOneEquipmentServ = exports.getEquipmentServ = exports.newEquipmentServ = void 0;
+const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
-const Headquarters = require("../models/headquarter");
+const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
 const newEquipmentServ = async (equip) => {
     try {
         const { name, description, serial, model, type, brand, locationId } = equip;
         const findLocation = await Location.findOne({
-            where: { id: equip.locationId },
+            where: { id: locationId },
         });
         if (!findLocation) {
             return {
                 msg: "La ubicación no existe...",
+                success: false,
             };
         }
         const findEquipment = await Equipment.findOne({
@@ -21,9 +23,34 @@ const newEquipmentServ = async (equip) => {
         });
         if (findEquipment) {
             return {
-                msg: "Este quipo ya esta registrado",
+                msg: "Este equipo ya esta registrado",
+                success: false,
             };
         }
+        const headId = findLocation.dataValues.headquarterId;
+        const locationName = findLocation.dataValues.locationName;
+        const findHead = await Headquarter.findOne({
+            where: { id: headId },
+        });
+        if (!findHead) {
+            return {
+                msg: "La sede no existe con esta ubicación...",
+                success: false,
+            };
+        }
+        const clientId = findHead.dataValues.clientId;
+        const headName = findHead.dataValues.headName;
+        const findClient = await Client.findOne({
+            where: { id: clientId },
+        });
+        if (!findClient) {
+            return {
+                msg: "Cliente no registrado ...",
+                success: false,
+            };
+        }
+        const customerId = findClient.dataValues.id;
+        const clientName = findClient.dataValues.businessName;
         const newEquipment = await Equipment.create({
             name,
             description,
@@ -31,6 +58,18 @@ const newEquipmentServ = async (equip) => {
             model,
             type,
             brand,
+            location: {
+                locationId,
+                locationName,
+            },
+            headquarter: {
+                headId,
+                headName,
+            },
+            client: {
+                clientId: customerId,
+                clientName,
+            },
             locationId,
         });
         if (!newEquipment) {
@@ -40,7 +79,7 @@ const newEquipmentServ = async (equip) => {
         }
         return {
             msg: "Equipo registrado satisfactoriamente...",
-            data: newEquipment,
+            newEquipment,
             success: true,
         };
     }
@@ -49,94 +88,129 @@ const newEquipmentServ = async (equip) => {
     }
 };
 exports.newEquipmentServ = newEquipmentServ;
-const getEquipmentServ = async (page, pageSize) => {
+/* const getEquipmentServPag = async (
+  page?: number,
+  pageSize?: number,
+  locationId?: string,
+  headId?: string,
+  clientId?: string) => {
+  try{
+    let equipments;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      offset,
+      limit: pageSize,
+    }
+  }catch(e){
+    throw new Error(e as string);
+  }
+} */
+// Service get equipment without pagination
+const getEquipmentServ = async (locationName, headName, businessName) => {
     try {
-        let equipments;
-        if (page && pageSize) {
-            const offset = (page - 1) * pageSize;
-            equipments = await Equipment.findAll({
-                offset,
-                limit: pageSize,
-                where: { status: false },
-                attributes: { exclude: ["updatedAt"] },
-                order: [["createdAt", "DESC"]],
-                include: [
-                    {
-                        model: Location,
-                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-                        include: [
-                            {
-                                model: Headquarters,
-                                attributes: {
-                                    exclude: [
-                                        "id",
-                                        "createdAt",
-                                        "updatedAt",
-                                        "status",
-                                        "isPrincipal",
-                                    ],
-                                },
-                                include: [
-                                    {
-                                        model: Client,
-                                        attributes: {
-                                            exclude: ["id", "createdAt", "updatedAt", "status"],
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            });
-            const totalCount = await Equipment.count({ where: { status: false } });
-            return {
-                equipments,
-                totalCount,
-                success: true,
+        // Options filter where clausule and counter
+        let totalCount = 0;
+        let optionl = {};
+        let optionh = {};
+        let optionsc = {};
+        let options = {};
+        const linearDatap = [];
+        //Validation query params
+        if (locationName != undefined) {
+            optionl = {
+                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                status: false,
             };
         }
-        else {
-            equipments = await Equipment.findAll({
-                where: { status: false },
-                attributes: { exclude: ["updatedAt"] },
-                order: [["createdAt", "DESC"]],
-                include: [
-                    {
-                        model: Location,
-                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-                        include: [
-                            {
-                                model: Headquarters,
-                                attributes: {
-                                    exclude: [
-                                        "id",
-                                        "createdAt",
-                                        "updatedAt",
-                                        "status",
-                                        "isPrincipal",
-                                    ],
-                                },
-                                include: [
-                                    {
-                                        model: Client,
-                                        attributes: {
-                                            exclude: ["id", "createdAt", "updatedAt", "status"],
-                                        },
-                                    },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            });
-            const totalCount = await Equipment.count({ where: { status: false } });
-            return {
-                equipments,
-                totalCount,
-                success: true,
+        if (headName != undefined) {
+            optionh = {
+                headName: { [Sequelize.Op.like]: `${headName}%` },
+                status: false,
             };
         }
+        if (businessName != undefined) {
+            optionsc = {
+                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                status: false,
+            };
+        }
+        if (!locationName && !headName && !businessName) {
+            options = { status: false };
+        }
+        const equipments = await Equipment.findAll({
+            where: options,
+            attributes: { exclude: ["updatedAt", "locationId", "status"] },
+            order: [["createdAt", "DESC"]],
+            include: [
+                {
+                    model: Location,
+                    where: optionl,
+                    attributes: { exclude: ["createdAt", "updatedAt", "status", "description", "headquarterId"] },
+                    include: [
+                        {
+                            model: Headquarter,
+                            where: optionh,
+                            attributes: {
+                                exclude: ["createdAt", "updatedAt", "clientId", "status", "email", "phone", "address", "isPrincipal"],
+                            },
+                            include: [
+                                {
+                                    model: Client,
+                                    where: optionsc,
+                                    attributes: {
+                                        exclude: ["createdAt", "updatedAt", "status", "nit", "address", "email", "phone", "city", "contact"],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        });
+        // Iteration equipments array and add format response
+        for (const equipment of equipments) {
+            const equipmentData = equipment.get({ plain: true });
+            const location = equipment.Location;
+            const headquarter = location.Headquarter;
+            const client = headquarter.Client;
+            equipmentData.location = location.get({ plain: true });
+            equipmentData.headquarter = headquarter.get({ plain: true });
+            equipmentData.client = client.get({ plain: true });
+            delete equipmentData.Location;
+            delete equipmentData.location.Headquarter;
+            delete equipmentData.headquarter.Client;
+            linearDatap.push(equipmentData);
+        }
+        // Counter data validation query cases
+        totalCount = await Equipment.count({
+            where: options,
+            include: [
+                {
+                    model: Location,
+                    where: optionl,
+                    required: true,
+                    include: [
+                        {
+                            model: Headquarter,
+                            where: optionh,
+                            required: true,
+                            include: [
+                                {
+                                    model: Client,
+                                    where: optionsc,
+                                    required: true
+                                }
+                            ]
+                        }
+                    ]
+                },
+            ],
+        });
+        return {
+            equipments: linearDatap,
+            totalCount,
+            success: true,
+        };
     }
     catch (e) {
         throw new Error(e);
@@ -154,7 +228,7 @@ const getOneEquipmentServ = async (equip) => {
                     attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                     include: [
                         {
-                            model: Headquarters,
+                            model: Headquarter,
                             attributes: {
                                 exclude: [
                                     "id",
@@ -210,7 +284,7 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
                         attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                         include: [
                             {
-                                model: Headquarters,
+                                model: Headquarter,
                                 attributes: {
                                     exclude: [
                                         "id",
@@ -253,7 +327,7 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
                         attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                         include: [
                             {
-                                model: Headquarters,
+                                model: Headquarter,
                                 attributes: {
                                     exclude: [
                                         "id",
@@ -279,7 +353,7 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
             if (!equipLocation) {
                 return {
                     msg: "Equipos no hay con este espacio",
-                    success: false
+                    success: false,
                 };
             }
             const totalCount = await Equipment.count({ where: { status: false } });
