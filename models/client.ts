@@ -6,17 +6,15 @@ const Quotation = require("../models/quotation");
 
 
 class Client extends Model<ClientAttributes> implements ClientAttributes {
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
+
   id!: string;
   businessName!: string;
   nit!: string;
   address!: string;
   email!: string;
   phone!: string;
+  city!: string;
+  contact!: string;
   status!: boolean;
 
   static associate(quotations: any) {
@@ -57,6 +55,14 @@ Client.init(
       allowNull: false,
     },
     phone: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    contact: {
       type: DataTypes.STRING,
       allowNull: false,
     },

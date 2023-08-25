@@ -1,4 +1,4 @@
-import { MaintenanceAttributes } from './../interfaces/maintenance.interface';
+import { StatusOption } from "./../interfaces/maintenance.interface";
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
@@ -13,10 +13,25 @@ const createMaintenanceServ = async (maint: any) => {
       voltage_on_L1L2,
       voltage_on_L1L3,
       voltage_on_L2L3,
+      voltage_control,
       suction_pressure,
       amp_engine_1,
       amp_engine_2,
       amp_engine_3,
+      amp_engine_4,
+      amp_engine_evap,
+      compressor_1_amp_L1,
+      compressor_1_amp_L2,
+      compressor_1_amp_L3,
+      compressor_2_amp_L1,
+      compressor_2_amp_L2,
+      compressor_2_amp_L3,
+      supply_temp,
+      return_temp,
+      ater_in_temp,
+      water_out_temp,
+      sprinkler_state,
+      float_state,
       discharge_pressure,
       service_hour,
       service_date,
@@ -25,6 +40,7 @@ const createMaintenanceServ = async (maint: any) => {
       tech_sign,
       customerId,
       observations,
+      additional_remarks,
       equipmentId,
       techId,
       techName,
@@ -91,15 +107,46 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
+// Validation quantiy maintenances status "En proceso"
+    const maintCount = await Maintenance.count({
+      where: {
+        delete: false,
+        "tech.techId":techId,
+        status: StatusOption.inProcess,
+      },
+    });
+
+    if (maintCount === 5) {
+      return {
+        msg: "Sr. Técnico, tiene 5 servicios en estado en proceso, por favor firme y confirme al menos uno para poder registrar otro servicio...",
+        success: false,
+      };
+    }
+    
     const maintenance = await Maintenance.create({
       activities,
       voltage_on_L1L2,
       voltage_on_L1L3,
       voltage_on_L2L3,
+      voltage_control,
       suction_pressure,
       amp_engine_1,
       amp_engine_2,
       amp_engine_3,
+      amp_engine_4,
+      amp_engine_evap,
+      compressor_1_amp_L1,
+      compressor_1_amp_L2,
+      compressor_1_amp_L3,
+      compressor_2_amp_L1,
+      compressor_2_amp_L2,
+      compressor_2_amp_L3,
+      supply_temp,
+      return_temp,
+      ater_in_temp,
+      water_out_temp,
+      sprinkler_state,
+      float_state,
       discharge_pressure,
       service_hour,
       service_date,
@@ -113,6 +160,7 @@ const createMaintenanceServ = async (maint: any) => {
         techNumId,
       },
       observations,
+      additional_remarks,
       equipmentId,
     });
 
@@ -226,10 +274,14 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
 };
 
 // Get maintenances by tech (Home)
-const getMaintByTechServ = async (tech: any, page?: number, pageSize?: number) => {
+const getMaintByTechServ = async (
+  tech: any,
+  page?: number,
+  pageSize?: number
+) => {
   try {
     let maintenanceTech;
-    if(page && pageSize){
+    if (page && pageSize) {
       const offset = (page - 1) * pageSize;
       maintenanceTech = await Maintenance.findAll({
         offset,
@@ -280,7 +332,7 @@ const getMaintByTechServ = async (tech: any, page?: number, pageSize?: number) =
         totalCount,
         success: true,
       };
-    }else{
+    } else {
       maintenanceTech = await Maintenance.findAll({
         where: { "tech.techId": tech.techId, delete: false },
         order: [["createdAt", "DESC"]],
@@ -329,7 +381,6 @@ const getMaintByTechServ = async (tech: any, page?: number, pageSize?: number) =
         success: true,
       };
     }
-    
   } catch (error) {
     throw new Error(error as string);
   }
@@ -579,7 +630,7 @@ const deleteMaintenanceServ = async (id: any) => {
         success: false,
       };
     }
-    if(!findMaint){
+    if (!findMaint) {
       return {
         msg: "Mantenimiento desconocido...",
         success: false,

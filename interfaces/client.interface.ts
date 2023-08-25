@@ -5,5 +5,7 @@ export interface ClientAttributes {
     address: string;
     email: string;
     phone: string;
+    city: string;
+    contact: string;
     status: boolean;
   }

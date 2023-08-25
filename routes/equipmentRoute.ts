@@ -7,11 +7,17 @@ import {
   editEquipment,
   deleteEquipment,
 } from "../controllers/equipment.controllers";
+import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 
 const router = Router();
 
 // Register new equipment
-router.post("/create-equipment", createEquipment);
+router.post(
+  "/create-equipment",
+  verifyToken,
+  isSuperUser_isAdmin,
+  createEquipment
+);
 
 // Get all equipments
 router.get("/get-all-equipments", getAllEquipments);
@@ -23,9 +29,19 @@ router.get("/get-equipment/:id", getOneEquipment);
 router.get("/get-all-equipments-location/:locationId", getEquipmentsLocation);
 
 // Update equipment
-router.patch("/update-equipment/:id", editEquipment);
+router.patch(
+  "/update-equipment/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  editEquipment
+);
 
 // Delete equipment
-router.delete("/delete-equipment/:id", deleteEquipment);
+router.delete(
+  "/delete-equipment/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  deleteEquipment
+);
 
 export default router;

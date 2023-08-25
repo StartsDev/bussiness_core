@@ -8,19 +8,14 @@ const Client = require("../models/client");
 class Equipment
   extends Model<EquipmentAttributes>
   implements EquipmentAttributes
-{
-  /**
-   * Helper method for defining associations.
-   * This method is not a part of Sequelize lifecycle.
-   * The `models/index` file will call this method automatically.
-   */
+{ 
   id!: string;
   name!: string;
   description!: string;
   serial!: string;
   image!: string;
   model!: string;
-  type!: string;
+  type!: string;     
   brand!: string;
   status!: boolean;
 
@@ -49,7 +44,7 @@ Equipment.init(
       allowNull: false,
     },
     description: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(2000),
       allowNull: true,
     },
     serial: {

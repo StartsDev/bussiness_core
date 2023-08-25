@@ -124,7 +124,7 @@ const allHeadClientServ = async (
           success: false,
         };
       }
-      const totalCount = await Headquarter.count();
+      const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
 
       return {
         hedClient,
@@ -149,7 +149,7 @@ const allHeadClientServ = async (
           success: false,
         };
       }
-      const totalCount = await Headquarter.count();
+      const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
 
       return {
         hedClient,

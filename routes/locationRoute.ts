@@ -7,11 +7,17 @@ import {
   editLocation,
   deleteLocation,
 } from "../controllers/location.controllers";
+import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 
 const router = Router();
 
 // Register new location
-router.post("/create-location", createLocation);
+router.post(
+  "/create-location",
+  verifyToken,
+  isSuperUser_isAdmin,
+  createLocation
+);
 
 // Get all locations
 router.get("/get-all-locations", getLocations);
@@ -23,9 +29,19 @@ router.get("/get-one-location/:id", getOneLocation);
 router.get("/get-locations-headquarter/:headquarterId", getLocationHead);
 
 // Update location
-router.patch("/update-location/:id", editLocation);
+router.patch(
+  "/update-location/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  editLocation
+);
 
 // Delete location
-router.delete("/delete-location/:id", deleteLocation);
+router.delete(
+  "/delete-location/:id",
+  verifyToken,
+  isSuperUser_isAdmin,
+  deleteLocation
+);
 
 export default router;
