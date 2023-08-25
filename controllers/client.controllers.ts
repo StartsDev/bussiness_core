@@ -101,7 +101,7 @@ const getClients = async (req: Request, res: Response) => {
       );
 
       res.status(200).json({
-        locations: clients,
+        clients,
         numItmes: totalCount,
       });
     }

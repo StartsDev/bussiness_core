@@ -53,7 +53,7 @@ const getClientServPag = async (
   try {
     let clients;
     let totalCount: number = 0;
-        //Filters
+    //Filters
     let options: any | undefined = {};
     let optionh: any | undefined = {};
     let optionsl: any | undefined = {};
@@ -228,19 +228,22 @@ const getClientServPag = async (
         order: [["createdAt", "DESC"]],
         include: {
           model: Headquarter,
-          where : optionh,
+          required: false,
+          where: optionh,
           as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
             model: Location,
-            where : optionsl,
+            required: false,
+            where: optionsl,
             as: "locations",
             order: [["createdAt", "DESC"]],
             attributes: { exclude: ["createdAt", "updatedAt", "status"] },
             include: {
               model: Equipment,
-              where : optionse,
+              required: false,
+              where: optionse,
               as: "equipments",
               order: [["createdAt", "DESC"]],
               attributes: {
@@ -251,61 +254,37 @@ const getClientServPag = async (
         },
       });
 
-       //Hide properties heardquartes and locations
-    const propertiesToHide = ["locations"];
-    const propToHideLoc = ["equipments"];
+      //Hide properties heardquartes and locations
+      const propertiesToHide = ["locations"];
+      const propToHideLoc = ["equipments"];
 
-    // Customization data clients (serialization) hide some properties
-    for (const client of clients) {
-      const clientData = client.get({ plain: true });
-      clientData.headquarters = [];
-      for (const headquarter of client.headquarters) {
-        const sanitizedObject = { ...headquarter.get({ plain: true }) };
-        propertiesToHide.forEach((property) => {
-          delete sanitizedObject[property];
-        });
-        clientData.locations = [];
-        for (const location of headquarter.locations) {
-          const sanitizedObjectLoc = { ...location.get({ plain: true }) };
-          propToHideLoc.forEach((property) => {
-            delete sanitizedObjectLoc[property];
+      // Customization data clients (serialization) hide some properties
+      for (const client of clients) {
+        const clientData = client.get({ plain: true });
+        clientData.headquarters = [];
+        for (const headquarter of client.headquarters) {
+          const sanitizedObject = { ...headquarter.get({ plain: true }) };
+          propertiesToHide.forEach((property) => {
+            delete sanitizedObject[property];
           });
-          clientData.equipments = [];
-          for (const equipment of location.equipments) {
-            const equipData = equipment.get({ plain: true });
-            clientData.equipments.push(equipData);
+          clientData.locations = [];
+          for (const location of headquarter.locations) {
+            const sanitizedObjectLoc = { ...location.get({ plain: true }) };
+            propToHideLoc.forEach((property) => {
+              delete sanitizedObjectLoc[property];
+            });
+            clientData.equipments = [];
+            for (const equipment of location.equipments) {
+              const equipData = equipment.get({ plain: true });
+              clientData.equipments.push(equipData);
+            }
+            clientData.locations.push(sanitizedObjectLoc);
           }
-          clientData.locations.push(sanitizedObjectLoc);
+          clientData.headquarters.push(sanitizedObject);
         }
-        clientData.headquarters.push(sanitizedObject);
+        linearDatap.push(clientData);
       }
-      linearDatap.push(clientData);
-    }
 
-       // Counter
-   /*  console.log('COUNTER PPAL',options)
-    console.log('COUNTER HEAD',optionh)
-    console.log('COUNTER LOCAT',optionsl)
-    console.log('COUNTER EQUIP',optionse) */
-    
-    totalCount = await Client.count({
-      where:options,
-       include: {
-        model: Headquarter,
-        as: "headquarters",
-        where: optionh,
-        include: {
-          model: Location,
-          as: "locations",
-          where: optionsl,
-          include:{
-            model: Equipment,
-            as: "equipments",
-            where: optionse,
-            },
-        }, 
-      }, 
-    });
       if (!clients) {
         return {
           msg: "No existen clientes registrados...",
@@ -315,8 +294,8 @@ const getClientServPag = async (
       }
     }
     return {
-      clients: linearDatap,
-      totalCount,
+      clients,
+      totalCount: clients.length,
       success: true,
     };
   } catch (e) {
@@ -515,20 +494,21 @@ const getClientsServ = async (
       where: options,
       attributes: { exclude: ["updatedAt", "status", "headquarters"] },
       order: [["createdAt", "DESC"]],
+      all: true,
       include: [
         {
           model: Headquarter,
           where: optionh,
+          required: false,
           as: "headquarters",
-          order: [["createdAt", "DESC"]],
           attributes: {
             exclude: ["createdAt", "updatedAt", "status", "clientId"],
           },
           include: {
             model: Location,
             where: optionsl,
+            required: false,
             as: "locations",
-            order: [["createdAt", "DESC"]],
             attributes: {
               exclude: [
                 "createdAt",
@@ -541,8 +521,8 @@ const getClientsServ = async (
             include: {
               model: Equipment,
               where: optionse,
+              required: false,
               as: "equipments",
-              order: [["createdAt", "DESC"]],
               attributes: {
                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
               },
@@ -550,7 +530,11 @@ const getClientsServ = async (
           },
         },
       ],
+      required: false,
     });
+    Sequelize.options.logging = false;
+
+  
     if (!clients) {
       return {
         msg: "No existen clientes registrados...",
@@ -589,35 +573,10 @@ const getClientsServ = async (
       }
       linearDatap.push(clientData);
     }
-
-    // Counter
-   /*  console.log('COUNTER PPAL',options)
-    console.log('COUNTER HEAD',optionh)
-    console.log('COUNTER LOCAT',optionsl)
-    console.log('COUNTER EQUIP',optionse) */
-    
-    totalCount = await Client.count({
-      where:options,
-       include: {
-        model: Headquarter,
-        as: "headquarters",
-        where: optionh,
-        include: {
-          model: Location,
-          as: "locations",
-          where: optionsl,
-          include:{
-            model: Equipment,
-            as: "equipments",
-            where: optionse,
-            },
-        }, 
-      }, 
-    });
-
+   
     return {
       clients: linearDatap,
-      totalCount,
+      totalCount: clients.length,
       success: true,
     };
   } catch (e) {
