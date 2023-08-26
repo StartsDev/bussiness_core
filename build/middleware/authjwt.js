@@ -119,12 +119,14 @@ const isSuperUser_isAdmin = async (req, res, next) => {
         console.log('DATA1:', data.findUser);
         console.log('DATA2:', data.findUser.Role);
         console.log('DATA3:', data.findUser.Role.role);
+        console.log('DATA4');
         if (!userData?.findUser) {
             return res.status(401).json({ message: "Usuario no encontrado" });
         }
-        if (userData?.findUser?.Role?.role !== "Super_Usuario" || userData?.findUser?.Role?.role !== "Administrador") {
+        // if (userData?.findUser?.Role?.role !== "Super_Usuario" || userData?.findUser?.Role?.role !== "Administrador"){
+        if (userData?.findUser?.Role?.role === 'Tecnico') {
             return res.status(401).json({
-                message: "El rol de usuario no es super usuario o administrador",
+                message: "El rol de usuario no es super usuario o administrador...",
             });
         }
         next();
