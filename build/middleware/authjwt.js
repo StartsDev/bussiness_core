@@ -114,7 +114,9 @@ const isSuperUser_isAdmin = async (req, res, next) => {
         console.log(id);
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
-        console.log(response);
+        //  console.log(response)
+        console.log('RESPONDE:', response);
+        console.log('DATA:', response?.data);
         if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido revisar..." });
         }
