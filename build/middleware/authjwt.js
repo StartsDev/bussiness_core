@@ -111,17 +111,16 @@ const isSuperUser_isAdmin = async (req, res, next) => {
         const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
         const baseUrl = `${URL}/user/get-user`;
         const id = req.decoded?.userId;
-        console.log(id);
-        const response = await axios_1.default.get(`${baseUrl}/${id}`);
-        const userData = response.data;
+        const { data } = await axios_1.default.get(`${baseUrl}/${id}`);
+        const userData = data;
         //  console.log(response)
-        console.log('RESPONDE:', response);
-        console.log('DATA:', response?.data);
-        if (!userData.findUser) {
-            return res.status(401).json({ message: "Usuario no válido revisar..." });
+        // console.log('RESPONDE:', response);
+        console.log('DATA:', data);
+        if (!userData?.findUser) {
+            return res.status(401).json({ message: "Usuario no encontrado" });
         }
-        if (userData.findUser.Role.role !== "Super_Usuario" &&
-            userData.findUser.Role.role !== "Administrador") {
+        if (userData?.findUser?.Role?.role !== "Super_Usuario" &&
+            userData?.findUser?.Role?.role !== "Administrador") {
             return res.status(401).json({
                 message: "El rol de usuario no es super usuario o administrador",
             });
