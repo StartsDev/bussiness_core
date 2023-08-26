@@ -45,10 +45,11 @@ const isTech = async (req, res, next) => {
         if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.findUser.Role.role !== "Tecnico")
+        if (userData.findUser.Role.role !== "Tecnico") {
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es técnico" });
+        }
         req.body.techId = userData.findUser.id;
         req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
         req.body.techNumId = userData.findUser.numIdent;
@@ -70,10 +71,11 @@ const isAdmin = async (req, res, next) => {
         if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.findUser.Role.role !== "Administrador")
+        if (userData.findUser.Role.role !== "Administrador") {
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es administrador" });
+        }
         req.body.userId = userData.findUseruser.id;
         req.body.userName = `${userData.findUseruser.firstName} ${userData.findUseruser.lastName}`;
         req.body.numIdent = userData.findUseruser.numIdent;
@@ -95,10 +97,11 @@ const isSuperUser = async (req, res, next) => {
         if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.findUser.Role.role !== "Super_Usuario")
+        if (userData.findUser.Role.role !== "Super_Usuario") {
             return res
                 .status(401)
                 .json({ message: "El rol de usuario no es super usuario" });
+        }
         next();
     }
     catch (error) {
@@ -113,18 +116,10 @@ const isSuperUser_isAdmin = async (req, res, next) => {
         const id = req.decoded?.userId;
         const { data } = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = data;
-        //  console.log(response)
-        // console.log('RESPONDE:', response);
-        console.log('DATA:', data);
-        console.log('DATA1:', data.findUser);
-        console.log('DATA2:', data.findUser.Role);
-        console.log('DATA3:', data.findUser.Role.role);
-        console.log('DATA4');
         if (!userData?.findUser) {
             return res.status(401).json({ message: "Usuario no encontrado" });
         }
-        // if (userData?.findUser?.Role?.role !== "Super_Usuario" || userData?.findUser?.Role?.role !== "Administrador"){
-        if (userData?.findUser?.Role?.role === 'Tecnico') {
+        if (userData?.findUser?.Role?.role === "Tecnico") {
             return res.status(401).json({
                 message: "El rol de usuario no es super usuario o administrador...",
             });
@@ -144,12 +139,13 @@ const isAdmin_isTech_isSuperU = async (req, res, next) => {
         const response = await axios_1.default.get(`${baseUrl}/${id}`);
         const userData = response.data;
         if (!userData.findUser) {
-            return res.status(401).json({ message: "Usuario no válido" });
+            return res.status(401).json({ message: "Usuario no encontrado" });
         }
         if (userData.findUser.Role.role !== "Super_Usuario" &&
             userData.findUser.Role.role !== "Administrador" &&
-            userData.findUser.Role.role !== "Tecnico")
+            userData.findUser.Role.role !== "Tecnico") {
             return res.status(401).json({ message: "Este rol no es permitido" });
+        }
         req.body.rolName = userData.user.Role.role;
         next();
     }

@@ -68,10 +68,13 @@ export const isTech = async (
     if (!userData.findUser) {
       return res.status(401).json({ message: "Usuario no válido" });
     }
-    if (userData.findUser.Role.role !== "Tecnico")
+
+    if (userData.findUser.Role.role !== "Tecnico") {
       return res
         .status(401)
         .json({ message: "El rol de usuario no es técnico" });
+    }
+
     req.body.techId = userData.findUser.id;
     req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
     req.body.techNumId = userData.findUser.numIdent;
@@ -100,10 +103,12 @@ export const isAdmin = async (
     if (!userData.findUser) {
       return res.status(401).json({ message: "Usuario no válido" });
     }
-    if (userData.findUser.Role.role !== "Administrador")
+
+    if (userData.findUser.Role.role !== "Administrador") {
       return res
         .status(401)
         .json({ message: "El rol de usuario no es administrador" });
+    }
     req.body.userId = userData.findUseruser.id;
     req.body.userName = `${userData.findUseruser.firstName} ${userData.findUseruser.lastName}`;
     req.body.numIdent = userData.findUseruser.numIdent;
@@ -125,17 +130,19 @@ export const isSuperUser = async (
     const baseUrl = `${URL}/user/get-user`;
 
     const id = req.decoded?.userId;
-    
+
     const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = response.data;
 
     if (!userData.findUser) {
       return res.status(401).json({ message: "Usuario no válido" });
     }
-    if (userData.findUser.Role.role !== "Super_Usuario")
+
+    if (userData.findUser.Role.role !== "Super_Usuario") {
       return res
         .status(401)
         .json({ message: "El rol de usuario no es super usuario" });
+    }
     next();
   } catch (error) {
     return res.status(401).json({ error });
@@ -151,27 +158,19 @@ export const isSuperUser_isAdmin = async (
     const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
 
     const baseUrl = `${URL}/user/get-user`;
-    
+
     const id = req.decoded?.userId;
-    const {data}: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+    const { data }: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = data;
-  //  console.log(response)
-    // console.log('RESPONDE:', response);
-    console.log('DATA:', data);
-    console.log('DATA1:', data.findUser);
-    console.log('DATA2:', data.findUser.Role);
-    console.log('DATA3:', data.findUser.Role.role);
-    console.log('DATA4');
     if (!userData?.findUser) {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
-    // if (userData?.findUser?.Role?.role !== "Super_Usuario" || userData?.findUser?.Role?.role !== "Administrador"){
-    if (userData?.findUser?.Role?.role === 'Tecnico'){
+    
+    if (userData?.findUser?.Role?.role === "Tecnico") {
       return res.status(401).json({
         message: "El rol de usuario no es super usuario o administrador...",
       });
     }
-     
     next();
   } catch (error) {
     return res.status(401).json({ error });
@@ -194,14 +193,15 @@ export const isAdmin_isTech_isSuperU = async (
     const userData: any = response.data;
 
     if (!userData.findUser) {
-      return res.status(401).json({ message: "Usuario no válido" });
+      return res.status(401).json({ message: "Usuario no encontrado" });
     }
     if (
       userData.findUser.Role.role !== "Super_Usuario" &&
       userData.findUser.Role.role !== "Administrador" &&
       userData.findUser.Role.role !== "Tecnico"
-    )
+    ) {
       return res.status(401).json({ message: "Este rol no es permitido" });
+    }
     req.body.rolName = userData.user.Role.role;
     next();
   } catch (error) {

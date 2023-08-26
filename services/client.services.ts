@@ -63,43 +63,43 @@ const getClientServPag = async (
 
     if (businessName != undefined) {
       options = {
-        businessName: { [Sequelize.Op.like]: `${businessName}%` },
+        businessName: { [Sequelize.Op.iLike]: `${businessName}%` },
         status: false,
       };
     }
     if (nit != undefined) {
       options = {
-        nit: { [Sequelize.Op.like]: `${nit}%` },
+        nit: { [Sequelize.Op.iLike]: `${nit}%` },
         status: false,
       };
     }
     if (address != undefined) {
       options = {
-        address: { [Sequelize.Op.like]: `${address}%` },
+        address: { [Sequelize.Op.iLike]: `${address}%` },
         status: false,
       };
     }
     if (email != undefined) {
       options = {
-        email: { [Sequelize.Op.like]: `${email}%` },
+        email: { [Sequelize.Op.iLike]: `${email}%` },
         status: false,
       };
     }
     if (phone != undefined) {
       options = {
-        phone: { [Sequelize.Op.like]: `${phone}%` },
+        phone: { [Sequelize.Op.iLike]: `${phone}%` },
         status: false,
       };
     }
     if (city != undefined) {
       options = {
-        city: { [Sequelize.Op.like]: `${city}%` },
+        city: { [Sequelize.Op.iLike]: `${city}%` },
         status: false,
       };
     }
     if (contact != undefined) {
       options = {
-        contact: { [Sequelize.Op.like]: `${contact}%` },
+        contact: { [Sequelize.Op.iLike]: `${contact}%` },
         status: false,
       };
     }
@@ -107,28 +107,28 @@ const getClientServPag = async (
     // Filter heaquarters propeties
     if (headName != undefined) {
       optionh = {
-        headName: { [Sequelize.Op.like]: `${headName}%` },
+        headName: { [Sequelize.Op.iLike]: `${headName}%` },
         status: false,
       };
     }
 
     if (addressh != undefined) {
       optionh = {
-        address: { [Sequelize.Op.like]: `${addressh}%` },
+        address: { [Sequelize.Op.iLike]: `${addressh}%` },
         status: false,
       };
     }
 
     if (emailh != undefined) {
       optionh = {
-        email: { [Sequelize.Op.like]: `${emailh}%` },
+        email: { [Sequelize.Op.iLike]: `${emailh}%` },
         status: false,
       };
     }
 
     if (phoneh != undefined) {
       optionh = {
-        phone: { [Sequelize.Op.like]: `${phoneh}%` },
+        phone: { [Sequelize.Op.iLike]: `${phoneh}%` },
         status: false,
       };
     }
@@ -153,7 +153,7 @@ const getClientServPag = async (
 
     if (locationName != undefined) {
       optionsl = {
-        locationName: { [Sequelize.Op.like]: `${locationName}%` },
+        locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
         status: false,
       };
     }
@@ -162,31 +162,31 @@ const getClientServPag = async (
 
     if (name != undefined) {
       optionse = {
-        name: { [Sequelize.Op.like]: `${name}%` },
+        name: { [Sequelize.Op.iLike]: `${name}%` },
         status: false,
       };
     }
     if (serial != undefined) {
       optionse = {
-        serial: { [Sequelize.Op.like]: `${serial}%` },
+        serial: { [Sequelize.Op.iLike]: `${serial}%` },
         status: false,
       };
     }
     if (model != undefined) {
       optionse = {
-        model: { [Sequelize.Op.like]: `${model}%` },
+        model: { [Sequelize.Op.iLike]: `${model}%` },
         status: false,
       };
     }
     if (type != undefined) {
       optionse = {
-        type: { [Sequelize.Op.like]: `${type}%` },
+        type: { [Sequelize.Op.iLike]: `${type}%` },
         status: false,
       };
     }
     if (brand != undefined) {
       optionse = {
-        brand: { [Sequelize.Op.like]: `${brand}%` },
+        brand: { [Sequelize.Op.iLike]: `${brand}%` },
         status: false,
       };
     }
@@ -294,7 +294,7 @@ const getClientServPag = async (
       }
     }
     return {
-      clients,
+      clients: linearDatap,
       totalCount: clients.length,
       success: true,
     };
@@ -341,37 +341,37 @@ const getClientsServ = async (
     }
     if (nit != undefined) {
       options = {
-        nit: { [Sequelize.Op.like]: `${nit}%` },
+        nit: { [Sequelize.Op.iLike]: `${nit}%` },
         status: false,
       };
     }
     if (address != undefined) {
       options = {
-        address: { [Sequelize.Op.like]: `${address}%` },
+        address: { [Sequelize.Op.iLike]: `${address}%` },
         status: false,
       };
     }
     if (email != undefined) {
       options = {
-        email: { [Sequelize.Op.like]: `${email}%` },
+        email: { [Sequelize.Op.iLike]: `${email}%` },
         status: false,
       };
     }
     if (phone != undefined) {
       options = {
-        phone: { [Sequelize.Op.like]: `${phone}%` },
+        phone: { [Sequelize.Op.iLike]: `${phone}%` },
         status: false,
       };
     }
     if (city != undefined) {
       options = {
-        city: { [Sequelize.Op.like]: `${city}%` },
+        city: { [Sequelize.Op.iLike]: `${city}%` },
         status: false,
       };
     }
     if (contact != undefined) {
       options = {
-        contact: { [Sequelize.Op.like]: `${contact}%` },
+        contact: { [Sequelize.Op.iLike]: `${contact}%` },
         status: false,
       };
     }
@@ -379,28 +379,28 @@ const getClientsServ = async (
     // Filter heaquarters propeties
     if (headName != undefined) {
       optionh = {
-        headName: { [Sequelize.Op.like]: `${headName}%` },
+        headName: { [Sequelize.Op.iLike]: `${headName}%` },
         status: false,
       };
     }
 
     if (addressh != undefined) {
       optionh = {
-        address: { [Sequelize.Op.like]: `${addressh}%` },
+        address: { [Sequelize.Op.iLike]: `${addressh}%` },
         status: false,
       };
     }
 
     if (emailh != undefined) {
       optionh = {
-        email: { [Sequelize.Op.like]: `${emailh}%` },
+        email: { [Sequelize.Op.iLike]: `${emailh}%` },
         status: false,
       };
     }
 
     if (phoneh != undefined) {
       optionh = {
-        phone: { [Sequelize.Op.like]: `${phoneh}%` },
+        phone: { [Sequelize.Op.iLike]: `${phoneh}%` },
         status: false,
       };
     }
@@ -425,7 +425,7 @@ const getClientsServ = async (
 
     if (locationName != undefined) {
       optionsl = {
-        locationName: { [Sequelize.Op.like]: `${locationName}%` },
+        locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
         status: false,
       };
     }
@@ -434,31 +434,31 @@ const getClientsServ = async (
 
     if (name != undefined) {
       optionse = {
-        name: { [Sequelize.Op.like]: `${name}%` },
+        name: { [Sequelize.Op.iLike]: `${name}%` },
         status: false,
       };
     }
     if (serial != undefined) {
       optionse = {
-        serial: { [Sequelize.Op.like]: `${serial}%` },
+        serial: { [Sequelize.Op.iLike]: `${serial}%` },
         status: false,
       };
     }
     if (model != undefined) {
       optionse = {
-        model: { [Sequelize.Op.like]: `${model}%` },
+        model: { [Sequelize.Op.iLike]: `${model}%` },
         status: false,
       };
     }
     if (type != undefined) {
       optionse = {
-        type: { [Sequelize.Op.like]: `${type}%` },
+        type: { [Sequelize.Op.iLike]: `${type}%` },
         status: false,
       };
     }
     if (brand != undefined) {
       optionse = {
-        brand: { [Sequelize.Op.like]: `${brand}%` },
+        brand: { [Sequelize.Op.iLike]: `${brand}%` },
         status: false,
       };
     }
