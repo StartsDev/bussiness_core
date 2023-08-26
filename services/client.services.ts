@@ -228,21 +228,18 @@ const getClientServPag = async (
         order: [["createdAt", "DESC"]],
         include: {
           model: Headquarter,
-          required: false,
           where: optionh,
           as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
             model: Location,
-            required: false,
             where: optionsl,
             as: "locations",
             order: [["createdAt", "DESC"]],
             attributes: { exclude: ["createdAt", "updatedAt", "status"] },
             include: {
               model: Equipment,
-              required: false,
               where: optionse,
               as: "equipments",
               order: [["createdAt", "DESC"]],
@@ -252,6 +249,7 @@ const getClientServPag = async (
             },
           },
         },
+        required: false,
       });
 
       //Hide properties heardquartes and locations
@@ -325,7 +323,6 @@ const getClientsServ = async (
 ) => {
   try {
     //Filters
-    let totalCount: number = 0;
     let options: any | undefined = {};
     let optionh: any | undefined = {};
     let optionsl: any | undefined = {};
@@ -489,7 +486,7 @@ const getClientsServ = async (
 
     // All query clients
     const linearDatap: any[] = [];
-
+   
     const clients = await Client.findAll({
       where: options,
       attributes: { exclude: ["updatedAt", "status", "headquarters"] },
@@ -499,7 +496,6 @@ const getClientsServ = async (
         {
           model: Headquarter,
           where: optionh,
-          required: false,
           as: "headquarters",
           attributes: {
             exclude: ["createdAt", "updatedAt", "status", "clientId"],
@@ -507,7 +503,6 @@ const getClientsServ = async (
           include: {
             model: Location,
             where: optionsl,
-            required: false,
             as: "locations",
             attributes: {
               exclude: [
@@ -521,7 +516,6 @@ const getClientsServ = async (
             include: {
               model: Equipment,
               where: optionse,
-              required: false,
               as: "equipments",
               attributes: {
                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
