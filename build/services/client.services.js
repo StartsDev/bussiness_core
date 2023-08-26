@@ -276,7 +276,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         // Filter client propeties
         if (businessName != undefined) {
             options = {
-                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                businessName: { [Sequelize.Op.iLike]: `${businessName}%` },
                 status: false,
             };
         }

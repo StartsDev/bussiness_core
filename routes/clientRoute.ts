@@ -11,7 +11,7 @@ import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 const router = Router();
 
 // Register Client
-router.post("/create-client", verifyToken, /*isSuperUser_isAdmin*/ createClient);
+router.post("/create-client", verifyToken, isSuperUser_isAdmin, createClient);
 
 // Get all Clients
 router.get("/get-clients", getClients);
