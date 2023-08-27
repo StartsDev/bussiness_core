@@ -191,18 +191,17 @@ export const isAdmin_isTech_isSuperU = async (
 
     const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = response.data;
-
-    if (!userData.findUser) {
+    if (!userData?.findUser) {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
     if (
-      userData.findUser.Role.role !== "Super_Usuario" &&
-      userData.findUser.Role.role !== "Administrador" &&
-      userData.findUser.Role.role !== "Tecnico"
+      userData?.findUser?.Role?.role !== "Super_Usuario" &&
+      userData?.findUser?.Role?.role !== "Administrador" &&
+      userData?.findUser?.Role?.role !== "Tecnico"
     ) {
       return res.status(401).json({ message: "Este rol no es permitido" });
     }
-    req.body.rolName = userData.user.Role.role;
+    req.body.rolName = userData.findUser.Role.role;
     next();
   } catch (error) {
     return res.status(401).json({ error });

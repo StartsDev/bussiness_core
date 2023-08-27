@@ -589,7 +589,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
     }
 
     // Update maintenance
-    const [updateMaintenance] = await Maintenance.update(maint, {
+    const updateMaintenance = await Maintenance.update(maint, {
       where: {
         id,
       },
@@ -616,6 +616,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
       success: true,
     };
   } catch (e) {
+    console.log(e)
     throw new Error(e as string);
   }
 };
