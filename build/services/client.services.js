@@ -192,21 +192,21 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 order: [["createdAt", "DESC"]],
                 include: {
                     model: Headquarter,
-                    required: false,
                     where: optionh,
+                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
                     as: "headquarters",
                     order: [["createdAt", "DESC"]],
                     attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                     include: {
                         model: Location,
-                        required: false,
+                        required: locationName,
                         where: optionsl,
                         as: "locations",
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                         include: {
                             model: Equipment,
-                            required: false,
+                            required: true,
                             where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
@@ -216,6 +216,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                         },
                     },
                 },
+                required: Object.values(options).some((value) => value !== null),
             });
             //Hide properties heardquartes and locations
             const propertiesToHide = ["locations"];
@@ -254,11 +255,23 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 };
             }
         }
-        return {
-            clients: linearDatap,
-            totalCount: clients.length,
-            success: true,
-        };
+        // Filter Equipment
+        if (name || serial || model || type || brand) {
+            // Hacer filter con linearDatap
+            const dataEquipments = linearDatap.filter((client) => client.headquarters.length > 0);
+            return {
+                clients: dataEquipments,
+                totalCount: dataEquipments.length,
+                success: true,
+            };
+        }
+        else {
+            return {
+                clients: linearDatap,
+                totalCount: clients.length,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);
@@ -416,10 +429,6 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         }
         // All query clients
         const linearDatap = [];
-        console.log('CLIENT OPT', options);
-        console.log('HEAD OPT', optionh);
-        console.log('LOCAT OPT', optionsl);
-        console.log('CLIENT OPT', optionse);
         const clients = await Client.findAll({
             where: options,
             attributes: { exclude: ["updatedAt", "status", "headquarters"] },
@@ -429,7 +438,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                 {
                     model: Headquarter,
                     where: optionh,
-                    required: false,
+                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
                     as: "headquarters",
                     attributes: {
                         exclude: ["createdAt", "updatedAt", "status", "clientId"],
@@ -437,7 +446,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                     include: {
                         model: Location,
                         where: optionsl,
-                        required: false,
+                        required: locationName,
                         as: "locations",
                         attributes: {
                             exclude: [
@@ -450,17 +459,17 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                         },
                         include: {
                             model: Equipment,
-                            where: optionse,
-                            required: false,
                             as: "equipments",
                             attributes: {
                                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
                             },
+                            where: optionse,
+                            required: true,
                         },
                     },
                 },
             ],
-            required: false,
+            required: Object.values(options).some((value) => value !== null),
         });
         Sequelize.options.logging = false;
         if (!clients) {
@@ -499,11 +508,23 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
             }
             linearDatap.push(clientData);
         }
-        return {
-            clients: linearDatap,
-            totalCount: clients.length,
-            success: true,
-        };
+        // Filter Equipment
+        if (name || serial || model || type || brand) {
+            // Hacer filter con linearDatap
+            const dataEquipments = linearDatap.filter((client) => client.headquarters.length > 0);
+            return {
+                clients: dataEquipments,
+                totalCount: dataEquipments.length,
+                success: true,
+            };
+        }
+        else {
+            return {
+                clients: linearDatap,
+                totalCount: clients.length,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);

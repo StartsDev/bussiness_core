@@ -67,6 +67,7 @@ const getHeadServ = async (page?: number, pageSize?: number) => {
         ],
       });
       const totalCount = await Headquarter.count({ where: { status: false } });
+      
       return {
         headquarters,
         totalCount,

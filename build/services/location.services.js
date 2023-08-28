@@ -37,16 +37,21 @@ const createLocationServ = async (location) => {
 exports.createLocationServ = createLocationServ;
 // Get locations
 //Pagination
-const getLocationServPag = async (page, pageSize, headName, businessName) => {
+const getLocationServPag = async (page, pageSize, locationName, headName, businessName) => {
     try {
         let locations;
         // Options filter where clausule and counter
-        let totalCountp = 0;
         let optionh = {};
         let optionsc = {};
         let options = {};
         const linearDatap = [];
         //Validation query params
+        if (locationName != undefined) {
+            options = {
+                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                status: false,
+            };
+        }
         if (headName != undefined) {
             optionh = {
                 headName: { [Sequelize.Op.like]: `${headName}%` },
@@ -59,7 +64,7 @@ const getLocationServPag = async (page, pageSize, headName, businessName) => {
                 status: false,
             };
         }
-        if (!headName && !businessName) {
+        if (!locationName && !headName && !businessName) {
             options = { status: false };
         }
         if (page && pageSize) {
@@ -134,69 +139,10 @@ const getLocationServPag = async (page, pageSize, headName, businessName) => {
                     linearDatap.push(locationData);
                 }
             }
-            // Counter data validation query cases
-            if (headName != undefined) {
-                totalCountp = await Location.count({
-                    where: { status: false },
-                    include: [
-                        {
-                            model: Headquarter,
-                            where: { headName: { [Sequelize.Op.like]: `${headName}%` } },
-                            required: true,
-                        },
-                    ],
-                });
-            }
-            if (businessName != undefined) {
-                totalCountp = await Location.count({
-                    where: { status: false },
-                    include: [
-                        {
-                            model: Headquarter,
-                            required: true,
-                            include: [
-                                {
-                                    model: Client,
-                                    where: {
-                                        businessName: { [Sequelize.Op.like]: `${businessName}%` },
-                                    },
-                                    required: true,
-                                },
-                            ],
-                        },
-                    ],
-                });
-            }
-            if (headName && businessName) {
-                totalCountp = await Location.count({
-                    where: { status: false },
-                    include: [
-                        {
-                            model: Headquarter,
-                            where: {
-                                headName: { [Sequelize.Op.like]: `${headName}%` },
-                            },
-                            required: true,
-                            include: [
-                                {
-                                    model: Client,
-                                    where: {
-                                        businessName: { [Sequelize.Op.like]: `${businessName}%` },
-                                    },
-                                    required: true,
-                                },
-                            ],
-                        },
-                    ],
-                });
-            }
-            if (!headName && !businessName) {
-                totalCountp = await Location.count({ where: { status: false } });
-            }
         }
         return {
             linearDatap,
-            totalCountp,
+            totalCountp: linearDatap.length,
             success: true,
         };
     }
@@ -205,27 +151,32 @@ const getLocationServPag = async (page, pageSize, headName, businessName) => {
     }
 };
 exports.getLocationServPag = getLocationServPag;
-//No pagination
-const getLocationsServ = async (headName, businessName) => {
+//Not pagination location
+const getLocationsServ = async (locationName, headName, businessName) => {
     try {
-        let totalCount = 0;
         let optionh = {};
         let optionsc = {};
         let options = {};
         //Validation query params
+        if (locationName != undefined) {
+            options = {
+                locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
+                status: false,
+            };
+        }
         if (headName != undefined) {
             optionh = {
-                headName: { [Sequelize.Op.like]: `${headName}%` },
+                headName: { [Sequelize.Op.iLike]: `${headName}%` },
                 status: false,
             };
         }
         if (businessName != undefined) {
             optionsc = {
-                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                businessName: { [Sequelize.Op.iLike]: `${businessName}%` },
                 status: false,
             };
         }
-        if (!headName && !businessName) {
+        if (!locationName && !headName && !businessName) {
             options = { status: false };
         }
         // Get locations sequelize method using includes
@@ -302,68 +253,9 @@ const getLocationsServ = async (headName, businessName) => {
                 linearData.push(locationData);
             }
         }
-        // Counter data validation query cases
-        if (headName != undefined) {
-            totalCount = await Location.count({
-                where: { status: false },
-                include: [
-                    {
-                        model: Headquarter,
-                        where: { headName: { [Sequelize.Op.like]: `${headName}%` } },
-                        required: true,
-                    },
-                ],
-            });
-        }
-        if (businessName != undefined) {
-            totalCount = await Location.count({
-                where: { status: false },
-                include: [
-                    {
-                        model: Headquarter,
-                        required: true,
-                        include: [
-                            {
-                                model: Client,
-                                where: {
-                                    businessName: { [Sequelize.Op.like]: `${businessName}%` },
-                                },
-                                required: true,
-                            },
-                        ],
-                    },
-                ],
-            });
-        }
-        if (headName && businessName) {
-            totalCount = await Location.count({
-                where: { status: false },
-                include: [
-                    {
-                        model: Headquarter,
-                        where: {
-                            headName: { [Sequelize.Op.like]: `${headName}%` },
-                        },
-                        required: true,
-                        include: [
-                            {
-                                model: Client,
-                                where: {
-                                    businessName: { [Sequelize.Op.like]: `${businessName}%` },
-                                },
-                                required: true,
-                            },
-                        ],
-                    },
-                ],
-            });
-        }
-        if (!headName && !businessName) {
-            totalCount = await Location.count({ where: { status: false } });
-        }
         return {
             linearData,
-            totalCount,
+            totalCount: linearData.length,
             success: true,
         };
     }

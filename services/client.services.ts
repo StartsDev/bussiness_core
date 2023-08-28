@@ -228,21 +228,21 @@ const getClientServPag = async (
         order: [["createdAt", "DESC"]],
         include: {
           model: Headquarter,
-          required: false,
           where: optionh,
+          required: !!(headName || addressh || phoneh || emailh || isPrincipal),
           as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
             model: Location,
-            required: false,
+            required: locationName,
             where: optionsl,
             as: "locations",
             order: [["createdAt", "DESC"]],
             attributes: { exclude: ["createdAt", "updatedAt", "status"] },
             include: {
               model: Equipment,
-              required: false,
+              required: true,
               where: optionse,
               as: "equipments",
               order: [["createdAt", "DESC"]],
@@ -252,6 +252,7 @@ const getClientServPag = async (
             },
           },
         },
+        required: Object.values(options).some((value) => value !== null),
       });
 
       //Hide properties heardquartes and locations
@@ -293,11 +294,24 @@ const getClientServPag = async (
         };
       }
     }
-    return {
-      clients: linearDatap,
-      totalCount: clients.length,
-      success: true,
-    };
+      // Filter Equipment
+      if (name || serial || model || type || brand) {
+        // Hacer filter con linearDatap
+        const dataEquipments = linearDatap.filter(
+          (client) => client.headquarters.length > 0
+        );
+        return {
+          clients: dataEquipments,
+          totalCount: dataEquipments.length,
+          success: true,
+        };
+      } else {
+        return {
+          clients: linearDatap,
+          totalCount: clients.length,
+          success: true,
+        };
+      }
   } catch (e) {
     throw new Error(e as string);
   }
@@ -488,11 +502,6 @@ const getClientsServ = async (
 
     // All query clients
     const linearDatap: any[] = [];
-    console.log('CLIENT OPT', options)
-    console.log('HEAD OPT', optionh)
-    console.log('LOCAT OPT', optionsl)
-    console.log('CLIENT OPT', optionse)
-
     const clients = await Client.findAll({
       where: options,
       attributes: { exclude: ["updatedAt", "status", "headquarters"] },
@@ -502,7 +511,7 @@ const getClientsServ = async (
         {
           model: Headquarter,
           where: optionh,
-          required:false,
+          required: !!(headName || addressh || phoneh || emailh || isPrincipal),
           as: "headquarters",
           attributes: {
             exclude: ["createdAt", "updatedAt", "status", "clientId"],
@@ -510,7 +519,7 @@ const getClientsServ = async (
           include: {
             model: Location,
             where: optionsl,
-            required: false,
+            required: locationName,
             as: "locations",
             attributes: {
               exclude: [
@@ -523,21 +532,20 @@ const getClientsServ = async (
             },
             include: {
               model: Equipment,
-              where: optionse,
-              required: false,
               as: "equipments",
               attributes: {
                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
               },
+              where: optionse,
+              required: true,
             },
           },
         },
       ],
-      required: false,
+      required: Object.values(options).some((value) => value !== null),
     });
     Sequelize.options.logging = false;
 
-  
     if (!clients) {
       return {
         msg: "No existen clientes registrados...",
@@ -576,12 +584,25 @@ const getClientsServ = async (
       }
       linearDatap.push(clientData);
     }
-   
-    return {
-      clients: linearDatap,
-      totalCount: clients.length,
-      success: true,
-    };
+
+    // Filter Equipment
+    if (name || serial || model || type || brand) {
+      // Hacer filter con linearDatap
+      const dataEquipments = linearDatap.filter(
+        (client) => client.headquarters.length > 0
+      );
+      return {
+        clients: dataEquipments,
+        totalCount: dataEquipments.length,
+        success: true,
+      };
+    } else {
+      return {
+        clients: linearDatap,
+        totalCount: clients.length,
+        success: true,
+      };
+    }
   } catch (e) {
     throw new Error(e as string);
   }
