@@ -610,16 +610,50 @@ const getClientsServ = async (
 
 const getOneClientServ = async (client: any) => {
   try {
+    
     const findClient = await Client.findOne({
       where: { id: client },
+      attributes: { exclude: ["updatedAt", "status"] },
+      include :[
+        {
+          model: Headquarter,
+          as: "headquarters",
+          attributes: {
+            exclude: ["createdAt", "updatedAt", "status"],
+          },
+          include: {
+            model: Location,
+            as: "locations",
+            attributes: {
+              exclude: [
+                "createdAt",
+                "updatedAt",
+                "status",
+                "headquarterId",
+                "description",
+              ],
+            },
+            include: {
+              model: Equipment,
+              as: "equipments",
+              attributes: {
+                exclude: ["createdAt", "updatedAt", "status", "locationId"],
+              },
+              required: true,
+            },
+          },
+        }
+      ]
     });
-    if (!client) {
+    if (!findClient) {
       return {
         msg: "Este cliente no existe",
+        success: false
       };
     }
+
     return {
-      findClient,
+      client : findClient,
       success: true,
     };
   } catch (e) {
