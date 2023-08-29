@@ -40,68 +40,68 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
         // Filter client propeties
         if (businessName != undefined) {
             options = {
-                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                businessName: { [Sequelize.Op.iLike]: `${businessName}%` },
                 status: false,
             };
         }
         if (nit != undefined) {
             options = {
-                nit: { [Sequelize.Op.like]: `${nit}%` },
+                nit: { [Sequelize.Op.iLike]: `${nit}%` },
                 status: false,
             };
         }
         if (address != undefined) {
             options = {
-                address: { [Sequelize.Op.like]: `${address}%` },
+                address: { [Sequelize.Op.iLike]: `${address}%` },
                 status: false,
             };
         }
         if (email != undefined) {
             options = {
-                email: { [Sequelize.Op.like]: `${email}%` },
+                email: { [Sequelize.Op.iLike]: `${email}%` },
                 status: false,
             };
         }
         if (phone != undefined) {
             options = {
-                phone: { [Sequelize.Op.like]: `${phone}%` },
+                phone: { [Sequelize.Op.iLike]: `${phone}%` },
                 status: false,
             };
         }
         if (city != undefined) {
             options = {
-                city: { [Sequelize.Op.like]: `${city}%` },
+                city: { [Sequelize.Op.iLike]: `${city}%` },
                 status: false,
             };
         }
         if (contact != undefined) {
             options = {
-                contact: { [Sequelize.Op.like]: `${contact}%` },
+                contact: { [Sequelize.Op.iLike]: `${contact}%` },
                 status: false,
             };
         }
         // Filter heaquarters propeties
         if (headName != undefined) {
             optionh = {
-                headName: { [Sequelize.Op.like]: `${headName}%` },
+                headName: { [Sequelize.Op.iLike]: `${headName}%` },
                 status: false,
             };
         }
         if (addressh != undefined) {
             optionh = {
-                address: { [Sequelize.Op.like]: `${addressh}%` },
+                address: { [Sequelize.Op.iLike]: `${addressh}%` },
                 status: false,
             };
         }
         if (emailh != undefined) {
             optionh = {
-                email: { [Sequelize.Op.like]: `${emailh}%` },
+                email: { [Sequelize.Op.iLike]: `${emailh}%` },
                 status: false,
             };
         }
         if (phoneh != undefined) {
             optionh = {
-                phone: { [Sequelize.Op.like]: `${phoneh}%` },
+                phone: { [Sequelize.Op.iLike]: `${phoneh}%` },
                 status: false,
             };
         }
@@ -123,38 +123,38 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
         // Filter location propeties
         if (locationName != undefined) {
             optionsl = {
-                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
                 status: false,
             };
         }
         // Filter equipment propeties
         if (name != undefined) {
             optionse = {
-                name: { [Sequelize.Op.like]: `${name}%` },
+                name: { [Sequelize.Op.iLike]: `${name}%` },
                 status: false,
             };
         }
         if (serial != undefined) {
             optionse = {
-                serial: { [Sequelize.Op.like]: `${serial}%` },
+                serial: { [Sequelize.Op.iLike]: `${serial}%` },
                 status: false,
             };
         }
         if (model != undefined) {
             optionse = {
-                model: { [Sequelize.Op.like]: `${model}%` },
+                model: { [Sequelize.Op.iLike]: `${model}%` },
                 status: false,
             };
         }
         if (type != undefined) {
             optionse = {
-                type: { [Sequelize.Op.like]: `${type}%` },
+                type: { [Sequelize.Op.iLike]: `${type}%` },
                 status: false,
             };
         }
         if (brand != undefined) {
             optionse = {
-                brand: { [Sequelize.Op.like]: `${brand}%` },
+                brand: { [Sequelize.Op.iLike]: `${brand}%` },
                 status: false,
             };
         }
@@ -192,21 +192,21 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 order: [["createdAt", "DESC"]],
                 include: {
                     model: Headquarter,
-                    required: false,
                     where: optionh,
+                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
                     as: "headquarters",
                     order: [["createdAt", "DESC"]],
                     attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                     include: {
                         model: Location,
-                        required: false,
+                        required: locationName,
                         where: optionsl,
                         as: "locations",
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                         include: {
                             model: Equipment,
-                            required: false,
+                            required: true,
                             where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
@@ -216,6 +216,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                         },
                     },
                 },
+                required: Object.values(options).some((value) => value !== null),
             });
             //Hide properties heardquartes and locations
             const propertiesToHide = ["locations"];
@@ -254,11 +255,23 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 };
             }
         }
-        return {
-            clients,
-            totalCount: clients.length,
-            success: true,
-        };
+        // Filter Equipment
+        if (name || serial || model || type || brand) {
+            // Hacer filter con linearDatap
+            const dataEquipments = linearDatap.filter((client) => client.headquarters.length > 0);
+            return {
+                clients: dataEquipments,
+                totalCount: dataEquipments.length,
+                success: true,
+            };
+        }
+        else {
+            return {
+                clients: linearDatap,
+                totalCount: clients.length,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);
@@ -268,7 +281,6 @@ exports.getClientServPag = getClientServPag;
 const getClientsServ = async (businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
     try {
         //Filters
-        let totalCount = 0;
         let options = {};
         let optionh = {};
         let optionsl = {};
@@ -282,62 +294,62 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         }
         if (nit != undefined) {
             options = {
-                nit: { [Sequelize.Op.like]: `${nit}%` },
+                nit: { [Sequelize.Op.iLike]: `${nit}%` },
                 status: false,
             };
         }
         if (address != undefined) {
             options = {
-                address: { [Sequelize.Op.like]: `${address}%` },
+                address: { [Sequelize.Op.iLike]: `${address}%` },
                 status: false,
             };
         }
         if (email != undefined) {
             options = {
-                email: { [Sequelize.Op.like]: `${email}%` },
+                email: { [Sequelize.Op.iLike]: `${email}%` },
                 status: false,
             };
         }
         if (phone != undefined) {
             options = {
-                phone: { [Sequelize.Op.like]: `${phone}%` },
+                phone: { [Sequelize.Op.iLike]: `${phone}%` },
                 status: false,
             };
         }
         if (city != undefined) {
             options = {
-                city: { [Sequelize.Op.like]: `${city}%` },
+                city: { [Sequelize.Op.iLike]: `${city}%` },
                 status: false,
             };
         }
         if (contact != undefined) {
             options = {
-                contact: { [Sequelize.Op.like]: `${contact}%` },
+                contact: { [Sequelize.Op.iLike]: `${contact}%` },
                 status: false,
             };
         }
         // Filter heaquarters propeties
         if (headName != undefined) {
             optionh = {
-                headName: { [Sequelize.Op.like]: `${headName}%` },
+                headName: { [Sequelize.Op.iLike]: `${headName}%` },
                 status: false,
             };
         }
         if (addressh != undefined) {
             optionh = {
-                address: { [Sequelize.Op.like]: `${addressh}%` },
+                address: { [Sequelize.Op.iLike]: `${addressh}%` },
                 status: false,
             };
         }
         if (emailh != undefined) {
             optionh = {
-                email: { [Sequelize.Op.like]: `${emailh}%` },
+                email: { [Sequelize.Op.iLike]: `${emailh}%` },
                 status: false,
             };
         }
         if (phoneh != undefined) {
             optionh = {
-                phone: { [Sequelize.Op.like]: `${phoneh}%` },
+                phone: { [Sequelize.Op.iLike]: `${phoneh}%` },
                 status: false,
             };
         }
@@ -359,38 +371,38 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         // Filter location propeties
         if (locationName != undefined) {
             optionsl = {
-                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
                 status: false,
             };
         }
         // Filter equipment propeties
         if (name != undefined) {
             optionse = {
-                name: { [Sequelize.Op.like]: `${name}%` },
+                name: { [Sequelize.Op.iLike]: `${name}%` },
                 status: false,
             };
         }
         if (serial != undefined) {
             optionse = {
-                serial: { [Sequelize.Op.like]: `${serial}%` },
+                serial: { [Sequelize.Op.iLike]: `${serial}%` },
                 status: false,
             };
         }
         if (model != undefined) {
             optionse = {
-                model: { [Sequelize.Op.like]: `${model}%` },
+                model: { [Sequelize.Op.iLike]: `${model}%` },
                 status: false,
             };
         }
         if (type != undefined) {
             optionse = {
-                type: { [Sequelize.Op.like]: `${type}%` },
+                type: { [Sequelize.Op.iLike]: `${type}%` },
                 status: false,
             };
         }
         if (brand != undefined) {
             optionse = {
-                brand: { [Sequelize.Op.like]: `${brand}%` },
+                brand: { [Sequelize.Op.iLike]: `${brand}%` },
                 status: false,
             };
         }
@@ -426,7 +438,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                 {
                     model: Headquarter,
                     where: optionh,
-                    required: false,
+                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
                     as: "headquarters",
                     attributes: {
                         exclude: ["createdAt", "updatedAt", "status", "clientId"],
@@ -434,7 +446,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                     include: {
                         model: Location,
                         where: optionsl,
-                        required: false,
+                        required: locationName,
                         as: "locations",
                         attributes: {
                             exclude: [
@@ -447,17 +459,17 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                         },
                         include: {
                             model: Equipment,
-                            where: optionse,
-                            required: false,
                             as: "equipments",
                             attributes: {
                                 exclude: ["createdAt", "updatedAt", "status", "locationId"],
                             },
+                            where: optionse,
+                            required: true,
                         },
                     },
                 },
             ],
-            required: false,
+            required: Object.values(options).some((value) => value !== null),
         });
         Sequelize.options.logging = false;
         if (!clients) {
@@ -496,11 +508,23 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
             }
             linearDatap.push(clientData);
         }
-        return {
-            clients: linearDatap,
-            totalCount: clients.length,
-            success: true,
-        };
+        // Filter Equipment
+        if (name || serial || model || type || brand) {
+            // Hacer filter con linearDatap
+            const dataEquipments = linearDatap.filter((client) => client.headquarters.length > 0);
+            return {
+                clients: dataEquipments,
+                totalCount: dataEquipments.length,
+                success: true,
+            };
+        }
+        else {
+            return {
+                clients: linearDatap,
+                totalCount: clients.length,
+                success: true,
+            };
+        }
     }
     catch (e) {
         throw new Error(e);
@@ -511,14 +535,46 @@ const getOneClientServ = async (client) => {
     try {
         const findClient = await Client.findOne({
             where: { id: client },
+            attributes: { exclude: ["updatedAt", "status"] },
+            include: [
+                {
+                    model: Headquarter,
+                    as: "headquarters",
+                    attributes: {
+                        exclude: ["createdAt", "updatedAt", "status"],
+                    },
+                    include: {
+                        model: Location,
+                        as: "locations",
+                        attributes: {
+                            exclude: [
+                                "createdAt",
+                                "updatedAt",
+                                "status",
+                                "headquarterId",
+                                "description",
+                            ],
+                        },
+                        include: {
+                            model: Equipment,
+                            as: "equipments",
+                            attributes: {
+                                exclude: ["createdAt", "updatedAt", "status", "locationId"],
+                            },
+                            required: true,
+                        },
+                    },
+                }
+            ]
         });
-        if (!client) {
+        if (!findClient) {
             return {
                 msg: "Este cliente no existe",
+                success: false
             };
         }
         return {
-            findClient,
+            client: findClient,
             success: true,
         };
     }

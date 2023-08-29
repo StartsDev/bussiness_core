@@ -25,11 +25,13 @@ const getLocations = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
     const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
+    const locationName = (req.query.locationName as string) || undefined;
     const headName = (req.query.headName as string) || undefined;
     const businessName = (req.query.businessName as string) || undefined;
     
     if (!page && !pageSize) {
       const { linearData, totalCount } = await getLocationsServ(
+        locationName,
         headName,
         businessName
       );
@@ -41,6 +43,7 @@ const getLocations = async (req: Request, res: Response) => {
       const { linearDatap, totalCountp } = await getLocationServPag(
         page,
         pageSize,
+        locationName,
         headName,
         businessName
       );
