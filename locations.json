@@ -1,0 +1,97 @@
+[
+  {
+   "locationName": "Administración Parking",
+   "description": "Administración Parking",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Recepción Parking",
+   "description": "Recepción Parking",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Comedor Parking",
+   "description": "Comedor Parking",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Sala de reuniones",
+   "description": "Sala de reuniones",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Contabilidad",
+   "description": "Contabilidad",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Mercadeo",
+   "description": "Mercadeo",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Gerencia",
+   "description": "Gerencia",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Rack",
+   "description": "Rack",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Oficina Seguridad",
+   "description": "Oficina Seguridad",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Comedor empleados",
+   "description": "Comedor empleados",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Sala de sonido",
+   "description": "Sala de sonido",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Administración",
+   "description": "Administración",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Auditorio 907",
+   "description": "Auditorio 907",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Consultorio 911",
+   "description": "Consultorio 911",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Administración",
+   "description": "Administración",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Sótano",
+   "description": "Sótano",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Cuarto Técnico Piso 3",
+   "description": "Cuarto Técnico Piso 3",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Terraza entrada Regional",
+   "description": "Terraza entrada Regional",
+   "headquarterId": "CC Monterrey"
+  },
+  {
+   "locationName": "Terraza piso 10",
+   "description": "Terraza piso 10",
+   "headquarterId": "CC Monterrey"
+  }
+ ]

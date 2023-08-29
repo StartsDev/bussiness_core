@@ -6,6 +6,7 @@ import {
   getEquipmentsLocation,
   editEquipment,
   deleteEquipment,
+  bulkCreate,
 } from "../controllers/equipment.controllers";
 import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 
@@ -18,6 +19,9 @@ router.post(
   isSuperUser_isAdmin,
   createEquipment
 );
+
+//creacion de unicacion bulk
+router.post("/bulk-create-equipments",bulkCreate);
 
 // Get all equipments
 router.get("/get-all-equipments", getAllEquipments);

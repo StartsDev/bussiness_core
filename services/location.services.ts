@@ -1,3 +1,5 @@
+import { bulkCreatefunction } from "../utils/bulkCreate";
+
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
@@ -566,6 +568,20 @@ const deleteLocationServ = async (id: any) => {
   }
 };
 
+const bulkCreateLocations = async (data: Array<{}>) => {
+  try {
+    await bulkCreatefunction(Location, data)
+    return 'Ubicaciones Creados'
+  } catch (error) {
+    console.log(error);
+    return {
+      message: 'hubo un error en la creacion',
+      success: false,
+  }
+}
+}
+
+
 export {
   createLocationServ,
   getLocationServPag,
@@ -574,4 +590,5 @@ export {
   allLocationsHeadServ,
   updateLocationServ,
   deleteLocationServ,
+  bulkCreateLocations
 };

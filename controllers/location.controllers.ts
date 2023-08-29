@@ -7,6 +7,7 @@ import {
   updateLocationServ,
   deleteLocationServ,
   getLocationServPag,
+  bulkCreateLocations,
 } from "../services/location.services";
 
 // Create new Location
@@ -118,6 +119,17 @@ const deleteLocation = async (req: Request, res: Response) => {
   }
 };
 
+//bulkcreate Location
+
+const bulkCreate = async (req: Request, res: Response) => {
+  try {
+    const location = await bulkCreateLocations(req.body);
+    res.status(200).json(location);
+  } catch (error) {
+    if (error instanceof Error) res.status(400).json({ error: error.message });
+  }
+};
+
 export {
   createLocation,
   getLocations,
@@ -125,4 +137,5 @@ export {
   getLocationHead,
   editLocation,
   deleteLocation,
+  bulkCreate
 };

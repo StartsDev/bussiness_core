@@ -1,3 +1,5 @@
+import { bulkCreatefunction } from "../utils/bulkCreate";
+
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
@@ -459,6 +461,19 @@ const deleteEquipmentServ = async (id: any) => {
   }
 };
 
+const bulkCreateEquipments = async (data: Array<{}>) => {
+  try {
+    await bulkCreatefunction(Equipment, data)
+    return 'Equipos Creados'
+  } catch (error) {
+    console.log(error);
+    return {
+      message: 'hubo un error en la creacion',
+      success: false,
+  }
+}
+}
+
 export {
   newEquipmentServ,
   getEquipmentServ,
@@ -466,4 +481,5 @@ export {
   allEquipmentsLocationServ,
   updateEquipmentServ,
   deleteEquipmentServ,
+  bulkCreateEquipments
 };
