@@ -6,6 +6,7 @@ import {
   getOneLocation,
   editLocation,
   deleteLocation,
+  bulkCreate,
 } from "../controllers/location.controllers";
 import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
 
@@ -18,6 +19,10 @@ router.post(
   isSuperUser_isAdmin,
   createLocation
 );
+
+
+//creacion de unicacion bulk
+router.post("/bulk-create-locations",bulkCreate);
 
 // Get all locations
 router.get("/get-all-locations", getLocations);

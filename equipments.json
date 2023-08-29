@@ -1,0 +1,299 @@
+[
+  {
+   "name": "Minisplit N° 1",
+   "description": "Minisplit",
+   "serial": "S122CP",
+   "model": "S122CP",
+   "brand": "LG",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Administración Parking"
+  },
+  {
+   "name": "Minisplit N° 2",
+   "description": "Minisplit",
+   "serial": "42KMP112303",
+   "model": "42KMP112303",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Recepción Parking"
+  },
+  {
+   "name": "Minisplit N° 3",
+   "description": "Minisplit",
+   "serial": "SYAC1200DX",
+   "model": "SYAC1200DX",
+   "brand": "SIMPLY",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Comedor Parking"
+  },
+  {
+   "name": "Minisplit N° 4",
+   "description": "Minisplit",
+   "serial": "G122CB",
+   "model": "G122CB",
+   "brand": "LG",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Sala de reuniones"
+  },
+  {
+   "name": "Minisplit N° 5",
+   "description": "Minisplit",
+   "serial": "LXGATTCO18100P",
+   "model": "LXGATTCO18100P",
+   "brand": "LENNOX",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Contabilidad"
+  },
+  {
+   "name": "Minisplit N° 6",
+   "description": "Minisplit",
+   "serial": "KF25-09aGWE",
+   "model": "KF25-09aGWE",
+   "brand": "LENNOX",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Contabilidad"
+  },
+  {
+   "name": "Minisplit N° 7",
+   "description": "Minisplit",
+   "serial": "EMF181E",
+   "model": "EMF181E",
+   "brand": "MIRAGE",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Mercadeo"
+  },
+  {
+   "name": "Minisplit N° 8",
+   "description": "Minisplit",
+   "serial": "EMF181E",
+   "model": "EMF181E",
+   "brand": "MIRAGE",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Gerencia 1"
+  },
+  {
+   "name": "Minisplit N° 9",
+   "description": "Minisplit",
+   "serial": "EMF181E",
+   "model": "EMF181E",
+   "brand": "MIRAGE",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Gerencia 2"
+  },
+  {
+   "name": "Minisplit N° 10",
+   "description": "Minisplit",
+   "serial": "ASV24PSBAN",
+   "model": "ASV24PSBAN",
+   "brand": "SAMSUNG",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Monitoreo"
+  },
+  {
+   "name": "Minisplit N° 11",
+   "description": "Minisplit",
+   "serial": "C122CR",
+   "model": "C122CR",
+   "brand": "LG",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Rack"
+  },
+  {
+   "name": "Minisplit N° 12",
+   "description": "Minisplit",
+   "serial": "AS24FBCN",
+   "model": "AS24FBCN",
+   "brand": "SAMSUNG",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Rack"
+  },
+  {
+   "name": "Minisplit N° 13",
+   "description": "Minisplit",
+   "serial": "ELF181Q",
+   "model": "ELF181Q",
+   "brand": "MIRAGE",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Oficina de seguridad"
+  },
+  {
+   "name": "Minisplit N° 14",
+   "description": "Minisplit",
+   "serial": "KF-51GW",
+   "model": "KF-51GW",
+   "brand": "HACEB",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Comedor empleados"
+  },
+  {
+   "name": "Minisplit N° 15",
+   "description": "Minisplit",
+   "serial": "WCHXR-18KCR1",
+   "model": "WCHXR-18KCR1",
+   "brand": "WESTIING HOUSE",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Sala de sonido"
+  },
+  {
+   "name": "Central N°1",
+   "description": "Central",
+   "serial": "FB4BNF018",
+   "model": "FB4BNF018",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Auditorio 907"
+  },
+  {
+   "name": "Central N°2",
+   "description": "Central",
+   "serial": "FB4BNF030",
+   "model": "FB4BNF030",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Auditorio 907"
+  },
+  {
+   "name": "Central N°3 ",
+   "description": "Central",
+   "serial": "FB4BNF018000",
+   "model": "FB4BNF018000",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Consultorio 911"
+  },
+  {
+   "name": "Central N°4",
+   "description": "Central",
+   "serial": "FB4BNF018000",
+   "model": "FB4BNF018000",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Consultorio 911"
+  },
+  {
+   "name": "Fancoil",
+   "description": "Fancoil",
+   "serial": "N/A",
+   "model": "N/A",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Administración  "
+  },
+  {
+   "name": "Chiller 1",
+   "description": "Chiller",
+   "serial": "30HXC106-671",
+   "model": "30HXC106-671",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Chiller 2",
+   "description": "Chiller",
+   "serial": "30HXC171R-677",
+   "model": "30HXC171R-677",
+   "brand": "CARRIER",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Chiller 3",
+   "description": "Chiller",
+   "serial": "CN040-2C-220VIA",
+   "model": "CN040-2C-220VIA",
+   "brand": "FRESH",
+   "Type": "MINISPLIT, CENTRAL, PISOTECHO, CASSETTE",
+   "locationId": "Cuarto técnico piso 3"
+  },
+  {
+   "name": "Bomba de condensación Chiller 1",
+   "description": "Bomba de Condensación",
+   "serial": "A2CD052",
+   "model": "A2CD052",
+   "brand": "SIEMENS",
+   "Type": "BOMBAS",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Bomba de condensación Chiller 2",
+   "description": "Bomba de Condensación",
+   "serial": "J1000D7HE3-TE",
+   "model": "J1000D7HE3-TE",
+   "brand": "NEMA",
+   "Type": "BOMBAS",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Bomba de condensación Chiller 3",
+   "description": "Bomba de Condensación",
+   "serial": "LMI2201-8000",
+   "model": "LMI2201-8000",
+   "brand": "SIEMENS",
+   "Type": "BOMBAS",
+   "locationId": "Cuarto técnico piso 3"
+  },
+  {
+   "name": "Bomba de agua helada Chiller 1",
+   "description": "Bomba de agua helada",
+   "serial": "JMA0054DPRIO",
+   "model": "JMA0054DPRIO",
+   "brand": "TECHTOP",
+   "Type": "BOMBAS",
+   "locationId": "Sótano anillo primario"
+  },
+  {
+   "name": "Bomba de agua helada Chiller 1",
+   "description": "Bomba de agua helada",
+   "serial": "EM37",
+   "model": "EM37",
+   "brand": "EMERSON",
+   "Type": "BOMBAS",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Bomba de agua helada Chiller 2",
+   "description": "Bomba de agua helada",
+   "serial": "30HXC106-671",
+   "model": "30HXC106-671",
+   "brand": "CARRIER",
+   "Type": "BOMBAS",
+   "locationId": "Sótano"
+  },
+  {
+   "name": "Bomba de agua helada Chiller 3",
+   "description": "Bomba de agua helada",
+   "serial": "1LE0193",
+   "model": "1LE0193",
+   "brand": "SIEMENS",
+   "Type": "BOMBAS",
+   "locationId": "Cuarto técnico piso 3"
+  },
+  {
+   "name": "Torre Enfriamiento N° 1",
+   "description": "Torre de enfriamiento",
+   "serial": "N/A",
+   "model": "N/A",
+   "brand": "GLACIAR",
+   "Type": "TORRES",
+   "locationId": "Terraza entrada Regional"
+  },
+  {
+   "name": "Torre Enfriamiento N° 2",
+   "description": "Torre de enfriamiento",
+   "serial": "N/A",
+   "model": "N/A",
+   "brand": "GLACIAR",
+   "Type": "TORRES",
+   "locationId": "Terraza entrada Regional"
+  },
+  {
+   "name": "Torre Enfriamiento N° 3",
+   "description": "Torre de enfriamiento",
+   "serial": "N/A",
+   "model": "N/A",
+   "brand": "GLACIAR",
+   "Type": "TORRES",
+   "locationId": "Terraza piso 10"
+  }
+ ]
