@@ -82,8 +82,8 @@ const getMaintenanceTech = async (req: Request, res: Response) => {
 // Get all maintenances by client
 const getMaintenanceClient = async (req: Request, res: Response) => {
   try {
-    const maintclient = await getMaintByClientServ(req.params);
-    res.status(200).json(maintclient);
+    const maintenances = await getMaintByClientServ(req.params);
+    res.status(200).json(maintenances);
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }

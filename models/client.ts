@@ -4,9 +4,7 @@ import { ClientAttributes } from "../interfaces/client.interface";
 const { sequelize, DataTypes } = require("../database/index");
 const Quotation = require("../models/quotation");
 
-
 class Client extends Model<ClientAttributes> implements ClientAttributes {
-
   id!: string;
   businessName!: string;
   nit!: string;
@@ -16,18 +14,19 @@ class Client extends Model<ClientAttributes> implements ClientAttributes {
   city!: string;
   contact!: string;
   status!: boolean;
+  user_app!: [{ user_id: string; role_id: string; role_name: string; }];
+
 
   static associate(quotations: any) {
+    // Client - Quotations
+    Client.hasMany(quotations, {
+      foreignKey: "clientId",
+      as: "quotations",
+    });
 
-      // Client - Quotations
-        Client.hasMany(quotations, {
-          foreignKey: 'clientId',
-          as: 'quotations',
-        });
-        
-        quotations.belongsTo(Client, {
-          foreignKey: 'clientId',
-        });
+    quotations.belongsTo(Client, {
+      foreignKey: "clientId",
+    });
   }
 }
 Client.init(
@@ -70,6 +69,10 @@ Client.init(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    user_app: {
+      type: DataTypes.JSON, // Using JSON data type for array of objects
+      defaultValue: [], // Default value can be an empty array
+    },
   },
   {
     sequelize,
@@ -77,7 +80,6 @@ Client.init(
     freezeTableName: true,
   }
 );
-
 
 // aqui estoy ejecutando las relaciones
 Client.associate(Quotation);

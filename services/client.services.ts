@@ -3,6 +3,8 @@ const Client = require("../models/client");
 const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { Console } from "console";
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
@@ -52,7 +54,6 @@ const getClientServPag = async (
 ) => {
   try {
     let clients;
-    let totalCount: number = 0;
     //Filters
     let options: any | undefined = {};
     let optionh: any | undefined = {};
@@ -193,8 +194,6 @@ const getClientServPag = async (
 
     // Filter none params
     if (
-      !page &&
-      !pageSize &&
       !businessName &&
       !nit &&
       !address &&
@@ -217,7 +216,7 @@ const getClientServPag = async (
       options = { status: false };
     }
     const linearDatap: any[] = [];
-
+    console.log(options);
     if (page && pageSize) {
       const offset = (page - 1) * pageSize;
       clients = await Client.findAll({
@@ -229,20 +228,23 @@ const getClientServPag = async (
         include: {
           model: Headquarter,
           where: optionh,
-          required: !!(headName || addressh || phoneh || emailh || isPrincipal),
+          required: false,
+          //required: !!(headName || addressh || phoneh || emailh || isPrincipal),
           as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
           include: {
             model: Location,
-            required: locationName,
+            required: false,
+            //required: locationName,
             where: optionsl,
             as: "locations",
             order: [["createdAt", "DESC"]],
             attributes: { exclude: ["createdAt", "updatedAt", "status"] },
             include: {
               model: Equipment,
-              required: true,
+              //required: true,
+              required: false,
               where: optionse,
               as: "equipments",
               order: [["createdAt", "DESC"]],
@@ -252,9 +254,10 @@ const getClientServPag = async (
             },
           },
         },
-        required: Object.values(options).some((value) => value !== null),
+        required: false,
+        //required: Object.values(options).some((value) => value !== null),
       });
-
+      console.log("DATA FIND ALL", clients);
       //Hide properties heardquartes and locations
       const propertiesToHide = ["locations"];
       const propToHideLoc = ["equipments"];
@@ -285,7 +288,7 @@ const getClientServPag = async (
         }
         linearDatap.push(clientData);
       }
-
+      console.log("LINEAR", linearDatap);
       if (!clients) {
         return {
           msg: "No existen clientes registrados...",
@@ -294,8 +297,8 @@ const getClientServPag = async (
         };
       }
     }
-      // Filter Equipment
-      if (name || serial || model || type || brand) {
+    // Filter Equipment
+    /*    if (name || serial || model || type || brand) {
         // Hacer filter con linearDatap
         const dataEquipments = linearDatap.filter(
           (client) => client.headquarters.length > 0
@@ -311,7 +314,12 @@ const getClientServPag = async (
           totalCount: clients.length,
           success: true,
         };
-      }
+      } */
+    return {
+      clients: linearDatap,
+      totalCount: clients.length,
+      success: true,
+    };
   } catch (e) {
     throw new Error(e as string);
   }
@@ -610,11 +618,10 @@ const getClientsServ = async (
 
 const getOneClientServ = async (client: any) => {
   try {
-    
     const findClient = await Client.findOne({
       where: { id: client },
       attributes: { exclude: ["updatedAt", "status"] },
-      include :[
+      include: [
         {
           model: Headquarter,
           as: "headquarters",
@@ -642,18 +649,18 @@ const getOneClientServ = async (client: any) => {
               required: true,
             },
           },
-        }
-      ]
+        },
+      ],
     });
     if (!findClient) {
       return {
         msg: "Este cliente no existe",
-        success: false
+        success: false,
       };
     }
 
     return {
-      client : findClient,
+      client: findClient,
       success: true,
     };
   } catch (e) {
@@ -662,31 +669,90 @@ const getOneClientServ = async (client: any) => {
 };
 
 const updateClientServ = async (id: any, cli: any) => {
+  const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+  let errorUsers =[];
   try {
+    //Micro de auth
+    //const baseUrlCient = `${URL}/user/update-user`;
+    const baseUrlPacth = `${URL}/user/update-user`;
+    const { businessName, nit, address, email, phone, user_app } = cli;
     const clientFound = await Client.findOne({ where: { id } });
     if (!clientFound) {
       return {
         msg: "Cliente no encontrado",
+        success: false
       };
     }
-    const [updateClient] = await Client.update(cli, {
-      where: {
-        id,
+
+    // verificar que el role_name sea diferente de cliente y retorne un error
+    if(user_app.role_name !== "Cliente"){
+      return {
+        msg:"El rol debe ser Cliente",
+        success: false
+      }
+    }
+    // Validar de que el user_id que recibe user_app exista y que tenga rol de cliente
+    // Validar que que el rol_id sea de tipo Cliente
+    const clientData = clientFound.get({ plain: true }); 
+    const userArray = clientData.user_app; 
+  
+    //filtrar antes de pushear
+    userArray.push(user_app);
+
+    const [updateClient] = await Client.update(
+      {
+        businessName,
+        nit,
+        address,
+        email,
+        phone,
+        user_app: userArray,
       },
-      returning: true,
-    });
+      {
+        where: {
+          id,
+        },
+        returning: true,
+      }
+    ); 
     if (updateClient <= 0) {
       return {
         msg: "Actualización no realizada...",
         success: false,
       };
+    } 
+
+    // Actualizacion del usuario llamando al micro de aut
+    if(userArray.length > 0){
+      for(const user of userArray){
+        if(user.role_name === "Cliente"){
+          
+          try{
+            // Llamar al end-poin que hace el pacth de usuarios
+            const {data}: AxiosResponse<any> = await axios.patch(`${baseUrlPacth}/${user.user_id}`,{
+              clientId : clientData.id
+            });
+            console.log(data);
+          }catch(error){
+            errorUsers.push(error);
+          }
+        }else{
+          return {
+            msg:`El usuario con id ${user.user_id} no es cliente`,
+            success: false
+          }
+        }
+     
+      }
     }
     const client = await Client.findOne({ where: { id } });
     return {
       msg: "Cliente actualizado con exito...",
       client,
       success: true,
+      usersErrors : errorUsers
     };
+
   } catch (e) {
     throw new Error(e as string);
   }

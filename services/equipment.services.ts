@@ -181,6 +181,7 @@ const getEquipmentServ = async (
         },
       ],
     });
+    
     // Iteration equipments array and add format response
     for (const equipment of equipments) {
     

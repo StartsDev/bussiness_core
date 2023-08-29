@@ -388,6 +388,7 @@ const getMaintByTechServ = async (
 
 // Get maintenance by client
 const getMaintByClientServ = async (client: any) => {
+  const linearDatap: any[] = [];
   try {
     const clientFound = await Client.findOne({
       where: { id: client.customId },
@@ -440,8 +441,32 @@ const getMaintByClientServ = async (client: any) => {
       };
     }
 
+     // Iteration maintenances array and add format response
+     for (const maintenance of maintClient) {
+    
+      const maintData = maintenance.get({ plain: true });
+      const equipment = maintenance.Equipment;
+      const location = equipment.Location;
+      const headquarter = location.Headquarter;
+      const client = headquarter.Client;
+      
+      maintData.equipment = equipment.get({ plain: true });
+      maintData.location = location.get({ plain : true});
+      maintData.headquarter = headquarter.get({ plain:true });
+      maintData.client = client.get({ plain: true});
+
+      delete maintData.Equipment;
+      delete maintData.equipment.Location;
+      delete maintData.location.Headquarter;
+      delete maintData.headquarter.Client;
+      
+      linearDatap.push(maintData);
+
+    }
+    
     return {
-      maintClient,
+      maintClient: linearDatap,
+      numItmes : linearDatap.length,
       success: true,
     };
   } catch (error) {
