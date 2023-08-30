@@ -644,7 +644,7 @@ const updateClientServ = async (id, cli) => {
         if (userArray.length > 0) {
             for (const { user_id } of userArray) {
                 try {
-                    // Llamar al end-poin que hace el pacth de usuarios
+                    // Llamar al end-point que hace el patch de usuarios
                     await axios_1.default.patch(`${baseUrlPacth}/${user_id}`, {
                         clientId: clientData.id,
                     });
