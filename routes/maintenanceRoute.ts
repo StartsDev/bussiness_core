@@ -2,8 +2,7 @@ import { Router } from "express";
 import {
   createMaintenance,
   getMaintenances,
-  getMaintenanceTech,
-  getMaintenanceClient,
+  getMaintenanceUser,
   getMaintenanceEquipment,
   getMaintenanceById,
   updateMaintenance,
@@ -11,7 +10,7 @@ import {
 } from "../controllers/maintenance.controllers";
 import {
   verifyToken,
-  isTech,
+  validateRolUser,
   isSuperUser_isAdmin,
   isAdmin_isTech_isSuperU,
 } from "../middleware/authjwt";
@@ -19,16 +18,13 @@ import {
 const router = Router();
 
 // Register new Maintenance
-router.post("/create-maintenance", verifyToken, isTech, createMaintenance);
+router.post("/create-maintenance", verifyToken, validateRolUser, createMaintenance);
 
 // Get all maintenances
 router.get("/get-maintenances", getMaintenances);
 
-// Get all maintenance by tech (Dashboard tech services)
-router.get("/get-maint-tech", verifyToken, isTech, getMaintenanceTech);
-
-// Get all maintenance by client
-router.get("/get-main-client/:customId", getMaintenanceClient);
+// Get all maintenance by user (tech - client) (Dashboard tech-client services)
+router.get("/get-maint-by-user", verifyToken, validateRolUser, getMaintenanceUser);
 
 // Get all maintenance by equipment
 router.get("/get-main-equipment/:equipmentId", getMaintenanceEquipment);

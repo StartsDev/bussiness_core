@@ -49,8 +49,8 @@ export const verifyToken = async (
 };
 
 //ROLES DE USUARIO
-// Verificamos si el rol del usuario es Tecnico
-export const isTech = async (
+// Verificamos si el rol del usuario es Tecnico o Cliente
+export const validateRolUser = async (
   req: CustomRequest,
   res: Response,
   next: NextFunction
@@ -69,16 +69,27 @@ export const isTech = async (
       return res.status(401).json({ message: "Usuario no válido" });
     }
 
-    if (userData.findUser.Role.role !== "Tecnico") {
-      return res
-        .status(401)
-        .json({ message: "El rol de usuario no es técnico" });
+    if (userData.findUser.Role.role === "Tecnico") {
+      req.body.techId = userData.findUser.id;
+      req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+      req.body.techNumId = userData.findUser.numIdent;
+      req.body.role = userData.findUser.Role.role;
+      next();
     }
 
-    req.body.techId = userData.findUser.id;
-    req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
-    req.body.techNumId = userData.findUser.numIdent;
-    next();
+    if (userData.findUser.Role.role === "Cliente") {
+      req.body.techId = userData.findUser.clientId;
+      req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+      req.body.techNumId = userData.findUser.numIdent;
+      req.body.role = userData.findUser.Role.role;
+      next();
+    }
+    if (userData.findUser.Role.role === "Administrador") {
+      return {
+        msg: "El rol no debe ser administrador",
+        success: false,
+      };
+    }
   } catch (error) {
     return res.status(401).json({ error });
   }
@@ -162,11 +173,11 @@ export const isSuperUser_isAdmin = async (
     const id = req.decoded?.userId;
     const { data }: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = data;
-  
+
     if (!userData?.findUser) {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }
-    
+
     if (userData?.findUser?.Role?.role === "Tecnico") {
       return res.status(401).json({
         message: "El rol de usuario no es super usuario o administrador...",

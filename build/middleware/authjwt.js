@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAdmin_isTech_isSuperU = exports.isSuperUser_isAdmin = exports.isSuperUser = exports.isAdmin = exports.isTech = exports.verifyToken = void 0;
+exports.isAdmin_isTech_isSuperU = exports.isSuperUser_isAdmin = exports.isSuperUser = exports.isAdmin = exports.validateRolUser = exports.verifyToken = void 0;
 const axios_1 = __importDefault(require("axios"));
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
@@ -34,8 +34,8 @@ const verifyToken = async (req, res, next) => {
 };
 exports.verifyToken = verifyToken;
 //ROLES DE USUARIO
-// Verificamos si el rol del usuario es Tecnico
-const isTech = async (req, res, next) => {
+// Verificamos si el rol del usuario es Tecnico o Cliente
+const validateRolUser = async (req, res, next) => {
     try {
         const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
         const baseUrl = `${URL}/user/get-user`;
@@ -45,21 +45,32 @@ const isTech = async (req, res, next) => {
         if (!userData.findUser) {
             return res.status(401).json({ message: "Usuario no válido" });
         }
-        if (userData.findUser.Role.role !== "Tecnico") {
-            return res
-                .status(401)
-                .json({ message: "El rol de usuario no es técnico" });
+        if (userData.findUser.Role.role === "Tecnico") {
+            req.body.techId = userData.findUser.id;
+            req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+            req.body.techNumId = userData.findUser.numIdent;
+            req.body.role = userData.findUser.Role.role;
+            next();
         }
-        req.body.techId = userData.findUser.id;
-        req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
-        req.body.techNumId = userData.findUser.numIdent;
-        next();
+        if (userData.findUser.Role.role === "Cliente") {
+            req.body.techId = userData.findUser.clientId;
+            req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+            req.body.techNumId = userData.findUser.numIdent;
+            req.body.role = userData.findUser.Role.role;
+            next();
+        }
+        if (userData.findUser.Role.role === "Administrador") {
+            return {
+                msg: "El rol no debe ser administrador",
+                success: false,
+            };
+        }
     }
     catch (error) {
         return res.status(401).json({ error });
     }
 };
-exports.isTech = isTech;
+exports.validateRolUser = validateRolUser;
 //Verificamos si el rol del usuario es administrador
 const isAdmin = async (req, res, next) => {
     try {

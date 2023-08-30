@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLocation = exports.editLocation = exports.getLocationHead = exports.getOneLocation = exports.getLocations = exports.createLocation = void 0;
+exports.bulkCreate = exports.deleteLocation = exports.editLocation = exports.getLocationHead = exports.getOneLocation = exports.getLocations = exports.createLocation = void 0;
 const location_services_1 = require("../services/location.services");
 // Create new Location
 const createLocation = async (req, res) => {
@@ -110,3 +110,15 @@ const deleteLocation = async (req, res) => {
     }
 };
 exports.deleteLocation = deleteLocation;
+//bulkcreate Location
+const bulkCreate = async (req, res) => {
+    try {
+        const location = await (0, location_services_1.bulkCreateLocations)(req.body);
+        res.status(200).json(location);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            res.status(400).json({ error: error.message });
+    }
+};
+exports.bulkCreate = bulkCreate;

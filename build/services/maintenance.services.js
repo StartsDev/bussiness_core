@@ -1,12 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByClientServ = exports.getMaintByTechServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
+exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByUserServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
 const maintenance_interface_1 = require("./../interfaces/maintenance.interface");
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+// Transform data maintenance format function
+const transObjMaintenance = (arr) => {
+    const linearDatap = [];
+    for (const maintenance of arr) {
+        const maintData = maintenance.get({ plain: true });
+        const equipment = maintenance.Equipment;
+        const location = equipment.Location;
+        const headquarter = location.Headquarter;
+        const client = headquarter.Client;
+        maintData.equipment = equipment.get({ plain: true });
+        maintData.location = location.get({ plain: true });
+        maintData.headquarter = headquarter.get({ plain: true });
+        maintData.client = client.get({ plain: true });
+        delete maintData.Equipment;
+        delete maintData.equipment.Location;
+        delete maintData.location.Headquarter;
+        delete maintData.headquarter.Client;
+        linearDatap.push(maintData);
+    }
+    return linearDatap;
+};
 // Create a manteinance
 const createMaintenanceServ = async (maint) => {
     try {
@@ -170,10 +191,16 @@ const getMaintenancesServ = async (page, pageSize) => {
                     },
                 ],
             });
-            const totalCount = await Maintenance.count({ where: { delete: false } });
+            if (!maintenances) {
+                return {
+                    msg: "No hay mantenimientos registrados...",
+                    success: false,
+                };
+            }
+            const maintenancesFormat = transObjMaintenance(maintenances);
             return {
-                maintenances,
-                totalCount,
+                maintenances: maintenancesFormat,
+                totalCount: maintenancesFormat.length,
                 success: true,
             };
         }
@@ -213,10 +240,16 @@ const getMaintenancesServ = async (page, pageSize) => {
                     },
                 ],
             });
-            const totalCount = await Maintenance.count({ where: { delete: false } });
+            if (!maintenances) {
+                return {
+                    msg: "No hay mantenimientos registrados...",
+                    success: false,
+                };
+            }
+            const maintenancesFormat = transObjMaintenance(maintenances);
             return {
-                maintenances,
-                totalCount,
+                maintenances: maintenancesFormat,
+                totalCount: maintenances.length,
                 success: true,
             };
         }
@@ -227,8 +260,8 @@ const getMaintenancesServ = async (page, pageSize) => {
     }
 };
 exports.getMaintenancesServ = getMaintenancesServ;
-// Get maintenances by tech (Home)
-const getMaintByTechServ = async (tech, page, pageSize) => {
+// Get maintenances by user (tech-client) (Home)
+const getMaintByUserServ = async (user, page, pageSize) => {
     try {
         let maintenanceTech;
         if (page && pageSize) {
@@ -236,7 +269,9 @@ const getMaintByTechServ = async (tech, page, pageSize) => {
             maintenanceTech = await Maintenance.findAll({
                 offset,
                 limit: pageSize,
-                where: { "tech.techId": tech.techId, delete: false },
+                where: user.role === "Tecnico"
+                    ? { "tech.techId": user.techId, delete: false }
+                    : { customerId: user.techId, delete: false },
                 attributes: { exclude: ["updatedAt", "tech"] },
                 order: [["createdAt", "DESC"]],
                 include: [
@@ -276,16 +311,18 @@ const getMaintByTechServ = async (tech, page, pageSize) => {
                     success: false,
                 };
             }
-            const totalCount = await Maintenance.count({ where: { delete: false } });
+            const maintenanceUser = transObjMaintenance(maintenanceTech);
             return {
-                maintenanceTech,
-                totalCount,
+                maintenanceUser,
+                totalCount: maintenanceUser.length,
                 success: true,
             };
         }
         else {
             maintenanceTech = await Maintenance.findAll({
-                where: { "tech.techId": tech.techId, delete: false },
+                where: user.role === "Tecnico"
+                    ? { "tech.techId": user.techId, delete: false }
+                    : { customerId: user.techId, delete: false },
                 order: [["createdAt", "DESC"]],
                 attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
                 include: [
@@ -325,10 +362,10 @@ const getMaintByTechServ = async (tech, page, pageSize) => {
                     success: false,
                 };
             }
-            const totalCount = await Maintenance.count({ where: { delete: false } });
+            const maintenanceUser = transObjMaintenance(maintenanceTech);
             return {
-                maintenanceTech,
-                totalCount,
+                maintenanceUser,
+                totalCount: maintenanceUser.length,
                 success: true,
             };
         }
@@ -337,70 +374,7 @@ const getMaintByTechServ = async (tech, page, pageSize) => {
         throw new Error(error);
     }
 };
-exports.getMaintByTechServ = getMaintByTechServ;
-// Get maintenance by client
-const getMaintByClientServ = async (client) => {
-    try {
-        const clientFound = await Client.findOne({
-            where: { id: client.customId },
-        });
-        if (!clientFound) {
-            return {
-                msg: "El cliente no esta registrado...",
-                success: false,
-            };
-        }
-        const maintClient = await Maintenance.findAll({
-            where: { customerId: clientFound.dataValues.id },
-            order: [["createdAt", "DESC"]],
-            attributes: { exclude: ["createdAt", "updatedAt", "delete"] },
-            include: [
-                {
-                    model: Equipment,
-                    attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-                    include: [
-                        {
-                            model: Location,
-                            attributes: {
-                                exclude: ["id", "createdAt", "updatedAt", "status"],
-                            },
-                            include: [
-                                {
-                                    model: Headquarter,
-                                    attributes: {
-                                        exclude: ["id", "createdAt", "updatedAt", "status"],
-                                    },
-                                    include: [
-                                        {
-                                            model: Client,
-                                            attributes: {
-                                                exclude: ["id", "createdAt", "updatedAt", "status"],
-                                            },
-                                        },
-                                    ],
-                                },
-                            ],
-                        },
-                    ],
-                },
-            ],
-        });
-        if (!maintClient) {
-            return {
-                msg: "No hay mantenimientos registrados para este cliente...",
-                success: false,
-            };
-        }
-        return {
-            maintClient,
-            success: true,
-        };
-    }
-    catch (error) {
-        throw new Error(error);
-    }
-};
-exports.getMaintByClientServ = getMaintByClientServ;
+exports.getMaintByUserServ = getMaintByUserServ;
 // Get maintenance by equipment
 const getMainByEquipment = async (equip) => {
     try {

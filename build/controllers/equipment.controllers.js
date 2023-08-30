@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEquipment = exports.editEquipment = exports.getEquipmentsLocation = exports.getOneEquipment = exports.getAllEquipments = exports.createEquipment = void 0;
+exports.bulkCreate = exports.deleteEquipment = exports.editEquipment = exports.getEquipmentsLocation = exports.getOneEquipment = exports.getAllEquipments = exports.createEquipment = void 0;
 const equipment_services_1 = require("../services/equipment.services");
 //Register new equipment
 const createEquipment = async (req, res) => {
@@ -98,3 +98,14 @@ const deleteEquipment = async (req, res) => {
     }
 };
 exports.deleteEquipment = deleteEquipment;
+const bulkCreate = async (req, res) => {
+    try {
+        const equipments = await (0, equipment_services_1.bulkCreateEquipments)(req.body);
+        res.status(200).json(equipments);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            res.status(400).json({ error: error.message });
+    }
+};
+exports.bulkCreate = bulkCreate;

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEquipmentServ = exports.updateEquipmentServ = exports.allEquipmentsLocationServ = exports.getOneEquipmentServ = exports.getEquipmentServ = exports.newEquipmentServ = void 0;
+exports.bulkCreateEquipments = exports.deleteEquipmentServ = exports.updateEquipmentServ = exports.allEquipmentsLocationServ = exports.getOneEquipmentServ = exports.getEquipmentServ = exports.newEquipmentServ = void 0;
+const bulkCreate_1 = require("../utils/bulkCreate");
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
@@ -435,3 +436,17 @@ const deleteEquipmentServ = async (id) => {
     }
 };
 exports.deleteEquipmentServ = deleteEquipmentServ;
+const bulkCreateEquipments = async (data) => {
+    try {
+        await (0, bulkCreate_1.bulkCreatefunction)(Equipment, data);
+        return 'Equipos Creados';
+    }
+    catch (error) {
+        console.log(error);
+        return {
+            message: 'hubo un error en la creacion',
+            success: false,
+        };
+    }
+};
+exports.bulkCreateEquipments = bulkCreateEquipments;

@@ -5,13 +5,11 @@ const maintenance_controllers_1 = require("../controllers/maintenance.controller
 const authjwt_1 = require("../middleware/authjwt");
 const router = (0, express_1.Router)();
 // Register new Maintenance
-router.post("/create-maintenance", authjwt_1.verifyToken, authjwt_1.isTech, maintenance_controllers_1.createMaintenance);
+router.post("/create-maintenance", authjwt_1.verifyToken, authjwt_1.validateRolUser, maintenance_controllers_1.createMaintenance);
 // Get all maintenances
 router.get("/get-maintenances", maintenance_controllers_1.getMaintenances);
-// Get all maintenance by tech (Dashboard tech services)
-router.get("/get-maint-tech", authjwt_1.verifyToken, authjwt_1.isTech, maintenance_controllers_1.getMaintenanceTech);
-// Get all maintenance by client
-router.get("/get-main-client/:customId", maintenance_controllers_1.getMaintenanceClient);
+// Get all maintenance by user (tech - client) (Dashboard tech-client services)
+router.get("/get-maint-by-user", authjwt_1.verifyToken, authjwt_1.validateRolUser, maintenance_controllers_1.getMaintenanceUser);
 // Get all maintenance by equipment
 router.get("/get-main-equipment/:equipmentId", maintenance_controllers_1.getMaintenanceEquipment);
 // Get one maintenance by id

@@ -6,6 +6,8 @@ const authjwt_1 = require("../middleware/authjwt");
 const router = (0, express_1.Router)();
 // Register new location
 router.post("/create-location", authjwt_1.verifyToken, authjwt_1.isSuperUser_isAdmin, location_controllers_1.createLocation);
+//creacion de unicacion bulk
+router.post("/bulk-create-locations", location_controllers_1.bulkCreate);
 // Get all locations
 router.get("/get-all-locations", location_controllers_1.getLocations);
 // Get one location

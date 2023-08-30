@@ -6,6 +6,8 @@ const authjwt_1 = require("../middleware/authjwt");
 const router = (0, express_1.Router)();
 // Register new equipment
 router.post("/create-equipment", authjwt_1.verifyToken, authjwt_1.isSuperUser_isAdmin, equipment_controllers_1.createEquipment);
+//creacion de unicacion bulk
+router.post("/bulk-create-equipments", equipment_controllers_1.bulkCreate);
 // Get all equipments
 router.get("/get-all-equipments", equipment_controllers_1.getAllEquipments);
 // Get one equipment

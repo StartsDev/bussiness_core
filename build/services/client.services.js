@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteClientServ = exports.updateClientServ = exports.getOneClientServ = exports.getClientsServ = exports.getClientServPag = exports.createClientServ = void 0;
 const Sequelize = require("sequelize");
@@ -6,6 +9,7 @@ const Client = require("../models/client");
 const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
+const axios_1 = __importDefault(require("axios"));
 const createClientServ = async (client) => {
     try {
         const findClient = await Client.findOne({ where: { nit: client.nit } });
@@ -31,7 +35,6 @@ exports.createClientServ = createClientServ;
 const getClientServPag = async (page, pageSize, businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
     try {
         let clients;
-        let totalCount = 0;
         //Filters
         let options = {};
         let optionh = {};
@@ -159,9 +162,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             };
         }
         // Filter none params
-        if (!page &&
-            !pageSize &&
-            !businessName &&
+        if (!businessName &&
             !nit &&
             !address &&
             !email &&
@@ -182,6 +183,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             options = { status: false };
         }
         const linearDatap = [];
+        console.log(options);
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
             clients = await Client.findAll({
@@ -193,20 +195,23 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 include: {
                     model: Headquarter,
                     where: optionh,
-                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
+                    required: false,
+                    //required: !!(headName || addressh || phoneh || emailh || isPrincipal),
                     as: "headquarters",
                     order: [["createdAt", "DESC"]],
                     attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                     include: {
                         model: Location,
-                        required: locationName,
+                        required: false,
+                        //required: locationName,
                         where: optionsl,
                         as: "locations",
                         order: [["createdAt", "DESC"]],
                         attributes: { exclude: ["createdAt", "updatedAt", "status"] },
                         include: {
                             model: Equipment,
-                            required: true,
+                            //required: true,
+                            required: false,
                             where: optionse,
                             as: "equipments",
                             order: [["createdAt", "DESC"]],
@@ -216,8 +221,10 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                         },
                     },
                 },
-                required: Object.values(options).some((value) => value !== null),
+                required: false,
+                //required: Object.values(options).some((value) => value !== null),
             });
+            console.log("DATA FIND ALL", clients);
             //Hide properties heardquartes and locations
             const propertiesToHide = ["locations"];
             const propToHideLoc = ["equipments"];
@@ -247,6 +254,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                 }
                 linearDatap.push(clientData);
             }
+            console.log("LINEAR", linearDatap);
             if (!clients) {
                 return {
                     msg: "No existen clientes registrados...",
@@ -256,22 +264,28 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             }
         }
         // Filter Equipment
-        if (name || serial || model || type || brand) {
+        /*    if (name || serial || model || type || brand) {
             // Hacer filter con linearDatap
-            const dataEquipments = linearDatap.filter((client) => client.headquarters.length > 0);
+            const dataEquipments = linearDatap.filter(
+              (client) => client.headquarters.length > 0
+            );
             return {
-                clients: dataEquipments,
-                totalCount: dataEquipments.length,
-                success: true,
+              clients: dataEquipments,
+              totalCount: dataEquipments.length,
+              success: true,
             };
-        }
-        else {
+          } else {
             return {
-                clients: linearDatap,
-                totalCount: clients.length,
-                success: true,
+              clients: linearDatap,
+              totalCount: clients.length,
+              success: true,
             };
-        }
+          } */
+        return {
+            clients: linearDatap,
+            totalCount: clients.length,
+            success: true,
+        };
     }
     catch (e) {
         throw new Error(e);
@@ -564,13 +578,13 @@ const getOneClientServ = async (client) => {
                             required: true,
                         },
                     },
-                }
-            ]
+                },
+            ],
         });
         if (!findClient) {
             return {
                 msg: "Este cliente no existe",
-                success: false
+                success: false,
             };
         }
         return {
@@ -584,14 +598,41 @@ const getOneClientServ = async (client) => {
 };
 exports.getOneClientServ = getOneClientServ;
 const updateClientServ = async (id, cli) => {
+    const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+    let errorUsers = [];
     try {
+        //Micro de auth
+        //const baseUrlCient = `${URL}/user/update-user`;
+        const baseUrlPacth = `${URL}/user/update-user`;
+        const { businessName, nit, address, email, phone, user_app } = cli;
         const clientFound = await Client.findOne({ where: { id } });
         if (!clientFound) {
             return {
                 msg: "Cliente no encontrado",
+                success: false
             };
         }
-        const [updateClient] = await Client.update(cli, {
+        // verificar que el role_name sea diferente de cliente y retorne un error
+        if (user_app.role_name !== "Cliente") {
+            return {
+                msg: "El rol debe ser Cliente",
+                success: false
+            };
+        }
+        // Validar de que el user_id que recibe user_app exista y que tenga rol de cliente
+        // Validar que que el rol_id sea de tipo Cliente
+        const clientData = clientFound.get({ plain: true });
+        const userArray = clientData.user_app;
+        //filtrar antes de pushear
+        userArray.push(user_app);
+        const [updateClient] = await Client.update({
+            businessName,
+            nit,
+            address,
+            email,
+            phone,
+            user_app: userArray,
+        }, {
             where: {
                 id,
             },
@@ -603,11 +644,35 @@ const updateClientServ = async (id, cli) => {
                 success: false,
             };
         }
+        // Actualizacion del usuario llamando al micro de aut
+        if (userArray.length > 0) {
+            for (const user of userArray) {
+                if (user.role_name === "Cliente") {
+                    try {
+                        // Llamar al end-poin que hace el pacth de usuarios
+                        const { data } = await axios_1.default.patch(`${baseUrlPacth}/${user.user_id}`, {
+                            clientId: clientData.id
+                        });
+                        console.log(data);
+                    }
+                    catch (error) {
+                        errorUsers.push(error);
+                    }
+                }
+                else {
+                    return {
+                        msg: `El usuario con id ${user.user_id} no es cliente`,
+                        success: false
+                    };
+                }
+            }
+        }
         const client = await Client.findOne({ where: { id } });
         return {
             msg: "Cliente actualizado con exito...",
             client,
             success: true,
+            usersErrors: errorUsers
         };
     }
     catch (e) {

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteLocationServ = exports.updateLocationServ = exports.allLocationsHeadServ = exports.getOneLocationServ = exports.getLocationsServ = exports.getLocationServPag = exports.createLocationServ = void 0;
+exports.bulkCreateLocations = exports.deleteLocationServ = exports.updateLocationServ = exports.allLocationsHeadServ = exports.getOneLocationServ = exports.getLocationsServ = exports.getLocationServPag = exports.createLocationServ = void 0;
+const bulkCreate_1 = require("../utils/bulkCreate");
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
@@ -433,3 +434,17 @@ const deleteLocationServ = async (id) => {
     }
 };
 exports.deleteLocationServ = deleteLocationServ;
+const bulkCreateLocations = async (data) => {
+    try {
+        await (0, bulkCreate_1.bulkCreatefunction)(Location, data);
+        return 'Ubicaciones Creados';
+    }
+    catch (error) {
+        console.log(error);
+        return {
+            message: 'hubo un error en la creacion',
+            success: false,
+        };
+    }
+};
+exports.bulkCreateLocations = bulkCreateLocations;

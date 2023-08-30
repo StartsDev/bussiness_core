@@ -13,14 +13,15 @@ class Client extends sequelize_1.Model {
     city;
     contact;
     status;
+    user_app;
     static associate(quotations) {
         // Client - Quotations
         Client.hasMany(quotations, {
-            foreignKey: 'clientId',
-            as: 'quotations',
+            foreignKey: "clientId",
+            as: "quotations",
         });
         quotations.belongsTo(Client, {
-            foreignKey: 'clientId',
+            foreignKey: "clientId",
         });
     }
 }
@@ -62,6 +63,10 @@ Client.init({
     status: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
+    },
+    user_app: {
+        type: DataTypes.JSON,
+        defaultValue: [], // Default value can be an empty array
     },
 }, {
     sequelize,

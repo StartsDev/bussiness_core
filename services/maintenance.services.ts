@@ -1,10 +1,37 @@
-import { StatusOption } from "./../interfaces/maintenance.interface";
+import {
+  StatusOption,
+  MaintenanceAttributes,
+} from "./../interfaces/maintenance.interface";
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
 
+// Transform data maintenance format function
+const transObjMaintenance = (arr: any[]): any[] => {
+  const linearDatap: any[] = [];
+  for (const maintenance of arr) {
+    const maintData = maintenance.get({ plain: true });
+    const equipment = maintenance.Equipment;
+    const location = equipment.Location;
+    const headquarter = location.Headquarter;
+    const client = headquarter.Client;
+
+    maintData.equipment = equipment.get({ plain: true });
+    maintData.location = location.get({ plain: true });
+    maintData.headquarter = headquarter.get({ plain: true });
+    maintData.client = client.get({ plain: true });
+
+    delete maintData.Equipment;
+    delete maintData.equipment.Location;
+    delete maintData.location.Headquarter;
+    delete maintData.headquarter.Client;
+
+    linearDatap.push(maintData);
+  }
+  return linearDatap;
+};
 // Create a manteinance
 const createMaintenanceServ = async (maint: any) => {
   try {
@@ -107,11 +134,11 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
-// Validation quantiy maintenances status "En proceso"
+    // Validation quantiy maintenances status "En proceso"
     const maintCount = await Maintenance.count({
       where: {
         delete: false,
-        "tech.techId":techId,
+        "tech.techId": techId,
         status: StatusOption.inProcess,
       },
     });
@@ -122,7 +149,7 @@ const createMaintenanceServ = async (maint: any) => {
         success: false,
       };
     }
-    
+
     const maintenance = await Maintenance.create({
       activities,
       voltage_on_L1L2,
@@ -218,10 +245,16 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
           },
         ],
       });
-      const totalCount = await Maintenance.count({ where: { delete: false } });
+      if (!maintenances) {
+        return {
+          msg: "No hay mantenimientos registrados...",
+          success: false,
+        };
+      }
+      const maintenancesFormat = transObjMaintenance(maintenances);
       return {
-        maintenances,
-        totalCount,
+        maintenances: maintenancesFormat,
+        totalCount: maintenancesFormat.length,
         success: true,
       };
     } else {
@@ -260,10 +293,16 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
           },
         ],
       });
-      const totalCount = await Maintenance.count({ where: { delete: false } });
+      if (!maintenances) {
+        return {
+          msg: "No hay mantenimientos registrados...",
+          success: false,
+        };
+      }
+      const maintenancesFormat = transObjMaintenance(maintenances);
       return {
-        maintenances,
-        totalCount,
+        maintenances: maintenancesFormat,
+        totalCount: maintenances.length,
         success: true,
       };
     }
@@ -273,9 +312,9 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
   }
 };
 
-// Get maintenances by tech (Home)
-const getMaintByTechServ = async (
-  tech: any,
+// Get maintenances by user (tech-client) (Home)
+const getMaintByUserServ = async (
+  user: any,
   page?: number,
   pageSize?: number
 ) => {
@@ -286,7 +325,10 @@ const getMaintByTechServ = async (
       maintenanceTech = await Maintenance.findAll({
         offset,
         limit: pageSize,
-        where: { "tech.techId": tech.techId, delete: false },
+        where:
+        user.role === "Tecnico"
+            ? { "tech.techId": user.techId, delete: false }
+            : { customerId: user.techId, delete: false },
         attributes: { exclude: ["updatedAt", "tech"] },
         order: [["createdAt", "DESC"]],
         include: [
@@ -326,15 +368,18 @@ const getMaintByTechServ = async (
           success: false,
         };
       }
-      const totalCount = await Maintenance.count({ where: { delete: false } });
+      const maintenanceUser = transObjMaintenance(maintenanceTech);
       return {
-        maintenanceTech,
-        totalCount,
+        maintenanceUser,
+        totalCount: maintenanceUser.length,
         success: true,
       };
     } else {
       maintenanceTech = await Maintenance.findAll({
-        where: { "tech.techId": tech.techId, delete: false },
+        where:
+        user.role === "Tecnico"
+            ? { "tech.techId": user.techId, delete: false }
+            : { customerId: user.techId, delete: false },
         order: [["createdAt", "DESC"]],
         attributes: { exclude: ["createdAt", "updatedAt", "tech"] },
         include: [
@@ -374,101 +419,13 @@ const getMaintByTechServ = async (
           success: false,
         };
       }
-      const totalCount = await Maintenance.count({ where: { delete: false } });
+      const maintenanceUser = transObjMaintenance(maintenanceTech);
       return {
-        maintenanceTech,
-        totalCount,
+        maintenanceUser,
+        totalCount: maintenanceUser.length,
         success: true,
       };
     }
-  } catch (error) {
-    throw new Error(error as string);
-  }
-};
-
-// Get maintenance by client
-const getMaintByClientServ = async (client: any) => {
-  const linearDatap: any[] = [];
-  try {
-    const clientFound = await Client.findOne({
-      where: { id: client.customId },
-    });
-    if (!clientFound) {
-      return {
-        msg: "El cliente no esta registrado...",
-        success: false,
-      };
-    }
-    const maintClient = await Maintenance.findAll({
-      where: { customerId: clientFound.dataValues.id },
-      order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["createdAt", "updatedAt", "delete"] },
-      include: [
-        {
-          model: Equipment,
-          attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
-          include: [
-            {
-              model: Location,
-              attributes: {
-                exclude: ["id", "createdAt", "updatedAt", "status"],
-              },
-              include: [
-                {
-                  model: Headquarter,
-                  attributes: {
-                    exclude: ["id", "createdAt", "updatedAt", "status"],
-                  },
-                  include: [
-                    {
-                      model: Client,
-                      attributes: {
-                        exclude: ["id", "createdAt", "updatedAt", "status"],
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    });
-    if (!maintClient) {
-      return {
-        msg: "No hay mantenimientos registrados para este cliente...",
-        success: false,
-      };
-    }
-
-     // Iteration maintenances array and add format response
-     for (const maintenance of maintClient) {
-    
-      const maintData = maintenance.get({ plain: true });
-      const equipment = maintenance.Equipment;
-      const location = equipment.Location;
-      const headquarter = location.Headquarter;
-      const client = headquarter.Client;
-      
-      maintData.equipment = equipment.get({ plain: true });
-      maintData.location = location.get({ plain : true});
-      maintData.headquarter = headquarter.get({ plain:true });
-      maintData.client = client.get({ plain: true});
-
-      delete maintData.Equipment;
-      delete maintData.equipment.Location;
-      delete maintData.location.Headquarter;
-      delete maintData.headquarter.Client;
-      
-      linearDatap.push(maintData);
-
-    }
-    
-    return {
-      maintClient: linearDatap,
-      numItmes : linearDatap.length,
-      success: true,
-    };
   } catch (error) {
     throw new Error(error as string);
   }
@@ -641,7 +598,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
       success: true,
     };
   } catch (e) {
-    console.log(e)
+    console.log(e);
     throw new Error(e as string);
   }
 };
@@ -694,8 +651,7 @@ const deleteMaintenanceServ = async (id: any) => {
 export {
   createMaintenanceServ,
   getMaintenancesServ,
-  getMaintByTechServ,
-  getMaintByClientServ,
+  getMaintByUserServ,
   getMainByEquipment,
   getMaintByIdServ,
   updateMaintenanceServ,

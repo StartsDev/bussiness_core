@@ -2,8 +2,7 @@ import { Request, Response } from "express";
 import {
   createMaintenanceServ,
   getMaintenancesServ,
-  getMaintByTechServ,
-  getMaintByClientServ,
+  getMaintByUserServ,
   getMainByEquipment,
   getMaintByIdServ,
   updateMaintenanceServ,
@@ -49,41 +48,33 @@ const getMaintenances = async (req: Request, res: Response) => {
   }
 };
 
-// Get all maintenances by tech (home)
-const getMaintenanceTech = async (req: Request, res: Response) => {
+// Get all maintenances by user (tech-clients) (home)
+const getMaintenanceUser = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
     const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
 
-    const { maintenanceTech, totalCount } = await getMaintByTechServ(
+    const { maintenanceUser, totalCount } = await getMaintByUserServ(
       req.body,
       page,
       pageSize
     );
     if (!page && !pageSize) {
       res.status(200).json({
-        maintenanceTech,
+        maintenanceUser,
         numItmes: totalCount,
       });
     } else {
-      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-      res.status(200).json({
-        maintenanceTech,
-        numItmes: totalCount,
-        currentPage: page,
-        totalPages,
-      });
+      if (totalCount) {
+        const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+        res.status(200).json({
+          maintenanceUser,
+          numItmes: totalCount,
+          currentPage: page,
+          totalPages,
+        });
+      }
     }
-  } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message });
-  }
-};
-
-// Get all maintenances by client
-const getMaintenanceClient = async (req: Request, res: Response) => {
-  try {
-    const maintenances = await getMaintByClientServ(req.params);
-    res.status(200).json(maintenances);
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
   }
@@ -133,8 +124,7 @@ const deleteMaintenance = async (req: Request, res: Response) => {
 export {
   createMaintenance,
   getMaintenances,
-  getMaintenanceTech,
-  getMaintenanceClient,
+  getMaintenanceUser,
   getMaintenanceEquipment,
   getMaintenanceById,
   updateMaintenance,

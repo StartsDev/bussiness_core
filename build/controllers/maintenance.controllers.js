@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMaintenance = exports.updateMaintenance = exports.getMaintenanceById = exports.getMaintenanceEquipment = exports.getMaintenanceClient = exports.getMaintenanceTech = exports.getMaintenances = exports.createMaintenance = void 0;
+exports.deleteMaintenance = exports.updateMaintenance = exports.getMaintenanceById = exports.getMaintenanceEquipment = exports.getMaintenanceUser = exports.getMaintenances = exports.createMaintenance = void 0;
 const maintenance_services_1 = require("../services/maintenance.services");
 //Register new maintenance
 const createMaintenance = async (req, res) => {
@@ -42,26 +42,28 @@ const getMaintenances = async (req, res) => {
     }
 };
 exports.getMaintenances = getMaintenances;
-// Get all maintenances by tech (home)
-const getMaintenanceTech = async (req, res) => {
+// Get all maintenances by user (tech-clients) (home)
+const getMaintenanceUser = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { maintenanceTech, totalCount } = await (0, maintenance_services_1.getMaintByTechServ)(req.body, page, pageSize);
+        const { maintenanceUser, totalCount } = await (0, maintenance_services_1.getMaintByUserServ)(req.body, page, pageSize);
         if (!page && !pageSize) {
             res.status(200).json({
-                maintenanceTech,
+                maintenanceUser,
                 numItmes: totalCount,
             });
         }
         else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-            res.status(200).json({
-                maintenanceTech,
-                numItmes: totalCount,
-                currentPage: page,
-                totalPages,
-            });
+            if (totalCount) {
+                const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+                res.status(200).json({
+                    maintenanceUser,
+                    numItmes: totalCount,
+                    currentPage: page,
+                    totalPages,
+                });
+            }
         }
     }
     catch (error) {
@@ -69,19 +71,7 @@ const getMaintenanceTech = async (req, res) => {
             res.status(400).json({ error: error.message });
     }
 };
-exports.getMaintenanceTech = getMaintenanceTech;
-// Get all maintenances by client
-const getMaintenanceClient = async (req, res) => {
-    try {
-        const maintclient = await (0, maintenance_services_1.getMaintByClientServ)(req.params);
-        res.status(200).json(maintclient);
-    }
-    catch (error) {
-        if (error instanceof Error)
-            res.status(400).json({ error: error.message });
-    }
-};
-exports.getMaintenanceClient = getMaintenanceClient;
+exports.getMaintenanceUser = getMaintenanceUser;
 // Get all maintenances by equipment
 const getMaintenanceEquipment = async (req, res) => {
     try {
