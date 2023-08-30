@@ -7,6 +7,24 @@ const Location = require("../models/location");
 const Equipment = require("../models/equipment");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+// Transform data equipment format function
+const transObjEquipment = (arr) => {
+    const linearDatap = [];
+    for (const equipment of arr) {
+        const equipmentData = equipment.get({ plain: true });
+        const location = equipment.Location;
+        const headquarter = location.Headquarter;
+        const client = headquarter.Client;
+        equipmentData.location = location.get({ plain: true });
+        equipmentData.headquarter = headquarter.get({ plain: true });
+        equipmentData.client = client.get({ plain: true });
+        delete equipmentData.Location;
+        delete equipmentData.location.Headquarter;
+        delete equipmentData.headquarter.Client;
+        linearDatap.push(equipmentData);
+    }
+    return linearDatap;
+};
 const newEquipmentServ = async (equip) => {
     try {
         const { name, description, serial, model, type, brand, locationId } = equip;
@@ -110,12 +128,10 @@ exports.newEquipmentServ = newEquipmentServ;
 const getEquipmentServ = async (locationName, headName, businessName) => {
     try {
         // Options filter where clausule and counter
-        let totalCount = 0;
         let optionl = {};
         let optionh = {};
         let optionsc = {};
         let options = {};
-        const linearDatap = [];
         //Validation query params
         if (locationName != undefined) {
             optionl = {
@@ -146,20 +162,47 @@ const getEquipmentServ = async (locationName, headName, businessName) => {
                 {
                     model: Location,
                     where: optionl,
-                    attributes: { exclude: ["createdAt", "updatedAt", "status", "description", "headquarterId"] },
+                    attributes: {
+                        exclude: [
+                            "createdAt",
+                            "updatedAt",
+                            "status",
+                            "description",
+                            "headquarterId",
+                        ],
+                    },
                     include: [
                         {
                             model: Headquarter,
                             where: optionh,
                             attributes: {
-                                exclude: ["createdAt", "updatedAt", "clientId", "status", "email", "phone", "address", "isPrincipal"],
+                                exclude: [
+                                    "createdAt",
+                                    "updatedAt",
+                                    "clientId",
+                                    "status",
+                                    "email",
+                                    "phone",
+                                    "address",
+                                    "isPrincipal",
+                                ],
                             },
                             include: [
                                 {
                                     model: Client,
                                     where: optionsc,
                                     attributes: {
-                                        exclude: ["createdAt", "updatedAt", "status", "nit", "address", "email", "phone", "city", "contact"],
+                                        exclude: [
+                                            "createdAt",
+                                            "updatedAt",
+                                            "status",
+                                            "nit",
+                                            "address",
+                                            "email",
+                                            "phone",
+                                            "city",
+                                            "contact",
+                                        ],
                                     },
                                 },
                             ],
@@ -168,48 +211,17 @@ const getEquipmentServ = async (locationName, headName, businessName) => {
                 },
             ],
         });
-        // Iteration equipments array and add format response
-        for (const equipment of equipments) {
-            const equipmentData = equipment.get({ plain: true });
-            const location = equipment.Location;
-            const headquarter = location.Headquarter;
-            const client = headquarter.Client;
-            equipmentData.location = location.get({ plain: true });
-            equipmentData.headquarter = headquarter.get({ plain: true });
-            equipmentData.client = client.get({ plain: true });
-            delete equipmentData.Location;
-            delete equipmentData.location.Headquarter;
-            delete equipmentData.headquarter.Client;
-            linearDatap.push(equipmentData);
+        if (!equipments) {
+            return {
+                msg: "Equipos no registrados...",
+                success: false,
+            };
         }
-        // Counter data validation query cases
-        totalCount = await Equipment.count({
-            where: options,
-            include: [
-                {
-                    model: Location,
-                    where: optionl,
-                    required: true,
-                    include: [
-                        {
-                            model: Headquarter,
-                            where: optionh,
-                            required: true,
-                            include: [
-                                {
-                                    model: Client,
-                                    where: optionsc,
-                                    required: true
-                                }
-                            ]
-                        }
-                    ]
-                },
-            ],
-        });
+        // Format data equipment
+        const equipmentsF = transObjEquipment(equipments);
         return {
-            equipments: linearDatap,
-            totalCount,
+            equipments: equipmentsF,
+            totalCount: equipmentsF.length,
             success: true,
         };
     }
@@ -310,12 +322,16 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
             });
             if (!equipLocation) {
                 return {
-                    msg: "Equipos no hay con este espacio",
+                    msg: "Equipos no hay con este espacio...",
                     succes: false,
                 };
             }
-            const totalCount = await Equipment.count({ where: { status: false } });
-            return { equipLocation, totalCount, success: true };
+            const equipLoc = transObjEquipment(equipLocation);
+            return {
+                equipLocation: equipLoc,
+                totalCount: equipLoc.length,
+                success: true,
+            };
         }
         else {
             equipLocation = await Equipment.findAll({
@@ -353,12 +369,16 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
             });
             if (!equipLocation) {
                 return {
-                    msg: "Equipos no hay con este espacio",
+                    msg: "Equipos no hay con este espacio...",
                     success: false,
                 };
             }
-            const totalCount = await Equipment.count({ where: { status: false } });
-            return { equipLocation, totalCount, success: true };
+            const equipLoc = transObjEquipment(equipLocation);
+            return {
+                equipLocation: equipLoc,
+                totalCount: equipLoc.length,
+                success: true,
+            };
         }
     }
     catch (e) {
@@ -439,12 +459,12 @@ exports.deleteEquipmentServ = deleteEquipmentServ;
 const bulkCreateEquipments = async (data) => {
     try {
         await (0, bulkCreate_1.bulkCreatefunction)(Equipment, data);
-        return 'Equipos Creados';
+        return "Equipos Creados";
     }
     catch (error) {
         console.log(error);
         return {
-            message: 'hubo un error en la creacion',
+            message: "Hubo un error en la creacion",
             success: false,
         };
     }

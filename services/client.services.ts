@@ -670,33 +670,29 @@ const getOneClientServ = async (client: any) => {
 
 const updateClientServ = async (id: any, cli: any) => {
   const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
-  let errorUsers =[];
+  let errorUsers = [];
   try {
     //Micro de auth
-    //const baseUrlCient = `${URL}/user/update-user`;
     const baseUrlPacth = `${URL}/user/update-user`;
     const { businessName, nit, address, email, phone, user_app } = cli;
     const clientFound = await Client.findOne({ where: { id } });
     if (!clientFound) {
       return {
         msg: "Cliente no encontrado",
-        success: false
+        success: false,
       };
     }
 
-    // verificar que el role_name sea diferente de cliente y retorne un error
-    if(user_app.role_name !== "Cliente"){
+    // verificar que el role_name sea diferente de cliente
+    if (user_app.role_name !== "Cliente") {
       return {
-        msg:"El rol debe ser Cliente",
-        success: false
-      }
+        msg: "El rol debe ser Cliente...",
+        success: false,
+      };
     }
-    // Validar de que el user_id que recibe user_app exista y que tenga rol de cliente
-    // Validar que que el rol_id sea de tipo Cliente
-    const clientData = clientFound.get({ plain: true }); 
-    const userArray = clientData.user_app; 
-  
-    //filtrar antes de pushear
+
+    const clientData = clientFound.get({ plain: true });
+    const userArray = clientData.user_app;
     userArray.push(user_app);
 
     const [updateClient] = await Client.update(
@@ -714,35 +710,25 @@ const updateClientServ = async (id: any, cli: any) => {
         },
         returning: true,
       }
-    ); 
+    );
     if (updateClient <= 0) {
       return {
         msg: "Actualización no realizada...",
         success: false,
       };
-    } 
+    }
 
     // Actualizacion del usuario llamando al micro de aut
-    if(userArray.length > 0){
-      for(const user of userArray){
-        if(user.role_name === "Cliente"){
-          
-          try{
-            // Llamar al end-poin que hace el pacth de usuarios
-            const {data}: AxiosResponse<any> = await axios.patch(`${baseUrlPacth}/${user.user_id}`,{
-              clientId : clientData.id
-            });
-            console.log(data);
-          }catch(error){
-            errorUsers.push(error);
-          }
-        }else{
-          return {
-            msg:`El usuario con id ${user.user_id} no es cliente`,
-            success: false
-          }
+    if (userArray.length > 0) {
+      for (const { user_id } of userArray) {
+        try {
+          // Llamar al end-poin que hace el pacth de usuarios
+          await axios.patch(`${baseUrlPacth}/${user_id}`, {
+            clientId: clientData.id,
+          });
+        } catch (error) {
+          errorUsers.push(error);
         }
-     
       }
     }
     const client = await Client.findOne({ where: { id } });
@@ -750,9 +736,8 @@ const updateClientServ = async (id: any, cli: any) => {
       msg: "Cliente actualizado con exito...",
       client,
       success: true,
-      usersErrors : errorUsers
+      usersErrors: errorUsers,
     };
-
   } catch (e) {
     throw new Error(e as string);
   }

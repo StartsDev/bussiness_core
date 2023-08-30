@@ -59,13 +59,15 @@ const getEquipmentsLocation = async (req, res) => {
             });
         }
         else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-            res.status(200).json({
-                equipLocation,
-                numItmes: totalCount,
-                currentPage: page,
-                totalPages,
-            });
+            if (totalCount) {
+                const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+                res.status(200).json({
+                    equipLocation,
+                    numItmes: totalCount,
+                    currentPage: page,
+                    totalPages,
+                });
+            }
         }
     }
     catch (error) {

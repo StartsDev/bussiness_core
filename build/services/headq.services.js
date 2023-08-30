@@ -50,10 +50,15 @@ const getHeadServ = async (page, pageSize) => {
                     },
                 ],
             });
-            const totalCount = await Headquarter.count({ where: { status: false } });
+            if (!headquarters) {
+                return {
+                    msg: "No hay sedes registradas...",
+                    success: false,
+                };
+            }
             return {
                 headquarters,
-                totalCount,
+                totalCount: headquarters.length,
                 success: true,
             };
         }
@@ -69,10 +74,15 @@ const getHeadServ = async (page, pageSize) => {
                     },
                 ],
             });
-            const totalCount = await Headquarter.count({ where: { status: false } });
+            if (!headquarters) {
+                return {
+                    msg: "No hay sedes registradas...",
+                    success: false,
+                };
+            }
             return {
                 headquarters,
-                totalCount,
+                totalCount: headquarters.length,
                 success: true,
             };
         }
@@ -125,10 +135,9 @@ const allHeadClientServ = async (user, page, pageSize) => {
                     success: false,
                 };
             }
-            const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
             return {
                 hedClient,
-                totalCount,
+                totalCount: hedClient.length,
                 success: true,
             };
         }
@@ -150,10 +159,9 @@ const allHeadClientServ = async (user, page, pageSize) => {
                     success: false,
                 };
             }
-            const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
             return {
                 hedClient,
-                totalCount,
+                totalCount: hedClient.length,
                 success: true,
             };
         }

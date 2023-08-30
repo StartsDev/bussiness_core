@@ -69,13 +69,15 @@ const getEquipmentsLocation = async (req: Request, res: Response) => {
         numItmes: totalCount,
       });
     } else {
-      const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
-      res.status(200).json({
-        equipLocation,
-        numItmes: totalCount,
-        currentPage: page,
-        totalPages,
-      });
+      if (totalCount) {
+        const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+        res.status(200).json({
+          equipLocation,
+          numItmes: totalCount,
+          currentPage: page,
+          totalPages,
+        });
+      }
     }
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });
@@ -118,5 +120,5 @@ export {
   getEquipmentsLocation,
   editEquipment,
   deleteEquipment,
-  bulkCreate
+  bulkCreate,
 };

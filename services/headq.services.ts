@@ -48,10 +48,15 @@ const getHeadServ = async (page?: number, pageSize?: number) => {
           },
         ],
       });
-      const totalCount = await Headquarter.count({ where: { status: false } });
+      if (!headquarters) {
+        return {
+          msg: "No hay sedes registradas...",
+          success: false,
+        };
+      }
       return {
         headquarters,
-        totalCount,
+        totalCount: headquarters.length,
         success: true,
       };
     } else {
@@ -66,11 +71,15 @@ const getHeadServ = async (page?: number, pageSize?: number) => {
           },
         ],
       });
-      const totalCount = await Headquarter.count({ where: { status: false } });
-      
+      if (!headquarters) {
+        return {
+          msg: "No hay sedes registradas...",
+          success: false,
+        };
+      }
       return {
         headquarters,
-        totalCount,
+        totalCount: headquarters.length,
         success: true,
       };
     }
@@ -125,11 +134,10 @@ const allHeadClientServ = async (
           success: false,
         };
       }
-      const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
 
       return {
         hedClient,
-        totalCount,
+        totalCount: hedClient.length,
         success: true,
       };
     } else {
@@ -150,11 +158,9 @@ const allHeadClientServ = async (
           success: false,
         };
       }
-      const totalCount = await Headquarter.count({ where: { status: false, clientId: user } });
-
       return {
         hedClient,
-        totalCount,
+        totalCount: hedClient.length,
         success: true,
       };
     }
