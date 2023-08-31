@@ -14,7 +14,7 @@ const sequelize = new Sequelize(DATABASE_URL_CORE, {
       require: true,
       rejectUnauthorized: false,
     },
-  },   
+  },  
 });
 
 sequelize

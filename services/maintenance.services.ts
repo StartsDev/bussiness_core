@@ -608,7 +608,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
       };
     }
     // Update maintenance customer sign by client
-    if (rolName === "Cliente" && maintFound.dataValues.customer_sign.length > 0) {
+    if (rolName === "Cliente" && maintFound.dataValues.tech_sign.length > 0) {
       const updateMaintenance = await Maintenance.update(
         { customer_sign: customer_sign },
         {
