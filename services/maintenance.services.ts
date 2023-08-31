@@ -123,7 +123,7 @@ const createMaintenanceServ = async (maint: any) => {
       phone: client.dataValues.phone,
     };
 
-    const findMaintenance = await Maintenance.findOne({
+   /*  const findMaintenance = await Maintenance.findOne({
       where: { service_hour },
     });
 
@@ -132,7 +132,7 @@ const createMaintenanceServ = async (maint: any) => {
         msg: "Ya existe un servicio registrado a esa hora...",
         success: false,
       };
-    }
+    } */
 
     // Validation quantiy maintenances status "En proceso"
     const maintCount = await Maintenance.count({
@@ -212,7 +212,7 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
         offset,
         limit: pageSize,
         where: { delete: false },
-        attributes: { exclude: ["updatedAt"] },
+        attributes: { exclude: ["updatedAt", "delete"] },
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -260,7 +260,7 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
     } else {
       maintenances = await Maintenance.findAll({
         where: { delete: false },
-        attributes: { exclude: ["updatedAt"] },
+        attributes: { exclude: ["updatedAt", "delete"] },
         order: [["createdAt", "DESC"]],
         include: [
           {

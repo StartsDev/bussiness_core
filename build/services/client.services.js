@@ -228,6 +228,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             //Hide properties heardquartes and locations
             const propertiesToHide = ["locations"];
             const propToHideLoc = ["equipments"];
+            const allEquipments = [];
             // Customization data clients (serialization) hide some properties
             for (const client of clients) {
                 const clientData = client.get({ plain: true });
@@ -246,7 +247,8 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                         clientData.equipments = [];
                         for (const equipment of location.equipments) {
                             const equipData = equipment.get({ plain: true });
-                            clientData.equipments.push(equipData);
+                            allEquipments.push(equipData);
+                            clientData.equipments = allEquipments;
                         }
                         clientData.locations.push(sanitizedObjectLoc);
                     }
@@ -293,6 +295,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
 };
 exports.getClientServPag = getClientServPag;
 const getClientsServ = async (businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
+    console.log('Hola');
     try {
         //Filters
         let options = {};
@@ -496,6 +499,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         //Hide properties heardquartes and locations
         const propertiesToHide = ["locations"];
         const propToHideLoc = ["equipments"];
+        const allEquipments = [];
         // Customization data clients (serialization) hide some properties
         for (const client of clients) {
             const clientData = client.get({ plain: true });
@@ -514,7 +518,8 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                     clientData.equipments = [];
                     for (const equipment of location.equipments) {
                         const equipData = equipment.get({ plain: true });
-                        clientData.equipments.push(equipData);
+                        allEquipments.push(equipData);
+                        clientData.equipments = allEquipments;
                     }
                     clientData.locations.push(sanitizedObjectLoc);
                 }
@@ -535,7 +540,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
         else {
             return {
                 clients: linearDatap,
-                totalCount: clients.length,
+                totalCount: linearDatap.length,
                 success: true,
             };
         }

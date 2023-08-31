@@ -48,6 +48,7 @@ const getMaintenances = async (req: Request, res: Response) => {
   }
 };
 
+
 // Get all maintenances by user (tech-clients) (home)
 const getMaintenanceUser = async (req: Request, res: Response) => {
   try {

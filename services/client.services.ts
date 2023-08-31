@@ -3,8 +3,7 @@ const Client = require("../models/client");
 const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
-import axios, { AxiosError, AxiosResponse } from "axios";
-import { Console } from "console";
+import axios from "axios";
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
@@ -261,6 +260,7 @@ const getClientServPag = async (
       //Hide properties heardquartes and locations
       const propertiesToHide = ["locations"];
       const propToHideLoc = ["equipments"];
+      const allEquipments = [];
 
       // Customization data clients (serialization) hide some properties
       for (const client of clients) {
@@ -280,7 +280,8 @@ const getClientServPag = async (
             clientData.equipments = [];
             for (const equipment of location.equipments) {
               const equipData = equipment.get({ plain: true });
-              clientData.equipments.push(equipData);
+              allEquipments.push(equipData);
+              clientData.equipments = allEquipments;
             }
             clientData.locations.push(sanitizedObjectLoc);
           }
@@ -345,6 +346,7 @@ const getClientsServ = async (
   type?: string,
   brand?: string
 ) => {
+  console.log('Hola')
   try {
     //Filters
     let options: any | undefined = {};
@@ -561,11 +563,11 @@ const getClientsServ = async (
         success: false,
       };
     }
-
     //Hide properties heardquartes and locations
     const propertiesToHide = ["locations"];
     const propToHideLoc = ["equipments"];
-
+    const allEquipments = [];
+   
     // Customization data clients (serialization) hide some properties
     for (const client of clients) {
       const clientData = client.get({ plain: true });
@@ -577,14 +579,15 @@ const getClientsServ = async (
         });
         clientData.locations = [];
         for (const location of headquarter.locations) {
-          const sanitizedObjectLoc = { ...location.get({ plain: true }) };
+           const sanitizedObjectLoc = { ...location.get({ plain: true }) };
           propToHideLoc.forEach((property) => {
             delete sanitizedObjectLoc[property];
-          });
+          }); 
           clientData.equipments = [];
           for (const equipment of location.equipments) {
             const equipData = equipment.get({ plain: true });
-            clientData.equipments.push(equipData);
+            allEquipments.push(equipData);
+            clientData.equipments = allEquipments;
           }
           clientData.locations.push(sanitizedObjectLoc);
         }
@@ -592,7 +595,6 @@ const getClientsServ = async (
       }
       linearDatap.push(clientData);
     }
-
     // Filter Equipment
     if (name || serial || model || type || brand) {
       // Hacer filter con linearDatap
@@ -606,8 +608,8 @@ const getClientsServ = async (
       };
     } else {
       return {
-        clients: linearDatap,
-        totalCount: clients.length,
+        clients:linearDatap,
+        totalCount: linearDatap.length,
         success: true,
       };
     }
