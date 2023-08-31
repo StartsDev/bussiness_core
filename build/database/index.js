@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
-const { DATABASE_URL } = process.env;
+const { DATABASE_URL_CORE } = process.env;
 const { Sequelize, DataTypes, Op } = require("sequelize");
 //para uso desplegado
-const sequelize = new Sequelize(DATABASE_URL, {
+const sequelize = new Sequelize(DATABASE_URL_CORE, {
     logging: false,
     native: false,
     dialectOptions: {

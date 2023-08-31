@@ -26,7 +26,7 @@ require("./models/product_services");
 dotenv.config();
 const app = express();
 
-const port = process.env.PORT || 7000;
+const port = process.env.PORTCORE || 7000;
 
 // Middlewares
 app.use(express.json());

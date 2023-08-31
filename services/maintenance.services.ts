@@ -123,7 +123,7 @@ const createMaintenanceServ = async (maint: any) => {
       phone: client.dataValues.phone,
     };
 
-   /*  const findMaintenance = await Maintenance.findOne({
+    /*  const findMaintenance = await Maintenance.findOne({
       where: { service_hour },
     });
 
@@ -326,7 +326,7 @@ const getMaintByUserServ = async (
         offset,
         limit: pageSize,
         where:
-        user.role === "Tecnico"
+          user.role === "Tecnico"
             ? { "tech.techId": user.techId, delete: false }
             : { customerId: user.techId, delete: false },
         attributes: { exclude: ["updatedAt", "tech"] },
@@ -377,7 +377,7 @@ const getMaintByUserServ = async (
     } else {
       maintenanceTech = await Maintenance.findAll({
         where:
-        user.role === "Tecnico"
+          user.role === "Tecnico"
             ? { "tech.techId": user.techId, delete: false }
             : { customerId: user.techId, delete: false },
         order: [["createdAt", "DESC"]],
@@ -507,96 +507,201 @@ const getMaintByIdServ = async (maint: any) => {
   }
 };
 
-// Update maintenance
+// Update maintenance 
 const updateMaintenanceServ = async (id: number, maint: any) => {
   try {
+    const {
+      activities,
+      voltage_on_L1L2,
+      voltage_on_L1L3,
+      voltage_on_L2L3,
+      voltage_control,
+      suction_pressure,
+      amp_engine_1,
+      amp_engine_2,
+      amp_engine_3,
+      amp_engine_4,
+      amp_engine_evap,
+      compressor_1_amp_L1,
+      compressor_1_amp_L2,
+      compressor_1_amp_L3,
+      compressor_2_amp_L1,
+      compressor_2_amp_L2,
+      compressor_2_amp_L3,
+      supply_temp,
+      return_temp,
+      water_in_temp,
+      water_out_temp,
+      sprinkler_state,
+      float_state,
+      discharge_pressure,
+      service_hour,
+      service_date,
+      customer_sign,
+      tech_sign,
+      customerId,
+      photos,
+      observations,
+      additional_remarks,
+      equipmentId,
+      rolName,
+    } = maint;
     // Validate maintenance
     const maintFound = await Maintenance.findOne({ where: { id } });
     if (!maintFound) {
       return {
-        msg: "Mantenimiento no válido",
+        msg: "Mantenimiento no válido...",
         success: false,
       };
     }
+
     // Validate Maintenance state & user autorization role
     if (
       maintFound.dataValues.status === "En proceso" &&
-      maint.rolName != "Tecnico" &&
-      maint.rolName != "Super_Usuario"
+      rolName != "Tecnico" &&
+      rolName != "Super_Usuario"
     ) {
       return {
-        msg: "El administrador no puede modificar un mantenimiento en proceso",
+        msg: "El administrador ni el cliente pueden modificar un mantenimiento en proceso...",
         success: false,
       };
     }
 
     if (
       maintFound.dataValues.status === "Completado" &&
-      maint.rolName != "Administrador" &&
-      maint.rolName != "Super_Usuario"
+      rolName != "Administrador" &&
+      rolName != "Super_Usuario" &&
+      rolName != "Cliente"
     ) {
       return {
-        msg: "El técnico no puede modificar un mantenimiento completado",
+        msg: "El técnico no puede modificar un mantenimiento completado...",
         success: false,
       };
     }
 
     if (maintFound.dataValues.status === "Confirmado") {
       return {
-        msg: "No es posible actualizar un mantenimiento confirmado",
+        msg: "No es posible actualizar un mantenimiento confirmado...",
         success: false,
       };
     }
 
     // Validate client
     const clientFound = await Client.findOne({
-      where: { id: maint.customerId },
+      where: { id: customerId },
     });
     if (!clientFound) {
       return {
-        msg: "Cliente no registado",
+        msg: "Cliente no registado...",
         success: false,
       };
     }
 
     // Validate equipment
     const equipFound = await Equipment.findOne({
-      where: { id: maint.equipmentId },
+      where: { id: equipmentId },
     });
     if (!equipFound) {
       return {
-        msg: "Equipo no registado",
+        msg: "Equipo no registado...",
         success: false,
       };
     }
-
-    // Update maintenance
-    const updateMaintenance = await Maintenance.update(maint, {
-      where: {
-        id,
-      },
-      returning: true,
-    });
-    if (updateMaintenance <= 0) {
+    // Update maintenance customer sign by client
+    if (rolName === "Cliente" && maintFound.dataValues.customer_sign.length > 0) {
+      const updateMaintenance = await Maintenance.update(
+        { customer_sign: customer_sign },
+        {
+          where: {
+            id,
+          },
+          returning: true,
+        }
+      );
+      if (updateMaintenance <= 0) {
+        return {
+          msg: "Actualización de firma no realizada...",
+          success: false,
+        };
+      }
+      // Return maintenace sign updated
+      const maintenance = await Maintenance.findOne({ where: { id } });
+      if (!updateMaintenance) {
+        return {
+          msg: "El mantenimiento no esta definido...",
+          success: false,
+        };
+      }
       return {
-        msg: "Actualización no realizada...",
-        success: false,
+        msg: "Firma actualizada...",
+        maintenance,
+        success: true,
       };
-    }
+    } else {
+      // Update maintenance other roles != Client
+      const updateMaintenance = await Maintenance.update(
+        {
+          activities,
+          voltage_on_L1L2,
+          voltage_on_L1L3,
+          voltage_on_L2L3,
+          voltage_control,
+          suction_pressure,
+          amp_engine_1,
+          amp_engine_2,
+          amp_engine_3,
+          amp_engine_4,
+          amp_engine_evap,
+          compressor_1_amp_L1,
+          compressor_1_amp_L2,
+          compressor_1_amp_L3,
+          compressor_2_amp_L1,
+          compressor_2_amp_L2,
+          compressor_2_amp_L3,
+          supply_temp,
+          return_temp,
+          water_in_temp,
+          water_out_temp,
+          sprinkler_state,
+          float_state,
+          discharge_pressure,
+          service_hour,
+          service_date,
+          tech_sign,
+          customerId,
+          photos,
+          observations,
+          additional_remarks,
+          equipmentId,
+        },
+        {
+          where: {
+            id,
+          },
+          returning: true,
+        }
+      );
+      if (updateMaintenance <= 0) {
+        return {
+          msg: "Actualización no realizada...",
+          success: false,
+        };
+      }
 
-    // Return maintenace updated
-    const maintenance = await Maintenance.findOne({ where: { id } });
-    if (!updateMaintenance) {
+      // Return maintenace updated
+      const maintenance = await Maintenance.findOne({ where: { id } });
+      if (!updateMaintenance) {
+        return {
+          msg: "Actualización no es correcta...",
+          success: false,
+        };
+      }
       return {
-        msg: "Actualización no es correcta",
-        success: false,
+        msg: "Mantenimiento actualizado...",
+        maintenance,
+        success: true,
       };
     }
-    return {
-      msg: "Mantenimiento actualizado...",
-      maintenance,
-      success: true,
-    };
   } catch (e) {
     console.log(e);
     throw new Error(e as string);

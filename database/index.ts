@@ -1,12 +1,12 @@
 "use strict";
 import dotenv from "dotenv";
 dotenv.config();
-const { DATABASE_URL } = process.env;
+const { DATABASE_URL_CORE } = process.env;
 
 const { Sequelize, DataTypes, Op } = require("sequelize");
 
 //para uso desplegado
-const sequelize = new Sequelize(DATABASE_URL, {
+const sequelize = new Sequelize(DATABASE_URL_CORE, {
   logging: false, // set to console.log to see the raw SQL queries
   native: false, // lets Sequelize know we can use pg-native for ~30% more speed
      dialectOptions: {
@@ -14,7 +14,7 @@ const sequelize = new Sequelize(DATABASE_URL, {
       require: true,
       rejectUnauthorized: false,
     },
-  },  
+  },   
 });
 
 sequelize

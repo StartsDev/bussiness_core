@@ -524,7 +524,7 @@ const getClientsServ = async (
           required: !!(headName || addressh || phoneh || emailh || isPrincipal),
           as: "headquarters",
           attributes: {
-            exclude: ["createdAt", "updatedAt", "status", "clientId"],
+            exclude: ["createdAt", "updatedAt", "status"],
           },
           include: {
             model: Location,
@@ -536,7 +536,6 @@ const getClientsServ = async (
                 "createdAt",
                 "updatedAt",
                 "status",
-                "headquarterId",
                 "description",
               ],
             },
@@ -544,7 +543,7 @@ const getClientsServ = async (
               model: Equipment,
               as: "equipments",
               attributes: {
-                exclude: ["createdAt", "updatedAt", "status", "locationId"],
+                exclude: ["createdAt", "updatedAt", "status"],
               },
               where: optionse,
               required: true,

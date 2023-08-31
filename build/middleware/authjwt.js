@@ -154,7 +154,8 @@ const isAdmin_isTech_isSuperU = async (req, res, next) => {
         }
         if (userData?.findUser?.Role?.role !== "Super_Usuario" &&
             userData?.findUser?.Role?.role !== "Administrador" &&
-            userData?.findUser?.Role?.role !== "Tecnico") {
+            userData?.findUser?.Role?.role !== "Tecnico" &&
+            userData?.findUser?.Role?.role !== "Cliente") {
             return res.status(401).json({ message: "Este rol no es permitido" });
         }
         req.body.rolName = userData.findUser.Role.role;

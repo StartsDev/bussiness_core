@@ -26,7 +26,7 @@ require("./models/quotation");
 require("./models/product_services");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const port = process.env.PORT || 7000;
+const port = process.env.PORTCORE || 7000;
 // Middlewares
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
