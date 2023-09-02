@@ -594,23 +594,23 @@ const getClientsServ = async (
         equipments: clientEquipments,
       };
     });
-          if (name || serial || model || type || brand) {
-        // Hacer filter con linearDatap
-        const dataEquipments = combinedResults.filter(
-          (client:any) => client.equipments.length > 0
-        );
-        return {
-          clients: dataEquipments,
-          totalCount: dataEquipments.length,
-          success: true,
-        };
-      } else {
-        return {
-          clients: combinedResults,
-          totalCount: combinedResults.length,
-          success: true,
-        };
-      } 
+    if (name || serial || model || type || brand) {
+      // Hacer filter con linearDatap
+      const dataEquipments = combinedResults.filter(
+        (client: any) => client.equipments.length > 0
+      );
+      return {
+        clients: dataEquipments,
+        totalCount: dataEquipments.length,
+        success: true,
+      };
+    } else {
+      return {
+        clients: combinedResults,
+        totalCount: combinedResults.length,
+        success: true,
+      };
+    }
   } catch (e) {
     throw new Error(e as string);
   }
@@ -618,49 +618,79 @@ const getClientsServ = async (
 
 const getOneClientServ = async (client: any) => {
   try {
-    const findClient = await Client.findOne({
+    const clientF = await Client.findOne({
       where: { id: client },
-      attributes: { exclude: ["updatedAt", "status"] },
-      include: [
-        {
-          model: Headquarter,
-          as: "headquarters",
-          attributes: {
-            exclude: ["createdAt", "updatedAt", "status"],
-          },
-          include: {
-            model: Location,
-            as: "locations",
-            attributes: {
-              exclude: [
-                "createdAt",
-                "updatedAt",
-                "status",
-                "headquarterId",
-                "description",
-              ],
-            },
-            include: {
-              model: Equipment,
-              as: "equipments",
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "status", "locationId"],
-              },
-              required: true,
-            },
-          },
-        },
+      attributes: [
+        "id",
+        "businessName",
+        "nit",
+        "address",
+        "email",
+        "phone",
+        "city",
+        "contact",
       ],
+      raw: true,
     });
-    if (!findClient) {
+
+    if (!clientF) {
       return {
-        msg: "Este cliente no existe",
+        msg: "El cliente no existe...",
         success: false,
       };
     }
+    // Obtén los resultados de Headquarter, Location y Equipment
+    const headquarters = await Headquarter.findAll({
+      where: { clientId: clientF.id },
+      attributes: [
+        "id",
+        "headName",
+        "address",
+        "email",
+        "phone",
+        "isPrincipal",
+        "clientId",
+      ],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
 
+    const locationIds = headquarters.map((hq: any) => hq.id);
+
+    const locations = await Location.findAll({
+      where: {
+        headquarterId: locationIds,
+      },
+
+      attributes: ["id", "locationName", "headquarterId"],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+
+    const equipment = await Equipment.findAll({
+      attributes: [
+        "id",
+        "name",
+        "description",
+        "serial",
+        "image",
+        "model",
+        "type",
+        "brand",
+        "locationId",
+      ],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+    // Objeto combinado con la información del cliente y sus relaciones
+    const combinedData = {
+      client: clientF,
+      headquarters: headquarters,
+      locations: locations,
+      equipments: equipment,
+    };
     return {
-      client: findClient,
+      client: combinedData,
       success: true,
     };
   } catch (e) {

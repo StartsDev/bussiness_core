@@ -539,48 +539,74 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
 exports.getClientsServ = getClientsServ;
 const getOneClientServ = async (client) => {
     try {
-        const findClient = await Client.findOne({
+        const clientF = await Client.findOne({
             where: { id: client },
-            attributes: { exclude: ["updatedAt", "status"] },
-            include: [
-                {
-                    model: Headquarter,
-                    as: "headquarters",
-                    attributes: {
-                        exclude: ["createdAt", "updatedAt", "status"],
-                    },
-                    include: {
-                        model: Location,
-                        as: "locations",
-                        attributes: {
-                            exclude: [
-                                "createdAt",
-                                "updatedAt",
-                                "status",
-                                "headquarterId",
-                                "description",
-                            ],
-                        },
-                        include: {
-                            model: Equipment,
-                            as: "equipments",
-                            attributes: {
-                                exclude: ["createdAt", "updatedAt", "status", "locationId"],
-                            },
-                            required: true,
-                        },
-                    },
-                },
+            attributes: [
+                "id",
+                "businessName",
+                "nit",
+                "address",
+                "email",
+                "phone",
+                "city",
+                "contact",
             ],
+            raw: true,
         });
-        if (!findClient) {
+        if (!clientF) {
             return {
-                msg: "Este cliente no existe",
+                msg: "El cliente no existe...",
                 success: false,
             };
         }
+        // Obtén los resultados de Headquarter, Location y Equipment
+        const headquarters = await Headquarter.findAll({
+            where: { clientId: clientF.id },
+            attributes: [
+                "id",
+                "headName",
+                "address",
+                "email",
+                "phone",
+                "isPrincipal",
+                "clientId",
+            ],
+            order: [["createdAt", "DESC"]],
+            raw: true,
+        });
+        const locationIds = headquarters.map((hq) => hq.id);
+        const locations = await Location.findAll({
+            where: {
+                headquarterId: locationIds,
+            },
+            attributes: ["id", "locationName", "headquarterId"],
+            order: [["createdAt", "DESC"]],
+            raw: true,
+        });
+        const equipment = await Equipment.findAll({
+            attributes: [
+                "id",
+                "name",
+                "description",
+                "serial",
+                "image",
+                "model",
+                "type",
+                "brand",
+                "locationId",
+            ],
+            order: [["createdAt", "DESC"]],
+            raw: true,
+        });
+        // Objeto combinado con la información del cliente y sus relaciones
+        const combinedData = {
+            client: clientF,
+            headquarters: headquarters,
+            locations: locations,
+            equipments: equipment,
+        };
         return {
-            client: findClient,
+            client: combinedData,
             success: true,
         };
     }
