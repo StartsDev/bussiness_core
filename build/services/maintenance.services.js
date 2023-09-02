@@ -57,21 +57,21 @@ const createMaintenanceServ = async (maint) => {
                 },
             },
         });
-        if (!(client &&
-            client.dataValues.headquarters.length > 0 &&
-            client.dataValues.headquarters[0].locations.length > 0)) {
+        const clientData = client.get({ plain: true });
+        if (!(clientData &&
+            clientData.headquarters.length > 0)) {
             return {
-                msg: "EL equipo no le pertenece al cliente...",
+                msg: "El equipo no le pertenece al cliente...",
                 success: false,
             };
         }
         const customer = {
-            id: client.dataValues.id,
-            businessName: client.dataValues.businessName,
-            nit: client.dataValues.nit,
-            address: client.dataValues.address,
-            email: client.dataValues.email,
-            phone: client.dataValues.phone,
+            id: clientData.id,
+            businessName: clientData.businessName,
+            nit: clientData.nit,
+            address: clientData.address,
+            email: clientData.email,
+            phone: clientData.phone,
         };
         /*  const findMaintenance = await Maintenance.findOne({
           where: { service_hour },
@@ -454,10 +454,10 @@ const getMaintByIdServ = async (maint) => {
     }
 };
 exports.getMaintByIdServ = getMaintByIdServ;
-// Update maintenance 
+// Update maintenance
 const updateMaintenanceServ = async (id, maint) => {
     try {
-        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, voltage_control, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, amp_engine_4, amp_engine_evap, compressor_1_amp_L1, compressor_1_amp_L2, compressor_1_amp_L3, compressor_2_amp_L1, compressor_2_amp_L2, compressor_2_amp_L3, supply_temp, return_temp, water_in_temp, water_out_temp, sprinkler_state, float_state, discharge_pressure, service_hour, service_date, customer_sign, tech_sign, customerId, photos, observations, additional_remarks, equipmentId, rolName, } = maint;
+        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, voltage_control, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, amp_engine_4, amp_engine_evap, compressor_1_amp_L1, compressor_1_amp_L2, compressor_1_amp_L3, compressor_2_amp_L1, compressor_2_amp_L2, compressor_2_amp_L3, supply_temp, return_temp, water_in_temp, water_out_temp, sprinkler_state, float_state, discharge_pressure, service_hour, service_date, customer_sign, tech_sign, customerId, photos, observations, additional_remarks, equipmentId, rolName, status, } = maint;
         // Validate maintenance
         const maintFound = await Maintenance.findOne({ where: { id } });
         if (!maintFound) {
@@ -484,7 +484,8 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: false,
             };
         }
-        if (maintFound.dataValues.status === "Confirmado") {
+        if (maintFound.dataValues.status === "Confirmado" &&
+            rolName != "Super_Usuario") {
             return {
                 msg: "No es posible actualizar un mantenimiento confirmado...",
                 success: false,
@@ -511,8 +512,8 @@ const updateMaintenanceServ = async (id, maint) => {
             };
         }
         // Update maintenance customer sign by client
-        if (rolName === "Cliente" && maintFound.dataValues.tech_sign.length > 0) {
-            const updateMaintenance = await Maintenance.update({ customer_sign: customer_sign }, {
+        if (rolName === "Cliente" && maintFound.dataValues.tech_sign != null) {
+            const updateMaintenance = await Maintenance.update({ customer_sign: customer_sign, status: "Confirmado" }, {
                 where: {
                     id,
                 },
@@ -538,8 +539,14 @@ const updateMaintenanceServ = async (id, maint) => {
                 success: true,
             };
         }
-        else {
+        if (rolName !== "Cliente") {
             // Update maintenance other roles != Client
+            if (customer_sign) {
+                return {
+                    msg: "No puede firmar por el cliente...",
+                    success: false,
+                };
+            }
             const updateMaintenance = await Maintenance.update({
                 activities,
                 voltage_on_L1L2,
@@ -573,6 +580,7 @@ const updateMaintenanceServ = async (id, maint) => {
                 observations,
                 additional_remarks,
                 equipmentId,
+                status,
             }, {
                 where: {
                     id,
@@ -597,6 +605,12 @@ const updateMaintenanceServ = async (id, maint) => {
                 msg: "Mantenimiento actualizado...",
                 maintenance,
                 success: true,
+            };
+        }
+        else {
+            return {
+                msg: "Su rol es de cliente, no puede modificar datos...",
+                success: false,
             };
         }
     }

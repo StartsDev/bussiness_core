@@ -4,6 +4,7 @@ const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
 import axios from "axios";
+import { stringify } from "querystring";
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
@@ -52,6 +53,7 @@ const getClientServPag = async (
   brand?: string
 ) => {
   try {
+    console.log("HELLO");
     let clients;
     //Filters
     let options: any | undefined = {};
@@ -227,8 +229,8 @@ const getClientServPag = async (
         include: {
           model: Headquarter,
           where: optionh,
-          required: false,
-          //required: !!(headName || addressh || phoneh || emailh || isPrincipal),
+          //required: false,
+          required: !!(headName || addressh || phoneh || emailh || isPrincipal),
           as: "headquarters",
           order: [["createdAt", "DESC"]],
           attributes: { exclude: ["createdAt", "updatedAt", "status"] },
@@ -346,7 +348,6 @@ const getClientsServ = async (
   type?: string,
   brand?: string
 ) => {
-  console.log('Hola')
   try {
     //Filters
     let options: any | undefined = {};
@@ -511,107 +512,105 @@ const getClientsServ = async (
     }
 
     // All query clients
-    const linearDatap: any[] = [];
+
     const clients = await Client.findAll({
       where: options,
-      attributes: { exclude: ["updatedAt", "status", "headquarters"] },
-      order: [["createdAt", "DESC"]],
-      all: true,
-      include: [
-        {
-          model: Headquarter,
-          where: optionh,
-          required: !!(headName || addressh || phoneh || emailh || isPrincipal),
-          as: "headquarters",
-          attributes: {
-            exclude: ["createdAt", "updatedAt", "status"],
-          },
-          include: {
-            model: Location,
-            where: optionsl,
-            required: locationName,
-            as: "locations",
-            attributes: {
-              exclude: [
-                "createdAt",
-                "updatedAt",
-                "status",
-                "description",
-              ],
-            },
-            include: {
-              model: Equipment,
-              as: "equipments",
-              attributes: {
-                exclude: ["createdAt", "updatedAt", "status"],
-              },
-              where: optionse,
-              required: true,
-            },
-          },
-        },
+      attributes: [
+        "id",
+        "businessName",
+        "nit",
+        "address",
+        "email",
+        "phone",
+        "city",
+        "contact",
       ],
-      required: Object.values(options).some((value) => value !== null),
+      order: [["createdAt", "DESC"]],
+      raw: true,
     });
-    Sequelize.options.logging = false;
 
-    if (!clients) {
-      return {
-        msg: "No existen clientes registrados...",
-        clients,
-        success: false,
-      };
-    }
-    //Hide properties heardquartes and locations
-    const propertiesToHide = ["locations"];
-    const propToHideLoc = ["equipments"];
-    const allEquipments = [];
-   
-    // Customization data clients (serialization) hide some properties
-    for (const client of clients) {
-      const clientData = client.get({ plain: true });
-      clientData.headquarters = [];
-      for (const headquarter of client.headquarters) {
-        const sanitizedObject = { ...headquarter.get({ plain: true }) };
-        propertiesToHide.forEach((property) => {
-          delete sanitizedObject[property];
-        });
-        clientData.locations = [];
-        for (const location of headquarter.locations) {
-           const sanitizedObjectLoc = { ...location.get({ plain: true }) };
-          propToHideLoc.forEach((property) => {
-            delete sanitizedObjectLoc[property];
-          }); 
-          clientData.equipments = [];
-          for (const equipment of location.equipments) {
-            const equipData = equipment.get({ plain: true });
-            allEquipments.push(equipData);
-            clientData.equipments = allEquipments;
-          }
-          clientData.locations.push(sanitizedObjectLoc);
-        }
-        clientData.headquarters.push(sanitizedObject);
-      }
-      linearDatap.push(clientData);
-    }
-    // Filter Equipment
-    if (name || serial || model || type || brand) {
-      // Hacer filter con linearDatap
-      const dataEquipments = linearDatap.filter(
-        (client) => client.headquarters.length > 0
+    // Obtén los resultados de Headquarter, Location y Equipment
+    const headquarterIds = clients.map((client: any) => client.id);
+
+    const headquarters = await Headquarter.findAll({
+      where: { clientId: headquarterIds },
+      optionh,
+      attributes: [
+        "id",
+        "headName",
+        "address",
+        "email",
+        "phone",
+        "isPrincipal",
+        "clientId",
+      ],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+
+    const locationIds = headquarters.map((hq: any) => hq.id);
+
+    const locations = await Location.findAll({
+      where: {
+        headquarterId: locationIds,
+      },
+      optionsl,
+      attributes: ["id", "locationName", "headquarterId"],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+
+    const equipment = await Equipment.findAll({
+      where: optionse,
+      attributes: [
+        "id",
+        "name",
+        "description",
+        "serial",
+        "image",
+        "model",
+        "type",
+        "brand",
+        "locationId",
+      ],
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+    // Combinar los resultados en un solo array de objetos
+    const combinedResults = clients.map((client: any) => {
+      const clientHeadquarters = headquarters.filter(
+        (hq: any) => hq.clientId === client.id
+      );
+      const clientLocations = locations.filter((loc: any) =>
+        clientHeadquarters.some((hq: any) => hq.id === loc.headquarterId)
+      );
+      const clientEquipments = equipment.filter((eq: any) =>
+        clientLocations.some((loc: any) => loc.id === eq.locationId)
       );
       return {
-        clients: dataEquipments,
-        totalCount: dataEquipments.length,
-        success: true,
+        ...client,
+        headquarters: clientHeadquarters,
+        locations: clientLocations,
+        equipments: clientEquipments,
       };
-    } else {
-      return {
-        clients:linearDatap,
-        totalCount: linearDatap.length,
-        success: true,
-      };
-    }
+    });
+          if (name || serial || model || type || brand) {
+        // Hacer filter con linearDatap
+        const dataEquipments = combinedResults.filter(
+          (client:any) => client.equipments.length > 0
+        );
+        return {
+          clients: dataEquipments,
+          totalCount: dataEquipments.length,
+          success: true,
+        };
+      } else {
+        return {
+          clients: combinedResults,
+          totalCount: combinedResults.length,
+          success: true,
+        };
+      } 
   } catch (e) {
     throw new Error(e as string);
   }

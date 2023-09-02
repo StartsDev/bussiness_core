@@ -101,26 +101,27 @@ const createMaintenanceServ = async (maint: any) => {
       },
     });
 
+    const clientData = client.get({ plain: true });
+  
     if (
       !(
-        client &&
-        client.dataValues.headquarters.length > 0 &&
-        client.dataValues.headquarters[0].locations.length > 0
+        clientData &&
+        clientData.headquarters.length > 0 
       )
     ) {
       return {
-        msg: "EL equipo no le pertenece al cliente...",
+        msg: "El equipo no le pertenece al cliente...",
         success: false,
       };
     }
 
     const customer = {
-      id: client.dataValues.id,
-      businessName: client.dataValues.businessName,
-      nit: client.dataValues.nit,
-      address: client.dataValues.address,
-      email: client.dataValues.email,
-      phone: client.dataValues.phone,
+      id: clientData.id,
+      businessName: clientData.businessName,
+      nit: clientData.nit,
+      address: clientData.address,
+      email: clientData.email,
+      phone: clientData.phone,
     };
 
     /*  const findMaintenance = await Maintenance.findOne({
@@ -507,7 +508,7 @@ const getMaintByIdServ = async (maint: any) => {
   }
 };
 
-// Update maintenance 
+// Update maintenance
 const updateMaintenanceServ = async (id: number, maint: any) => {
   try {
     const {
@@ -545,6 +546,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
       additional_remarks,
       equipmentId,
       rolName,
+      status,
     } = maint;
     // Validate maintenance
     const maintFound = await Maintenance.findOne({ where: { id } });
@@ -579,7 +581,10 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
       };
     }
 
-    if (maintFound.dataValues.status === "Confirmado") {
+    if (
+      maintFound.dataValues.status === "Confirmado" &&
+      rolName != "Super_Usuario"
+    ) {
       return {
         msg: "No es posible actualizar un mantenimiento confirmado...",
         success: false,
@@ -607,10 +612,11 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
         success: false,
       };
     }
+
     // Update maintenance customer sign by client
-    if (rolName === "Cliente" && maintFound.dataValues.tech_sign.length > 0) {
+    if (rolName === "Cliente" && maintFound.dataValues.tech_sign != null) {
       const updateMaintenance = await Maintenance.update(
-        { customer_sign: customer_sign },
+        { customer_sign: customer_sign, status: "Confirmado" },
         {
           where: {
             id,
@@ -637,8 +643,16 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
         maintenance,
         success: true,
       };
-    } else {
+    }
+
+    if (rolName !== "Cliente") {
       // Update maintenance other roles != Client
+      if (customer_sign) {
+        return {
+          msg: "No puede firmar por el cliente...",
+          success: false,
+        };
+      }
       const updateMaintenance = await Maintenance.update(
         {
           activities,
@@ -673,6 +687,7 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
           observations,
           additional_remarks,
           equipmentId,
+          status,
         },
         {
           where: {
@@ -700,6 +715,11 @@ const updateMaintenanceServ = async (id: number, maint: any) => {
         msg: "Mantenimiento actualizado...",
         maintenance,
         success: true,
+      };
+    } else {
+      return {
+        msg: "Su rol es de cliente, no puede modificar datos...",
+        success: false,
       };
     }
   } catch (e) {
