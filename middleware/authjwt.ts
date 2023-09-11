@@ -56,6 +56,17 @@ export const validateRolUser = async (
   next: NextFunction
 ) => {
   try {
+    
+    //Obtener token x-apikey del encabezado de autorización
+    
+    const apiToken = req.headers["x-apikey"] || req.headers.authorization;
+    if(apiToken !== process.env.API_KEY){
+      return{
+        msg:"API key no válido...",
+        success: false
+      }
+    }
+
     const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
 
     const baseUrl = `${URL}/user/get-user`;

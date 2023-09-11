@@ -1,6 +1,5 @@
 import {
-  StatusOption,
-  MaintenanceAttributes,
+  StatusOption
 } from "./../interfaces/maintenance.interface";
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");

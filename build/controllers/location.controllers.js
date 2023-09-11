@@ -21,22 +21,40 @@ const getLocations = async (req, res) => {
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
         const locationName = req.query.locationName || undefined;
         const headName = req.query.headName || undefined;
+        const addressh = req.query.addressh || undefined;
+        const emailh = req.query.emailh || undefined;
+        const phoneh = req.query.phoneh || undefined;
         const businessName = req.query.businessName || undefined;
+        const nit = req.query.nit || undefined;
+        const city = req.query.city || undefined;
+        const contact = req.query.contact || undefined;
+        const addressc = req.query.addressc || undefined;
+        const emailc = req.query.emailc || undefined;
+        const phonec = req.query.phonec || undefined;
         if (!page && !pageSize) {
-            const { linearData, totalCount } = await (0, location_services_1.getLocationsServ)(locationName, headName, businessName);
+            const { linearData, totalCount } = await (0, location_services_1.getLocationsServ)(locationName, headName, addressh, emailh, phoneh, businessName, nit, city, contact, addressc, emailc, phonec);
             res.status(200).json({
                 locations: linearData,
                 numItmes: totalCount,
             });
         }
-        else {
-            const { linearDatap, totalCountp } = await (0, location_services_1.getLocationServPag)(page, pageSize, locationName, headName, businessName);
-            const totalPages = Math.ceil(totalCountp / (pageSize ?? totalCountp));
+        if (page && pageSize) {
+            const { linearDatap, totalCountp, totalPages } = await (0, location_services_1.getLocationServPag)(page, pageSize, locationName, headName, addressh, emailh, phoneh, businessName, nit, city, contact, addressc, emailc, phonec);
             res.status(200).json({
                 locations: linearDatap,
                 numItmes: totalCountp,
                 currentPage: page,
                 totalPages,
+            });
+        }
+        if (pageSize) {
+            res.status(400).json({
+                msg: "Tiene que haber un número de página...",
+            });
+        }
+        if (page) {
+            res.status(400).json({
+                msg: "Debe indicar el número de items por página...",
             });
         }
     }
@@ -63,7 +81,8 @@ const getLocationHead = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { locations, totalCount } = await (0, location_services_1.allLocationsHeadServ)(req.params.headquarterId, page, pageSize);
+        const locationName = req.query.locationName || undefined;
+        const { locations, totalCount, totalPages } = await (0, location_services_1.allLocationsHeadServ)(req.params.headquarterId, page, pageSize, locationName);
         if (!page && !pageSize) {
             res.status(200).json({
                 locations,
@@ -71,7 +90,6 @@ const getLocationHead = async (req, res) => {
             });
         }
         else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
             res.status(200).json({
                 locations,
                 numItmes: totalCount,

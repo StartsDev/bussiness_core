@@ -36,20 +36,26 @@ const createLocationServ = async (location: any) => {
 };
 
 // Get locations
-
-//Pagination
 const getLocationServPag = async (
   page?: number,
   pageSize?: number,
-  locationName?:string,
+  locationName?: string,
   headName?: string,
-  businessName?: string
+  addressh?: string,
+  emailh?: string,
+  phoneh?: string,
+  businessName?: string,
+  nit?: string,
+  city?: string,
+  contact?: string,
+  addressc?: string,
+  emailc?: string,
+  phonec?: string
 ) => {
   try {
     let locations;
-
+    let totalPages = 0;
     // Options filter where clausule and counter
-    
     let optionh: any | undefined = {};
     let optionsc: any | undefined = {};
     let options: any | undefined = {};
@@ -70,13 +76,80 @@ const getLocationServPag = async (
         status: false,
       };
     }
+    if (addressh != undefined) {
+      optionh = {
+        address: { [Sequelize.Op.like]: `${addressh}%` },
+        status: false,
+      };
+    }
+    if (emailh != undefined) {
+      optionh = {
+        email: { [Sequelize.Op.like]: `${emailh}%` },
+        status: false,
+      };
+    }
+    if (phoneh != undefined) {
+      optionh = {
+        phone: { [Sequelize.Op.like]: `${phoneh}%` },
+        status: false,
+      };
+    }
     if (businessName != undefined) {
       optionsc = {
         businessName: { [Sequelize.Op.like]: `${businessName}%` },
         status: false,
       };
     }
-    if (!locationName && !headName && !businessName) {
+    if (nit != undefined) {
+      optionsc = {
+        nit: { [Sequelize.Op.like]: `${nit}%` },
+        status: false,
+      };
+    }
+    if (city != undefined) {
+      optionsc = {
+        city: { [Sequelize.Op.like]: `${city}%` },
+        status: false,
+      };
+    }
+    if (contact != undefined) {
+      optionsc = {
+        contact: { [Sequelize.Op.like]: `${contact}%` },
+        status: false,
+      };
+    }
+    if (addressc != undefined) {
+      optionsc = {
+        address: { [Sequelize.Op.like]: `${addressc}%` },
+        status: false,
+      };
+    }
+    if (emailc != undefined) {
+      optionsc = {
+        email: { [Sequelize.Op.like]: `${emailc}%` },
+        status: false,
+      };
+    }
+    if (phonec != undefined) {
+      optionsc = {
+        phone: { [Sequelize.Op.like]: `${phonec}%` },
+        status: false,
+      };
+    }
+    if (
+      !locationName &&
+      !headName &&
+      !addressh &&
+      !emailh &&
+      !phoneh &&
+      !businessName &&
+      !nit &&
+      !city &&
+      !contact &&
+      !addressc &&
+      !emailc &&
+      !phonec
+    ) {
       options = { status: false };
     }
 
@@ -86,7 +159,7 @@ const getLocationServPag = async (
         offset,
         limit: pageSize,
         where: options,
-        attributes: { exclude: ["updatedAt"] },
+        attributes: { exclude: ["updatedAt", "status"] },
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -107,17 +180,7 @@ const getLocationServPag = async (
       });
 
       // Response serial data location
-      const propertiesToHide = [
-        "createdAt",
-        "updatedAt",
-        "clientId",
-        "status",
-        "isPrincipal",
-        "Client",
-        "address",
-        "email",
-        "phone",
-      ];
+      const propertiesToHide = ["createdAt", "updatedAt", "status", "Client"];
       for (const location of locations) {
         const locationData = location.get({ plain: true });
         const headquarter = await Headquarter.findByPk(location.headquarterId, {
@@ -125,17 +188,7 @@ const getLocationServPag = async (
             {
               model: Client,
               attributes: {
-                exclude: [
-                  "nit",
-                  "email",
-                  "phone",
-                  "createdAt",
-                  "updatedAt",
-                  "status",
-                  "city",
-                  "address",
-                  "contact",
-                ],
+                exclude: ["createdAt", "updatedAt", "status"],
               },
             },
           ],
@@ -155,10 +208,28 @@ const getLocationServPag = async (
         }
       }
     }
-
+    if (pageSize) {
+      const totalLocations = await Location.count({
+        where: options,
+        include: [
+          {
+            model: Headquarter,
+            where: optionh,
+            include: [
+              {
+                model: Client,
+                where: optionsc,
+              },
+            ],
+          },
+        ],
+      });
+      totalPages = Math.ceil(totalLocations / pageSize);
+    }
     return {
       linearDatap,
       totalCountp: linearDatap.length,
+      totalPages,
       success: true,
     };
   } catch (e) {
@@ -167,7 +238,20 @@ const getLocationServPag = async (
 };
 
 //Not pagination location
-const getLocationsServ = async (locationName?:string ,headName?: string, businessName?: string) => {
+const getLocationsServ = async (
+  locationName?: string,
+  headName?: string,
+  addressh?: string,
+  emailh?: string,
+  phoneh?: string,
+  businessName?: string,
+  nit?: string,
+  city?: string,
+  contact?: string,
+  addressc?: string,
+  emailc?: string,
+  phonec?: string
+) => {
   try {
     let optionh: any | undefined = {};
     let optionsc: any | undefined = {};
@@ -188,21 +272,88 @@ const getLocationsServ = async (locationName?:string ,headName?: string, busines
         status: false,
       };
     }
+    if (addressh != undefined) {
+      optionh = {
+        address: { [Sequelize.Op.like]: `${addressh}%` },
+        status: false,
+      };
+    }
+    if (emailh != undefined) {
+      optionh = {
+        email: { [Sequelize.Op.like]: `${emailh}%` },
+        status: false,
+      };
+    }
+    if (phoneh != undefined) {
+      optionh = {
+        phone: { [Sequelize.Op.like]: `${phoneh}%` },
+        status: false,
+      };
+    }
     if (businessName != undefined) {
       optionsc = {
         businessName: { [Sequelize.Op.iLike]: `${businessName}%` },
         status: false,
       };
     }
-    if (!locationName && !headName && !businessName) {
+    if (nit != undefined) {
+      optionsc = {
+        nit: { [Sequelize.Op.like]: `${nit}%` },
+        status: false,
+      };
+    }
+    if (city != undefined) {
+      optionsc = {
+        city: { [Sequelize.Op.like]: `${city}%` },
+        status: false,
+      };
+    }
+    if (contact != undefined) {
+      optionsc = {
+        contact: { [Sequelize.Op.like]: `${contact}%` },
+        status: false,
+      };
+    }
+    if (addressc != undefined) {
+      optionsc = {
+        address: { [Sequelize.Op.like]: `${addressc}%` },
+        status: false,
+      };
+    }
+    if (emailc != undefined) {
+      optionsc = {
+        email: { [Sequelize.Op.like]: `${emailc}%` },
+        status: false,
+      };
+    }
+    if (phonec != undefined) {
+      optionsc = {
+        phone: { [Sequelize.Op.like]: `${phonec}%` },
+        status: false,
+      };
+    }
+    if (
+      !locationName &&
+      !headName &&
+      !addressh &&
+      !emailh &&
+      !phoneh &&
+      !businessName &&
+      !nit &&
+      !city &&
+      !contact &&
+      !addressc &&
+      !emailc &&
+      !phonec
+    ) {
       options = { status: false };
     }
-   
+
     // Get locations sequelize method using includes
     const locations = await Location.findAll({
       where: options,
       attributes: {
-        exclude: ["createdAt", "updatedAt", "description", "status"],
+        exclude: ["updatedAt", "status"],
       },
       order: [["createdAt", "DESC"]],
       include: [
@@ -227,17 +378,7 @@ const getLocationsServ = async (locationName?:string ,headName?: string, busines
 
     // Response serial data location
     const linearData: any[] = [];
-    const propertiesToHide = [
-      "createdAt",
-      "updatedAt",
-      "clientId",
-      "status",
-      "isPrincipal",
-      "Client",
-      "address",
-      "email",
-      "phone",
-    ];
+    const propertiesToHide = ["createdAt", "updatedAt", "status", "Client"];
     for (const location of locations) {
       const locationData = location.get({ plain: true });
       const headquarter = await Headquarter.findByPk(location.headquarterId, {
@@ -245,17 +386,7 @@ const getLocationsServ = async (locationName?:string ,headName?: string, busines
           {
             model: Client,
             attributes: {
-              exclude: [
-                "nit",
-                "email",
-                "phone",
-                "createdAt",
-                "updatedAt",
-                "status",
-                "city",
-                "address",
-                "contact",
-              ],
+              exclude: ["createdAt", "updatedAt", "status"],
             },
           },
         ],
@@ -325,17 +456,30 @@ const getOneLocationServ = async (location: any) => {
 const allLocationsHeadServ = async (
   location: any,
   page?: number,
-  pageSize?: number
+  pageSize?: number,
+  locationName?:string
 ) => {
   try {
     let locations;
+    let totalPages = 0;
+    let options: any | undefined = {};
+
+    if (locationName != undefined) {
+      options = {
+        locationName: { [Sequelize.Op.iLike]: `${locationName}%` },
+        status: false,
+      };
+    }
+    if (!locationName ) {
+      options = { status: false };
+    }
     if (page && pageSize) {
       const offset = (page - 1) * pageSize;
       locations = await Location.findAll({
         offset,
         limit: pageSize,
-        where: { headquarterId: location },
-        attributes: { exclude: ["updatedAt"] },
+        where: { headquarterId: location }, options,
+        attributes: { exclude: ["updatedAt", "status"] },
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -350,17 +494,23 @@ const allLocationsHeadServ = async (
           success: false,
         };
       }
-      const totalCount = await Client.count();
+      // Get total Pages and totalCount
+      const totalLocations = await Location.count({
+        where: { headquarterId: location }, options,
+        
+      });
+      totalPages = Math.ceil(totalLocations / pageSize);
 
       return {
         locations,
-        totalCount,
+        totalCount: locations.length,
+        totalPages,
         success: true,
       };
     } else {
       locations = await Location.findAll({
-        where: { headquarterId: location },
-        attributes: { exclude: ["updatedAt"] },
+        where: { headquarterId: location }, options,
+        attributes: { exclude: ["updatedAt", "status"] },
         order: [["createdAt", "DESC"]],
         include: [
           {
@@ -375,11 +525,9 @@ const allLocationsHeadServ = async (
           success: false,
         };
       }
-      const totalCount = await Client.count();
-
       return {
         locations,
-        totalCount,
+        totalCount: locations.length,
         success: true,
       };
     }
@@ -460,17 +608,16 @@ const deleteLocationServ = async (id: any) => {
 
 const bulkCreateLocations = async (data: Array<{}>) => {
   try {
-    await bulkCreatefunction(Location, data)
-    return 'Ubicaciones Creados'
+    await bulkCreatefunction(Location, data);
+    return "Ubicaciones Creados";
   } catch (error) {
     console.log(error);
     return {
-      message: 'hubo un error en la creacion',
+      message: "hubo un error en la creacion",
       success: false,
+    };
   }
-}
-}
-
+};
 
 export {
   createLocationServ,
@@ -480,5 +627,5 @@ export {
   allLocationsHeadServ,
   updateLocationServ,
   deleteLocationServ,
-  bulkCreateLocations
+  bulkCreateLocations,
 };

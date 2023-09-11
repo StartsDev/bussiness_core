@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.bulkCreateEquipments = exports.deleteEquipmentServ = exports.updateEquipmentServ = exports.allEquipmentsLocationServ = exports.getOneEquipmentServ = exports.getEquipmentServ = exports.newEquipmentServ = void 0;
+exports.bulkCreateEquipments = exports.deleteEquipmentServ = exports.updateEquipmentServ = exports.allEquipmentsLocationServ = exports.getOneEquipmentServ = exports.getEquipmentServPag = exports.getEquipmentServ = exports.newEquipmentServ = void 0;
 const bulkCreate_1 = require("../utils/bulkCreate");
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
@@ -107,32 +107,46 @@ const newEquipmentServ = async (equip) => {
     }
 };
 exports.newEquipmentServ = newEquipmentServ;
-/* const getEquipmentServPag = async (
-  page?: number,
-  pageSize?: number,
-  locationId?: string,
-  headId?: string,
-  clientId?: string) => {
-  try{
-    let equipments;
-    if (page && pageSize) {
-      const offset = (page - 1) * pageSize;
-      offset,
-      limit: pageSize,
-    }
-  }catch(e){
-    throw new Error(e as string);
-  }
-} */
-// Service get equipment without pagination
-const getEquipmentServ = async (locationName, headName, businessName) => {
+// Service get equipment paginated
+const getEquipmentServPag = async (name, serial, model, type, brand, page, pageSize, locationName, headName, businessName) => {
     try {
-        // Options filter where clausule and counter
+        let totalPages = 0;
+        let equipments;
         let optionl = {};
         let optionh = {};
         let optionsc = {};
         let options = {};
-        //Validation query params
+        let equipmentsF = [];
+        if (name != undefined) {
+            options = {
+                name: { [Sequelize.Op.iLike]: `${name}%` },
+                status: false,
+            };
+        }
+        if (serial != undefined) {
+            options = {
+                serial: { [Sequelize.Op.iLike]: `${serial}%` },
+                status: false,
+            };
+        }
+        if (model != undefined) {
+            options = {
+                model: { [Sequelize.Op.iLike]: `${model}%` },
+                status: false,
+            };
+        }
+        if (type != undefined) {
+            options = {
+                type: { [Sequelize.Op.iLike]: `${type}%` },
+                status: false,
+            };
+        }
+        if (brand != undefined) {
+            options = {
+                brand: { [Sequelize.Op.iLike]: `${brand}%` },
+                status: false,
+            };
+        }
         if (locationName != undefined) {
             optionl = {
                 locationName: { [Sequelize.Op.like]: `${locationName}%` },
@@ -151,7 +165,190 @@ const getEquipmentServ = async (locationName, headName, businessName) => {
                 status: false,
             };
         }
-        if (!locationName && !headName && !businessName) {
+        if (!name &&
+            !serial &&
+            !model &&
+            !type &&
+            !brand &&
+            !locationName &&
+            !headName &&
+            !businessName) {
+            options = { status: false };
+        }
+        if (page && pageSize) {
+            const offset = (page - 1) * pageSize;
+            equipments = await Equipment.findAll({
+                offset,
+                limit: pageSize,
+                where: options,
+                attributes: { exclude: ["updatedAt", "locationId", "status"] },
+                order: [["createdAt", "DESC"]],
+                include: [
+                    {
+                        model: Location,
+                        where: optionl,
+                        attributes: {
+                            exclude: [
+                                "createdAt",
+                                "updatedAt",
+                                "status",
+                                "description",
+                                "headquarterId",
+                            ],
+                        },
+                        include: [
+                            {
+                                model: Headquarter,
+                                where: optionh,
+                                attributes: {
+                                    exclude: [
+                                        "createdAt",
+                                        "updatedAt",
+                                        "clientId",
+                                        "status",
+                                        "email",
+                                        "phone",
+                                        "address",
+                                        "isPrincipal",
+                                    ],
+                                },
+                                include: [
+                                    {
+                                        model: Client,
+                                        where: optionsc,
+                                        attributes: {
+                                            exclude: [
+                                                "createdAt",
+                                                "updatedAt",
+                                                "status",
+                                                "nit",
+                                                "address",
+                                                "email",
+                                                "phone",
+                                                "city",
+                                                "contact",
+                                            ],
+                                        },
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+            if (!equipments) {
+                return {
+                    msg: "Equipos no registrados...",
+                    success: false,
+                };
+            }
+            // Format data equipment
+            equipmentsF = transObjEquipment(equipments);
+        }
+        if (pageSize) {
+            const totalEquipments = await Equipment.count({
+                where: options,
+                include: [
+                    {
+                        model: Location,
+                        where: optionl,
+                        include: [
+                            {
+                                model: Headquarter,
+                                where: optionh,
+                                include: [
+                                    {
+                                        model: Client,
+                                        where: optionsc,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                ],
+            });
+            totalPages = Math.ceil(totalEquipments / pageSize);
+        }
+        return {
+            equipments: equipmentsF,
+            totalCount: equipmentsF.length,
+            totalPages,
+            success: true,
+        };
+    }
+    catch (e) {
+        throw new Error(e);
+    }
+};
+exports.getEquipmentServPag = getEquipmentServPag;
+// Service get equipment without pagination
+const getEquipmentServ = async (name, serial, model, type, brand, locationName, headName, businessName) => {
+    try {
+        // Options filter where clausule and counter
+        let optionl = {};
+        let optionh = {};
+        let optionsc = {};
+        let options = {};
+        //Validation query params
+        // Equipment
+        if (name != undefined) {
+            options = {
+                name: { [Sequelize.Op.iLike]: `${name}%` },
+                status: false,
+            };
+        }
+        if (serial != undefined) {
+            options = {
+                serial: { [Sequelize.Op.iLike]: `${serial}%` },
+                status: false,
+            };
+        }
+        if (model != undefined) {
+            options = {
+                model: { [Sequelize.Op.iLike]: `${model}%` },
+                status: false,
+            };
+        }
+        if (type != undefined) {
+            options = {
+                type: { [Sequelize.Op.iLike]: `${type}%` },
+                status: false,
+            };
+        }
+        if (brand != undefined) {
+            options = {
+                brand: { [Sequelize.Op.iLike]: `${brand}%` },
+                status: false,
+            };
+        }
+        // Location
+        if (locationName != undefined) {
+            optionl = {
+                locationName: { [Sequelize.Op.like]: `${locationName}%` },
+                status: false,
+            };
+        }
+        // Headquarter
+        if (headName != undefined) {
+            optionh = {
+                headName: { [Sequelize.Op.like]: `${headName}%` },
+                status: false,
+            };
+        }
+        if (businessName != undefined) {
+            optionsc = {
+                businessName: { [Sequelize.Op.like]: `${businessName}%` },
+                status: false,
+            };
+        }
+        if (!name &&
+            !serial &&
+            !model &&
+            !type &&
+            !brand &&
+            !locationName &&
+            !headName &&
+            !businessName) {
             options = { status: false };
         }
         const equipments = await Equipment.findAll({
@@ -283,6 +480,7 @@ exports.getOneEquipmentServ = getOneEquipmentServ;
 const allEquipmentsLocationServ = async (user, page, pageSize) => {
     try {
         let equipLocation;
+        let totalPages = 0;
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
             equipLocation = await Equipment.findAll({
@@ -327,9 +525,16 @@ const allEquipmentsLocationServ = async (user, page, pageSize) => {
                 };
             }
             const equipLoc = transObjEquipment(equipLocation);
+            if (pageSize) {
+                const totalEquipments = await Equipment.count({
+                    where: { status: false },
+                });
+                totalPages = Math.ceil(totalEquipments / pageSize);
+            }
             return {
                 equipLocation: equipLoc,
                 totalCount: equipLoc.length,
+                totalPages,
                 success: true,
             };
         }

@@ -47,6 +47,7 @@ const getClients = async (req: Request, res: Response) => {
     const type = req.query.type as string || undefined;
     const brand = req.query.brand as string || undefined;
 
+    
     if (page && pageSize) {
       const { clients, totalCount } = await getClientServPag(
         page,

@@ -34,8 +34,8 @@ const createClientServ = async (client) => {
 exports.createClientServ = createClientServ;
 const getClientServPag = async (page, pageSize, businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand) => {
     try {
-        console.log("HELLO");
         let clients;
+        let combinedResults = [];
         //Filters
         let options = {};
         let optionh = {};
@@ -183,110 +183,109 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
             !brand) {
             options = { status: false };
         }
-        const linearDatap = [];
-        console.log(options);
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
+            // All query clients
             clients = await Client.findAll({
                 offset,
                 limit: pageSize,
                 where: options,
-                attributes: { exclude: ["updatedAt", "status"] },
+                attributes: [
+                    "id",
+                    "businessName",
+                    "nit",
+                    "address",
+                    "email",
+                    "phone",
+                    "city",
+                    "contact",
+                ],
                 order: [["createdAt", "DESC"]],
-                include: {
-                    model: Headquarter,
-                    where: optionh,
-                    //required: false,
-                    required: !!(headName || addressh || phoneh || emailh || isPrincipal),
-                    as: "headquarters",
-                    order: [["createdAt", "DESC"]],
-                    attributes: { exclude: ["createdAt", "updatedAt", "status"] },
-                    include: {
-                        model: Location,
-                        required: false,
-                        //required: locationName,
-                        where: optionsl,
-                        as: "locations",
-                        order: [["createdAt", "DESC"]],
-                        attributes: { exclude: ["createdAt", "updatedAt", "status"] },
-                        include: {
-                            model: Equipment,
-                            //required: true,
-                            required: false,
-                            where: optionse,
-                            as: "equipments",
-                            order: [["createdAt", "DESC"]],
-                            attributes: {
-                                exclude: ["createdAt", "updatedAt", "status", "locationId"],
-                            },
-                        },
-                    },
-                },
-                required: false,
-                //required: Object.values(options).some((value) => value !== null),
+                raw: true,
             });
-            console.log("DATA FIND ALL", clients);
-            //Hide properties heardquartes and locations
-            const propertiesToHide = ["locations"];
-            const propToHideLoc = ["equipments"];
-            const allEquipments = [];
-            // Customization data clients (serialization) hide some properties
-            for (const client of clients) {
-                const clientData = client.get({ plain: true });
-                clientData.headquarters = [];
-                for (const headquarter of client.headquarters) {
-                    const sanitizedObject = { ...headquarter.get({ plain: true }) };
-                    propertiesToHide.forEach((property) => {
-                        delete sanitizedObject[property];
-                    });
-                    clientData.locations = [];
-                    for (const location of headquarter.locations) {
-                        const sanitizedObjectLoc = { ...location.get({ plain: true }) };
-                        propToHideLoc.forEach((property) => {
-                            delete sanitizedObjectLoc[property];
-                        });
-                        clientData.equipments = [];
-                        for (const equipment of location.equipments) {
-                            const equipData = equipment.get({ plain: true });
-                            allEquipments.push(equipData);
-                            clientData.equipments = allEquipments;
-                        }
-                        clientData.locations.push(sanitizedObjectLoc);
-                    }
-                    clientData.headquarters.push(sanitizedObject);
-                }
-                linearDatap.push(clientData);
-            }
-            console.log("LINEAR", linearDatap);
             if (!clients) {
                 return {
                     msg: "No existen clientes registrados...",
-                    clients: linearDatap,
+                    clients: [],
                     success: false,
                 };
             }
+            // Obtén los resultados de Headquarter, Location y Equipment
+            const headquarterIds = clients.map((client) => client.id);
+            const headquarters = await Headquarter.findAll({
+                where: { clientId: headquarterIds },
+                optionh,
+                attributes: [
+                    "id",
+                    "headName",
+                    "address",
+                    "email",
+                    "phone",
+                    "isPrincipal",
+                    "clientId",
+                ],
+                order: [["createdAt", "DESC"]],
+                raw: true,
+            });
+            const locationIds = headquarters.map((hq) => hq.id);
+            const locations = await Location.findAll({
+                where: {
+                    headquarterId: locationIds,
+                },
+                optionsl,
+                attributes: ["id", "locationName", "headquarterId"],
+                order: [["createdAt", "DESC"]],
+                raw: true,
+            });
+            const equipment = await Equipment.findAll({
+                where: optionse,
+                attributes: [
+                    "id",
+                    "name",
+                    "description",
+                    "serial",
+                    "image",
+                    "model",
+                    "type",
+                    "brand",
+                    "locationId",
+                ],
+                order: [["createdAt", "DESC"]],
+                raw: true,
+            });
+            // Combinar los resultados en un solo array de objetos
+            combinedResults = clients.map((client) => {
+                const clientHeadquarters = headquarters.filter((hq) => hq.clientId === client.id);
+                const clientLocations = locations.filter((loc) => clientHeadquarters.some((hq) => hq.id === loc.headquarterId));
+                const clientEquipments = equipment.filter((eq) => clientLocations.some((loc) => loc.id === eq.locationId));
+                return {
+                    ...client,
+                    headquarters: clientHeadquarters,
+                    locations: clientLocations,
+                    equipments: clientEquipments,
+                };
+            });
+            /*  if (name || serial || model || type || brand) {
+               // Hacer filter con linearDatap
+               const dataEquipments = combinedResults.filter(
+                 (client: any) => client.equipments.length > 0
+               );
+               return {
+                 clients: dataEquipments,
+                 totalCount: dataEquipments.length,
+                 success: true,
+               };
+             } else {
+               return {
+                 clients: combinedResults,
+                 totalCount: combinedResults.length,
+                 success: true,
+               };
+             } */
         }
-        // Filter Equipment
-        /*    if (name || serial || model || type || brand) {
-            // Hacer filter con linearDatap
-            const dataEquipments = linearDatap.filter(
-              (client) => client.headquarters.length > 0
-            );
-            return {
-              clients: dataEquipments,
-              totalCount: dataEquipments.length,
-              success: true,
-            };
-          } else {
-            return {
-              clients: linearDatap,
-              totalCount: clients.length,
-              success: true,
-            };
-          } */
         return {
-            clients: linearDatap,
-            totalCount: clients.length,
+            clients: combinedResults,
+            totalCount: combinedResults.length,
             success: true,
         };
     }

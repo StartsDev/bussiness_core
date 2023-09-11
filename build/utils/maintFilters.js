@@ -138,13 +138,3 @@ const maintFilterOptions = (params) => {
     return { optionsm, optionsh, optionsl, optionse, optionsc };
 };
 exports.maintFilterOptions = maintFilterOptions;
-/*
-  // Uso de la función
-  const filterParams = {
-    businessName: "ABC Company",
-    city: "New York",
-    // ... (otros parámetros)
-  };
-  
-  const { options, optionh, optionsl, optionse } = buildFilterOptions(filterParams); */
-// Luego puedes usar los objetos de opciones resultantes en tu consulta Sequelize
