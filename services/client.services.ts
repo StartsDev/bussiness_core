@@ -644,6 +644,7 @@ const getOneClientServ = async (client: any) => {
         "phone",
         "city",
         "contact",
+        "user_app",
       ],
       raw: true,
     });
