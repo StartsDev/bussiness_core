@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { CustomRequest } from "../middleware/authjwt";
 import {
   createClientServ,
   getClientsServ,
@@ -122,9 +123,9 @@ const getOneClient = async (req: Request, res: Response) => {
 };
 
 //Update a client
-const editClient = async (req: Request, res: Response) => {
+const editClient = async (req: CustomRequest, res: Response) => {
   try {
-    const client = await updateClientServ(req.params.id, req.body);
+    const client = await updateClientServ(req.params.id, req.body, req.token);
     res.status(200).json(client);
   } catch (error) {
     if (error instanceof Error) res.status(400).json({ error: error.message });

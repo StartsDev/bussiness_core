@@ -182,9 +182,10 @@ export const isSuperUser_isAdmin = async (
     const baseUrl = `${URL}/user/get-user`;
 
     const id = req.decoded?.userId;
+
     const { data }: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = data;
-
+  
     if (!userData?.findUser) {
       return res.status(401).json({ message: "Usuario no encontrado" });
     }

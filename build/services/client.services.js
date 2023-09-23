@@ -617,7 +617,7 @@ const getOneClientServ = async (client) => {
     }
 };
 exports.getOneClientServ = getOneClientServ;
-const updateClientServ = async (id, cli) => {
+const updateClientServ = async (id, cli, token) => {
     const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
     let errorUsers = [];
     try {
@@ -667,6 +667,11 @@ const updateClientServ = async (id, cli) => {
                     // Llamar al end-point que hace el patch de usuarios
                     await axios_1.default.patch(`${baseUrlPacth}/${user_id}`, {
                         clientId: clientData.id,
+                    }, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-token': token
+                        }
                     });
                 }
                 catch (error) {

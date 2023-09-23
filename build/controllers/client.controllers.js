@@ -80,7 +80,7 @@ exports.getOneClient = getOneClient;
 //Update a client
 const editClient = async (req, res) => {
     try {
-        const client = await (0, client_services_1.updateClientServ)(req.params.id, req.body);
+        const client = await (0, client_services_1.updateClientServ)(req.params.id, req.body, req.token);
         res.status(200).json(client);
     }
     catch (error) {

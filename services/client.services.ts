@@ -4,7 +4,6 @@ const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
 import axios from "axios";
-import { stringify } from "querystring";
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
@@ -216,7 +215,7 @@ const getClientServPag = async (
     ) {
       options = { status: false };
     }
-   
+
 
     if (page && pageSize) {
       const offset = (page - 1) * pageSize;
@@ -296,7 +295,7 @@ const getClientServPag = async (
         raw: true,
       });
       // Combinar los resultados en un solo array de objetos
-        combinedResults = clients.map((client: any) => {
+      combinedResults = clients.map((client: any) => {
         const clientHeadquarters = headquarters.filter(
           (hq: any) => hq.clientId === client.id
         );
@@ -314,23 +313,23 @@ const getClientServPag = async (
         };
       });
 
-     /*  if (name || serial || model || type || brand) {
-        // Hacer filter con linearDatap
-        const dataEquipments = combinedResults.filter(
-          (client: any) => client.equipments.length > 0
-        );
-        return {
-          clients: dataEquipments,
-          totalCount: dataEquipments.length,
-          success: true,
-        };
-      } else {
-        return {
-          clients: combinedResults,
-          totalCount: combinedResults.length,
-          success: true,
-        };
-      } */
+      /*  if (name || serial || model || type || brand) {
+         // Hacer filter con linearDatap
+         const dataEquipments = combinedResults.filter(
+           (client: any) => client.equipments.length > 0
+         );
+         return {
+           clients: dataEquipments,
+           totalCount: dataEquipments.length,
+           success: true,
+         };
+       } else {
+         return {
+           clients: combinedResults,
+           totalCount: combinedResults.length,
+           success: true,
+         };
+       } */
     }
     return {
       clients: combinedResults,
@@ -714,7 +713,7 @@ const getOneClientServ = async (client: any) => {
   }
 };
 
-const updateClientServ = async (id: any, cli: any) => {
+const updateClientServ = async (id: any, cli: any, token: any) => {
   const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
   let errorUsers = [];
   try {
@@ -771,6 +770,11 @@ const updateClientServ = async (id: any, cli: any) => {
           // Llamar al end-point que hace el patch de usuarios
           await axios.patch(`${baseUrlPacth}/${user_id}`, {
             clientId: clientData.id,
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-token': token
+            }
           });
         } catch (error) {
           errorUsers.push(error);
