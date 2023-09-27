@@ -39,9 +39,8 @@ export const verifyToken = async (
       // Agregar los datos decodificados a la solicitud para que puedan ser utilizados en los controladores
       req.decoded = decoded;
       req.token = tokenArray;
-
       // Llama a la siguiente función del middleware
-      next();
+      return next();
     });
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized", error });
@@ -60,6 +59,11 @@ export const validateRolUser = async (
     //Obtener token x-apikey del encabezado de autorización
     
     const apiToken = req.headers["x-apikey"] || req.headers.authorization;
+
+    if (!apiToken) {
+      return res.status(403).json({ message: "No API token entregado [x-apikey]..." });
+    }
+
     if(apiToken !== process.env.API_KEY){
       return{
         msg:"API key no válido...",
@@ -72,35 +76,40 @@ export const validateRolUser = async (
     const baseUrl = `${URL}/user/get-user`;
 
     const id = req.decoded?.userId;
-
+    
     const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
     const userData: any = response.data;
 
     if (!userData.findUser) {
       return res.status(401).json({ message: "Usuario no válido" });
     }
-
     if (userData.findUser.Role.role === "Tecnico") {
       req.body.techId = userData.findUser.id;
       req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
       req.body.techNumId = userData.findUser.numIdent;
       req.body.role = userData.findUser.Role.role;
-      next();
+      return next();
     }
-
-    if (userData.findUser.Role.role === "Cliente") {
+    
+    if (userData.findUser.Role.role === "Cliente"){
+      return res.status(403).json({ mensaje: "Como cliente no puede registrar mantenimientos..." });
+    }else{
+      return next();
+    }
+   /*  if (userData.findUser.Role.role === "Cliente") {
       req.body.techId = userData.findUser.clientId;
       req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
       req.body.techNumId = userData.findUser.numIdent;
       req.body.role = userData.findUser.Role.role;
       next();
     }
+
     if (userData.findUser.Role.role === "Administrador") {
       return {
         msg: "El rol no debe ser administrador",
         success: false,
       };
-    }
+    } */
   } catch (error) {
     return res.status(401).json({ error });
   }

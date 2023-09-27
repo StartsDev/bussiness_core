@@ -18,7 +18,7 @@ import {
 const router = Router();
 
 // Register new Maintenance
-router.post("/create-maintenance", verifyToken, validateRolUser, createMaintenance);
+router.post("/create-maintenance",verifyToken, validateRolUser, createMaintenance);
 
 // Get all maintenances
 router.get("/get-maintenances", getMaintenances);

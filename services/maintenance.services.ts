@@ -6,6 +6,7 @@ const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+import axios, { AxiosResponse } from "axios";
 
 // Transform data maintenance format function
 const transObjMaintenance = (arr: any[]): any[] => {
@@ -33,6 +34,8 @@ const transObjMaintenance = (arr: any[]): any[] => {
 };
 // Create a manteinance
 const createMaintenanceServ = async (maint: any) => {
+  let techName_: any;
+  let techNumIdent_: any;
   try {
     const {
       activities,
@@ -71,7 +74,15 @@ const createMaintenanceServ = async (maint: any) => {
       techId,
       techName,
       techNumId,
+      role
     } = maint;
+
+    if (!techId) {
+      return {
+        msg: "Como Administrador o Super_Usuario debe asociar a un técnico...",
+        success: false,
+      };
+    }
 
     const findEquipment = await Equipment.findOne({
       where: { id: equipmentId },
@@ -101,11 +112,11 @@ const createMaintenanceServ = async (maint: any) => {
     });
 
     const clientData = client.get({ plain: true });
-  
+
     if (
       !(
         clientData &&
-        clientData.headquarters.length > 0 
+        clientData.headquarters.length > 0
       )
     ) {
       return {
@@ -122,7 +133,7 @@ const createMaintenanceServ = async (maint: any) => {
       email: clientData.email,
       phone: clientData.phone,
     };
-
+    // Valitation hour maintenance
     /*  const findMaintenance = await Maintenance.findOne({
       where: { service_hour },
     });
@@ -134,6 +145,32 @@ const createMaintenanceServ = async (maint: any) => {
       };
     } */
 
+    // Verificar si Tech Id existe y si su rol es de tecnico
+    if (role !== "Tecnico") {
+      const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+
+      const baseUrl = `${URL}/user/get-user`;
+
+      const id = techId;
+
+      const response: AxiosResponse<any> = await axios.get(`${baseUrl}/${id}`);
+      const userData: any = response.data;
+      if (!userData.findUser) {
+        return {
+          msg: "El técnico no existe...",
+          success: false,
+        };
+      }
+      if (userData.findUser.Role.role !== "Tecnico") {
+        return {
+          msg: "El rol debe ser técnico...",
+          success: false,
+        };
+      }
+      techName_ = `${userData.findUser.firstName} ${userData.findUser.lastName}`
+      techNumIdent_ = userData.findUser.numIdent
+    }
+
     // Validation quantiy maintenances status "En proceso"
     const maintCount = await Maintenance.count({
       where: {
@@ -142,7 +179,7 @@ const createMaintenanceServ = async (maint: any) => {
         status: StatusOption.inProcess,
       },
     });
-
+  
     if (maintCount === 5) {
       return {
         msg: "Sr. Técnico, tiene 5 servicios en estado en proceso, por favor firme y confirme al menos uno para poder registrar otro servicio...",
@@ -183,8 +220,8 @@ const createMaintenanceServ = async (maint: any) => {
       photos,
       tech: {
         techId,
-        techName,
-        techNumId,
+        techName: role !== "Tecnico" ? techName_ : techName,
+        techNumId: role !== "Tecnico" ? techNumIdent_ : techNumId,
       },
       observations,
       additional_remarks,

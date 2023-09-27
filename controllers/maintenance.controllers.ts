@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { CustomRequest } from "../middleware/authjwt";
 import {
   createMaintenanceServ,
   getMaintenancesServ,
@@ -10,12 +11,12 @@ import {
 } from "../services/maintenance.services";
 
 //Register new maintenance
-const createMaintenance = async (req: Request, res: Response) => {
+const createMaintenance = async (req: CustomRequest, res: Response) => {
   try {
-    const maintenance = await createMaintenanceServ(req.body);
-    res.status(200).json(maintenance);
+    const maintenance = await createMaintenanceServ(req.body)
+    return res.status(200).json(maintenance);
   } catch (error) {
-    if (error instanceof Error) res.status(400).json({ error: error.message });
+    if (error instanceof Error) return res.status(400).json({ error: error.message });
   }
 };
 

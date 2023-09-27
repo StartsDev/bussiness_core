@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByUserServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
 const maintenance_interface_1 = require("./../interfaces/maintenance.interface");
@@ -7,6 +10,7 @@ const Maintenance = require("../models/maintenance");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+const axios_1 = __importDefault(require("axios"));
 // Transform data maintenance format function
 const transObjMaintenance = (arr) => {
     const linearDatap = [];
@@ -30,8 +34,16 @@ const transObjMaintenance = (arr) => {
 };
 // Create a manteinance
 const createMaintenanceServ = async (maint) => {
+    let techName_;
+    let techNumIdent_;
     try {
-        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, voltage_control, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, amp_engine_4, amp_engine_evap, compressor_1_amp_L1, compressor_1_amp_L2, compressor_1_amp_L3, compressor_2_amp_L1, compressor_2_amp_L2, compressor_2_amp_L3, supply_temp, return_temp, ater_in_temp, water_out_temp, sprinkler_state, float_state, discharge_pressure, service_hour, service_date, photos, customer_sign, tech_sign, customerId, observations, additional_remarks, equipmentId, techId, techName, techNumId, } = maint;
+        const { activities, voltage_on_L1L2, voltage_on_L1L3, voltage_on_L2L3, voltage_control, suction_pressure, amp_engine_1, amp_engine_2, amp_engine_3, amp_engine_4, amp_engine_evap, compressor_1_amp_L1, compressor_1_amp_L2, compressor_1_amp_L3, compressor_2_amp_L1, compressor_2_amp_L2, compressor_2_amp_L3, supply_temp, return_temp, ater_in_temp, water_out_temp, sprinkler_state, float_state, discharge_pressure, service_hour, service_date, photos, customer_sign, tech_sign, customerId, observations, additional_remarks, equipmentId, techId, techName, techNumId, role } = maint;
+        if (!techId) {
+            return {
+                msg: "Como Administrador o Super_Usuario debe asociar a un técnico...",
+                success: false,
+            };
+        }
         const findEquipment = await Equipment.findOne({
             where: { id: equipmentId },
         });
@@ -73,6 +85,7 @@ const createMaintenanceServ = async (maint) => {
             email: clientData.email,
             phone: clientData.phone,
         };
+        // Valitation hour maintenance
         /*  const findMaintenance = await Maintenance.findOne({
           where: { service_hour },
         });
@@ -83,6 +96,28 @@ const createMaintenanceServ = async (maint) => {
             success: false,
           };
         } */
+        // Verificar si Tech Id existe y si su rol es de tecnico
+        if (role !== "Tecnico") {
+            const URL = process.env.URL_PRODUCTION_AUTH || process.env.URL_DEVELOP_AUTH;
+            const baseUrl = `${URL}/user/get-user`;
+            const id = techId;
+            const response = await axios_1.default.get(`${baseUrl}/${id}`);
+            const userData = response.data;
+            if (!userData.findUser) {
+                return {
+                    msg: "El técnico no existe...",
+                    success: false,
+                };
+            }
+            if (userData.findUser.Role.role !== "Tecnico") {
+                return {
+                    msg: "El rol debe ser técnico...",
+                    success: false,
+                };
+            }
+            techName_ = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
+            techNumIdent_ = userData.findUser.numIdent;
+        }
         // Validation quantiy maintenances status "En proceso"
         const maintCount = await Maintenance.count({
             where: {
@@ -130,8 +165,8 @@ const createMaintenanceServ = async (maint) => {
             photos,
             tech: {
                 techId,
-                techName,
-                techNumId,
+                techName: role !== "Tecnico" ? techName_ : techName,
+                techNumId: role !== "Tecnico" ? techNumIdent_ : techNumId,
             },
             observations,
             additional_remarks,
