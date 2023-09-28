@@ -3,12 +3,13 @@ const Client = require("../models/client");
 const Headquarter = require("../models/headquarter");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
+const { Op } = require('sequelize');
 import axios from "axios";
 import { ClientAttributes } from "../interfaces/client.interface";
 
 const createClientServ = async (client: ClientAttributes) => {
   try {
-    const findClient = await Client.findOne({ where: { nit: client.nit } });
+    const findClient = await Client.findOne({ where: { [Op.or]: [{ nit: client.nit }, { phone: client.phone }] } });
     if (findClient) {
       return {
         msg: "Este cliente ya existe",
@@ -16,9 +17,7 @@ const createClientServ = async (client: ClientAttributes) => {
         data: findClient,
       };
     }
-
     const newClient = await Client.create(client);
-
     return {
       msg: "Cliente registrado satisfactoriamente...",
       data: newClient,

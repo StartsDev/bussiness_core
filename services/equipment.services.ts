@@ -78,6 +78,13 @@ const newEquipmentServ = async (equip: any) => {
     const customerId = findClient.dataValues.id;
     const clientName = findClient.dataValues.businessName;
 
+    if (!type) {
+      return {
+        msg: "Debe ingresar un tipo de equipo...",
+        success: false,
+      };
+    }
+
     const newEquipment = await Equipment.create({
       name,
       description,
