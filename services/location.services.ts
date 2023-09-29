@@ -4,6 +4,7 @@ const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+const Equipment = require("../models/equipment");
 
 // Create a location
 const createLocationServ = async (location: any) => {
@@ -176,6 +177,13 @@ const getLocationServPag = async (
               },
             ],
           },
+          {
+            model: Equipment,
+            as: "equipments",
+            attributes: {
+              exclude: ["id", "createdAt", "updatedAt", "status"],
+            },
+          }
         ],
       });
 
@@ -373,6 +381,13 @@ const getLocationsServ = async (
             },
           ],
         },
+        {
+          model: Equipment,
+          as: "equipments",
+          attributes: {
+            exclude: ["id", "createdAt", "updatedAt", "status"],
+          },
+        }
       ],
     });
 
@@ -457,7 +472,7 @@ const allLocationsHeadServ = async (
   location: any,
   page?: number,
   pageSize?: number,
-  locationName?:string
+  locationName?: string
 ) => {
   try {
     let locations;
@@ -470,7 +485,7 @@ const allLocationsHeadServ = async (
         status: false,
       };
     }
-    if (!locationName ) {
+    if (!locationName) {
       options = { status: false };
     }
     if (page && pageSize) {
@@ -497,7 +512,7 @@ const allLocationsHeadServ = async (
       // Get total Pages and totalCount
       const totalLocations = await Location.count({
         where: { headquarterId: location }, options,
-        
+
       });
       totalPages = Math.ceil(totalLocations / pageSize);
 

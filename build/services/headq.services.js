@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteHeadServ = exports.allHeadClientServ = exports.getOneHeadServ = exports.updateHeadServ = exports.getHeadServ = exports.createHeadServ = void 0;
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+const Location = require("../models/location");
+const { Op } = require('sequelize');
 const createHeadServ = async (head) => {
     try {
         const findClient = await Client.findOne({
@@ -14,7 +16,7 @@ const createHeadServ = async (head) => {
             };
         }
         const findHead = await Headquarter.findOne({
-            where: { headName: head.headName },
+            where: { [Op.or]: [{ headName: head.headName }, { phone: head.phone }] },
         });
         if (findHead) {
             return {
@@ -48,6 +50,11 @@ const getHeadServ = async (page, pageSize) => {
                         model: Client,
                         attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                     },
+                    {
+                        model: Location,
+                        as: "locations",
+                        attributes: { exclude: ["createdAt", "updatedAt", "status", "headquarterId"] },
+                    }
                 ],
             });
             if (!headquarters) {
@@ -72,6 +79,11 @@ const getHeadServ = async (page, pageSize) => {
                         model: Client,
                         attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                     },
+                    {
+                        model: Location,
+                        as: "locations",
+                        attributes: { exclude: ["createdAt", "updatedAt", "status", "headquarterId"] },
+                    }
                 ],
             });
             if (!headquarters) {

@@ -6,6 +6,7 @@ const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+const Equipment = require("../models/equipment");
 // Create a location
 const createLocationServ = async (location) => {
     try {
@@ -156,6 +157,13 @@ const getLocationServPag = async (page, pageSize, locationName, headName, addres
                             },
                         ],
                     },
+                    {
+                        model: Equipment,
+                        as: "equipments",
+                        attributes: {
+                            exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
+                    }
                 ],
             });
             // Response serial data location
@@ -333,6 +341,13 @@ const getLocationsServ = async (locationName, headName, addressh, emailh, phoneh
                         },
                     ],
                 },
+                {
+                    model: Equipment,
+                    as: "equipments",
+                    attributes: {
+                        exclude: ["id", "createdAt", "updatedAt", "status"],
+                    },
+                }
             ],
         });
         // Response serial data location

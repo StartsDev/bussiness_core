@@ -1,5 +1,9 @@
+import { allLocationsHeadServ } from "./location.services";
+
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
+const Location = require("../models/location");
+const { Op } = require('sequelize');
 
 const createHeadServ = async (head: any) => {
   try {
@@ -12,7 +16,7 @@ const createHeadServ = async (head: any) => {
       };
     }
     const findHead = await Headquarter.findOne({
-      where: { headName: head.headName },
+      where: { [Op.or]: [{ headName: head.headName }, { phone: head.phone }] },
     });
     if (findHead) {
       return {
@@ -46,6 +50,11 @@ const getHeadServ = async (page?: number, pageSize?: number) => {
             model: Client,
             attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
           },
+          {
+            model: Location,
+            as: "locations",
+            attributes: { exclude: ["createdAt", "updatedAt", "status", "headquarterId"] },
+          }
         ],
       });
       if (!headquarters) {
@@ -69,8 +78,14 @@ const getHeadServ = async (page?: number, pageSize?: number) => {
             model: Client,
             attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
           },
+          {
+            model: Location,
+            as: "locations",
+            attributes: { exclude: ["createdAt", "updatedAt", "status", "headquarterId"] },
+          }
         ],
       });
+
       if (!headquarters) {
         return {
           msg: "No hay sedes registradas...",
