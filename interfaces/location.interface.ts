@@ -1,5 +1,5 @@
 export interface LoctionAttributes {
-    id: number;
+    id: string;
     locationName: string;
     description: string;
     status: boolean;

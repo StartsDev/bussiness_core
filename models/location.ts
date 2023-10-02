@@ -10,7 +10,7 @@ class Location extends Model<LoctionAttributes> implements LoctionAttributes {
    * This method is not a part of Sequelize lifecycle.
    * The `models/index` file will call this method automatically.
    */
-  id!: number;
+  id!: string;
   locationName!: string;
   description!: string;
   status!:boolean;
@@ -30,10 +30,10 @@ class Location extends Model<LoctionAttributes> implements LoctionAttributes {
 Location.init(
   {
     id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+      type: DataTypes.UUID,
+      defaultValue: UUIDV4,
       allowNull: false,
+      primaryKey: true,
     },
     locationName: {
       type: DataTypes.STRING,

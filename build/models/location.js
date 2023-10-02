@@ -25,10 +25,10 @@ class Location extends sequelize_1.Model {
 }
 Location.init({
     id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+        type: DataTypes.UUID,
+        defaultValue: sequelize_1.UUIDV4,
         allowNull: false,
+        primaryKey: true,
     },
     locationName: {
         type: DataTypes.STRING,
