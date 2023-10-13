@@ -66,23 +66,12 @@ const validateRolUser = async (req, res, next) => {
         if (userData.findUser.Role.role === "Cliente") {
             return res.status(403).json({ mensaje: "Como cliente no puede registrar mantenimientos..." });
         }
-        else {
+        if (userData.findUser.Role.role === "Administrador") {
             return next();
         }
-        /*  if (userData.findUser.Role.role === "Cliente") {
-           req.body.techId = userData.findUser.clientId;
-           req.body.techName = `${userData.findUser.firstName} ${userData.findUser.lastName}`;
-           req.body.techNumId = userData.findUser.numIdent;
-           req.body.role = userData.findUser.Role.role;
-           next();
-         }
-     
-         if (userData.findUser.Role.role === "Administrador") {
-           return {
-             msg: "El rol no debe ser administrador",
-             success: false,
-           };
-         } */
+        if (userData.findUser.Role.role === "Super_Usuario") {
+            return next();
+        }
     }
     catch (error) {
         return res.status(401).json({ error });

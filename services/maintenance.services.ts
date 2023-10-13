@@ -84,6 +84,7 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
+    
     const findEquipment = await Equipment.findOne({
       where: { id: equipmentId },
     });

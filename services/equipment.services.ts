@@ -512,7 +512,7 @@ const getOneEquipmentServ = async (equip: any) => {
     });
     if (!findEquipment) {
       return {
-        msg: "Esta equipo no existe",
+        msg: "Este equipo no existe",
         success: false,
       };
     }
