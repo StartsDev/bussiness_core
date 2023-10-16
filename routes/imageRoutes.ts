@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upImgEquip } from "../controllers/imageEquip.controllers";
 import { uploadControllerImg } from "../controllers/upload.controllers";
-import { verifyToken, isSuperUser_isAdmin } from "../middleware/authjwt";
+import { verifyToken, isSuperUser_isAdmin, validateRolUser } from "../middleware/authjwt";
 
 const router = Router();
 
@@ -9,7 +9,7 @@ const router = Router();
 router.post(
   "/upload-image/:id",
   verifyToken,
-  isSuperUser_isAdmin,
+  validateRolUser,
   uploadControllerImg
 );
 

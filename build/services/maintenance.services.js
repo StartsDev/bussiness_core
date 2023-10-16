@@ -188,6 +188,7 @@ exports.createMaintenanceServ = createMaintenanceServ;
 const getMaintenancesServ = async (page, pageSize) => {
     try {
         let maintenances;
+        let totalPages = 0;
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
             maintenances = await Maintenance.findAll({
@@ -234,9 +235,16 @@ const getMaintenancesServ = async (page, pageSize) => {
                 };
             }
             const maintenancesFormat = transObjMaintenance(maintenances);
+            if (pageSize) {
+                const totalMaintenances = await Maintenance.count({
+                    where: { delete: false }
+                });
+                totalPages = Math.ceil(totalMaintenances / pageSize);
+            }
             return {
                 maintenances: maintenancesFormat,
                 totalCount: maintenancesFormat.length,
+                totalPages,
                 success: true,
             };
         }

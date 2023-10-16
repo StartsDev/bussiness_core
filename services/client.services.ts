@@ -311,24 +311,6 @@ const getClientServPag = async (
           equipments: clientEquipments,
         };
       });
-
-      /*  if (name || serial || model || type || brand) {
-         // Hacer filter con linearDatap
-         const dataEquipments = combinedResults.filter(
-           (client: any) => client.equipments.length > 0
-         );
-         return {
-           clients: dataEquipments,
-           totalCount: dataEquipments.length,
-           success: true,
-         };
-       } else {
-         return {
-           clients: combinedResults,
-           totalCount: combinedResults.length,
-           success: true,
-         };
-       } */
     }
     return {
       clients: combinedResults,

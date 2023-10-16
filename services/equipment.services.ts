@@ -302,7 +302,6 @@ const getEquipmentServPag = async (
       });
       totalPages = Math.ceil(totalEquipments / pageSize);
     }
-
     return {
       equipments: equipmentsF,
       totalCount: equipmentsF.length,

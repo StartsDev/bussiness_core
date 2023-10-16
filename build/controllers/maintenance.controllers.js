@@ -19,15 +19,14 @@ const getMaintenances = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { maintenances, totalCount } = await (0, maintenance_services_1.getMaintenancesServ)(page, pageSize);
+        const { maintenances, totalCount, totalPages } = await (0, maintenance_services_1.getMaintenancesServ)(page, pageSize);
         if (!page && !pageSize) {
             res.status(200).json({
                 maintenances,
                 numItmes: totalCount,
             });
         }
-        else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+        if (page && pageSize) {
             res.status(200).json({
                 maintenances,
                 numItmes: totalCount,
