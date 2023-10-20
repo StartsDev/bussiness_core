@@ -7,6 +7,7 @@ const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
 import axios, { AxiosResponse } from "axios";
+const moment = require("moment");
 
 // Transform data maintenance format function
 const transObjMaintenance = (arr: any[]): any[] => {
@@ -84,7 +85,7 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
-    
+
     const findEquipment = await Equipment.findOne({
       where: { id: equipmentId },
     });
@@ -180,7 +181,7 @@ const createMaintenanceServ = async (maint: any) => {
         status: StatusOption.inProcess,
       },
     });
-  
+
     if (maintCount === 5) {
       return {
         msg: "Sr. Técnico, tiene 5 servicios en estado en proceso, por favor firme y confirme al menos uno para poder registrar otro servicio...",
@@ -214,7 +215,7 @@ const createMaintenanceServ = async (maint: any) => {
       float_state,
       discharge_pressure,
       service_hour,
-      service_date,
+      service_date: moment(service_date).format('YYYY-MM-DD'),
       customer_sign,
       tech_sign,
       customerId,
@@ -228,6 +229,7 @@ const createMaintenanceServ = async (maint: any) => {
       additional_remarks,
       equipmentId,
     });
+
 
     return {
       msg: "Servicio registrado satisfactoriamente...",
@@ -252,7 +254,7 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
         limit: pageSize,
         where: { delete: false },
         attributes: { exclude: ["updatedAt", "delete"] },
-        order: [["createdAt", "DESC"]],
+        order: [["service_date", "DESC"]],
         include: [
           {
             model: Equipment,
@@ -291,12 +293,10 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
         };
       }
       const maintenancesFormat = transObjMaintenance(maintenances);
-      if (pageSize) {
-        const totalMaintenances = await Maintenance.count({
-          where: { delete: false }
-        });
-        totalPages = Math.ceil(totalMaintenances / pageSize);
-      }
+      const totalMaintenances = await Maintenance.count({
+        where: { delete: false }
+      });
+      totalPages = Math.ceil(totalMaintenances / pageSize);
       return {
         maintenances: maintenancesFormat,
         totalCount: maintenancesFormat.length,
@@ -307,7 +307,7 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
       maintenances = await Maintenance.findAll({
         where: { delete: false },
         attributes: { exclude: ["updatedAt", "delete"] },
-        order: [["createdAt", "DESC"]],
+        order: [["service_date", "DESC"]],
         include: [
           {
             model: Equipment,

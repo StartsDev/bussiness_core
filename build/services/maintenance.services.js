@@ -11,6 +11,7 @@ const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
 const Client = require("../models/client");
 const axios_1 = __importDefault(require("axios"));
+const moment = require("moment");
 // Transform data maintenance format function
 const transObjMaintenance = (arr) => {
     const linearDatap = [];
@@ -158,7 +159,7 @@ const createMaintenanceServ = async (maint) => {
             float_state,
             discharge_pressure,
             service_hour,
-            service_date,
+            service_date: moment(service_date).format('YYYY-MM-DD'),
             customer_sign,
             tech_sign,
             customerId,
@@ -196,7 +197,7 @@ const getMaintenancesServ = async (page, pageSize) => {
                 limit: pageSize,
                 where: { delete: false },
                 attributes: { exclude: ["updatedAt", "delete"] },
-                order: [["createdAt", "DESC"]],
+                order: [["service_date", "DESC"]],
                 include: [
                     {
                         model: Equipment,
@@ -235,12 +236,10 @@ const getMaintenancesServ = async (page, pageSize) => {
                 };
             }
             const maintenancesFormat = transObjMaintenance(maintenances);
-            if (pageSize) {
-                const totalMaintenances = await Maintenance.count({
-                    where: { delete: false }
-                });
-                totalPages = Math.ceil(totalMaintenances / pageSize);
-            }
+            const totalMaintenances = await Maintenance.count({
+                where: { delete: false }
+            });
+            totalPages = Math.ceil(totalMaintenances / pageSize);
             return {
                 maintenances: maintenancesFormat,
                 totalCount: maintenancesFormat.length,
@@ -252,7 +251,7 @@ const getMaintenancesServ = async (page, pageSize) => {
             maintenances = await Maintenance.findAll({
                 where: { delete: false },
                 attributes: { exclude: ["updatedAt", "delete"] },
-                order: [["createdAt", "DESC"]],
+                order: [["service_date", "DESC"]],
                 include: [
                     {
                         model: Equipment,

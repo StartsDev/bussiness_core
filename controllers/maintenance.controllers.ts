@@ -36,8 +36,7 @@ const getMaintenances = async (req: Request, res: Response) => {
         maintenances,
         numItmes: totalCount,
       });
-    } 
-    
+    }     
     if(page && pageSize) {
       res.status(200).json({
         maintenances,

@@ -19,15 +19,14 @@ const getHeadquarters = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || undefined; // Get the requested page from query parameter
         const pageSize = parseInt(req.query.pageSize) || undefined; // Get the requested page size from query parameter
-        const { headquarters, totalCount } = await (0, headq_services_1.getHeadServ)(page, pageSize);
+        const { headquarters, totalCount, totalPages } = await (0, headq_services_1.getHeadServ)(page, pageSize);
         if (!page && !pageSize) {
             res.status(200).json({
                 headquarters,
                 numItmes: totalCount,
             });
         }
-        else {
-            const totalPages = Math.ceil(totalCount / (pageSize ?? totalCount));
+        if (page && pageSize) {
             res.status(200).json({
                 headquarters,
                 numItmes: totalCount,

@@ -167,7 +167,7 @@ const getLocationServPag = async (page, pageSize, locationName, headName, addres
                 ],
             });
             // Response serial data location
-            const propertiesToHide = ["createdAt", "updatedAt", "status", "Client"];
+            const propertiesToHide = ["updatedAt", "status", "Client"];
             for (const location of locations) {
                 const locationData = location.get({ plain: true });
                 const headquarter = await Headquarter.findByPk(location.headquarterId, {
@@ -175,7 +175,7 @@ const getLocationServPag = async (page, pageSize, locationName, headName, addres
                         {
                             model: Client,
                             attributes: {
-                                exclude: ["createdAt", "updatedAt", "status"],
+                                exclude: ["updatedAt", "status"],
                             },
                         },
                     ],

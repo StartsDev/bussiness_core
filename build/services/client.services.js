@@ -42,6 +42,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
         let optionh = {};
         let optionsl = {};
         let optionse = {};
+        let totalPages = 0;
         // Filter client propeties
         if (businessName != undefined) {
             options = {
@@ -267,10 +268,15 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                     equipments: clientEquipments,
                 };
             });
+            const totalClients = await Client.count({
+                where: { status: false }
+            });
+            totalPages = Math.ceil(totalClients / pageSize);
         }
         return {
             clients: combinedResults,
             totalCount: combinedResults.length,
+            totalPages,
             success: true,
         };
     }

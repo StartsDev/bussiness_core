@@ -42,8 +42,7 @@ const getClients = async (req, res) => {
         const type = req.query.type || undefined;
         const brand = req.query.brand || undefined;
         if (page && pageSize) {
-            const { clients, totalCount } = await (0, client_services_1.getClientServPag)(page, pageSize, businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand);
-            const totalPages = Math.ceil(totalCount / (pageSize));
+            const { clients, totalCount, totalPages } = await (0, client_services_1.getClientServPag)(page, pageSize, businessName, nit, address, email, phone, addressh, emailh, phoneh, city, contact, headName, isPrincipal, locationName, name, serial, model, type, brand);
             res.status(200).json({
                 clients,
                 numItmes: totalCount,

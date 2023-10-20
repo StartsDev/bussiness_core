@@ -46,7 +46,6 @@ export const verifyToken = async (
     return res.status(401).json({ message: "Unauthorized", error });
   }
 };
-
 //ROLES DE USUARIO
 // Verificamos si el rol del usuario es Tecnico o Cliente
 export const validateRolUser = async (

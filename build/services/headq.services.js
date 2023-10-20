@@ -37,6 +37,7 @@ exports.createHeadServ = createHeadServ;
 const getHeadServ = async (page, pageSize) => {
     try {
         let headquarters;
+        let totalPages = 0;
         if (page && pageSize) {
             const offset = (page - 1) * pageSize;
             headquarters = await Headquarter.findAll({
@@ -63,9 +64,14 @@ const getHeadServ = async (page, pageSize) => {
                     success: false,
                 };
             }
+            const totalHeadquarters = await Headquarter.count({
+                where: { status: false }
+            });
+            totalPages = Math.ceil(totalHeadquarters / pageSize);
             return {
                 headquarters,
                 totalCount: headquarters.length,
+                totalPages,
                 success: true,
             };
         }

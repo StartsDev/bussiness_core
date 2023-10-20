@@ -50,7 +50,7 @@ const getClients = async (req: Request, res: Response) => {
 
     
     if (page && pageSize) {
-      const { clients, totalCount } = await getClientServPag(
+      const { clients, totalCount, totalPages } = await getClientServPag(
         page,
         pageSize,
         businessName,
@@ -72,8 +72,6 @@ const getClients = async (req: Request, res: Response) => {
         type,
         brand
       );
-      
-      const totalPages = Math.ceil((totalCount as number) / (pageSize)) ;
       res.status(200).json({
         clients,
         numItmes: totalCount,
