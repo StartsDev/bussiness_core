@@ -10,13 +10,13 @@ const { Sequelize, DataTypes, Op } = require("sequelize");
 //para uso desplegado
 const sequelize = new Sequelize(DATABASE_URL_CORE, {
     logging: false,
-    native: false,
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false,
-        },
-    },
+    native: false, // lets Sequelize know we can use pg-native for ~30% more speed
+    /*   dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },  */
 });
 sequelize
     .authenticate()

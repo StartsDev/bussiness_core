@@ -448,6 +448,7 @@ const getClientsServ = async (businessName, nit, address, email, phone, addressh
                 "city",
                 "contact",
                 "user_app",
+                "createdAt",
             ],
             order: [["createdAt", "DESC"]],
             raw: true,
