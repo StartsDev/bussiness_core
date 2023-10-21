@@ -202,6 +202,7 @@ const getClientServPag = async (page, pageSize, businessName, nit, address, emai
                     "city",
                     "contact",
                     "user_app",
+                    "createdAt",
                 ],
                 order: [["createdAt", "DESC"]],
                 raw: true,
