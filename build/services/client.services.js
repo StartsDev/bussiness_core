@@ -623,13 +623,13 @@ const updateClientServ = async (id, cli, token) => {
                 success: false,
             };
         }
-        // verificar que el role_name sea diferente de cliente
-        if (user_app.role_name !== "Cliente") {
+        // verificar que el role_name sea diferente de cliente y administrador
+        /*   if (user_app.role_name !== "Cliente" || user_app.role_name !== "Administrador") {
             return {
-                msg: "El rol debe ser Cliente...",
-                success: false,
+              msg: "El rol debe ser Cliente...",
+              success: false,
             };
-        }
+          } */
         const clientData = clientFound.get({ plain: true });
         const userArray = clientData.user_app;
         userArray.push(user_app);

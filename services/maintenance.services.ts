@@ -189,6 +189,25 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
+/*     const esBase64 = (cadena: string): boolean => {
+      const regex = /^[A-Za-z0-9+/]+={0,2}$/;
+      return regex.test(cadena);
+    }
+
+    if (!esBase64(tech_sign)) {
+      return {
+        msg: "La firma del tecnico debe ser en formato base64...",
+        success: false,
+      }
+    }
+
+    if (!esBase64(customer_sign)) {
+      return {
+        msg: "Ambas firmas se deben subir en formato base64...",
+        success: false,
+      }
+    } */
+
     const maintenance = await Maintenance.create({
       activities,
       voltage_on_L1L2,

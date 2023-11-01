@@ -189,7 +189,7 @@ export const isSuperUser_isAdmin = async (
 
     if (userData?.findUser?.Role?.role === "Tecnico") {
       return res.status(401).json({
-        message: "El rol de usuario no es super usuario o administrador...",
+        message: "El rol de usuario no es super usuario, administrador o cliente...",
       });
     }
     next();
