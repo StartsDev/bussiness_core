@@ -615,69 +615,107 @@ const updateClientServ = async (id, cli, token) => {
     try {
         //Micro de auth
         const baseUrlPacth = `${URL}/user/update-user`;
-        const { businessName, nit, address, email, phone, user_app } = cli;
+        const { businessName, nit, address, email, phone, city, contact, user_app } = cli;
         const clientFound = await Client.findOne({ where: { id } });
         if (!clientFound) {
             return {
-                msg: "Cliente no encontrado",
+                msg: "Cliente no encontrado...",
                 success: false,
             };
         }
-        // verificar que el role_name sea diferente de cliente y administrador
-        /*   if (user_app.role_name !== "Cliente" || user_app.role_name !== "Administrador") {
+        if (!user_app) {
             return {
-              msg: "El rol debe ser Cliente...",
-              success: false,
-            };
-          } */
-        const clientData = clientFound.get({ plain: true });
-        const userArray = clientData.user_app;
-        userArray.push(user_app);
-        const [updateClient] = await Client.update({
-            businessName,
-            nit,
-            address,
-            email,
-            phone,
-            user_app: userArray,
-        }, {
-            where: {
-                id,
-            },
-            returning: true,
-        });
-        if (updateClient <= 0) {
-            return {
-                msg: "Actualización no realizada...",
+                msg: "Tiene que haber un array user_app minimo vacío asociado al cliente...",
                 success: false,
             };
         }
-        // Actualizacion del usuario llamando al micro de aut
-        if (userArray.length > 0) {
-            for (const { user_id } of userArray) {
-                try {
-                    // Llamar al end-point que hace el patch de usuarios
-                    await axios_1.default.patch(`${baseUrlPacth}/${user_id}`, {
-                        clientId: clientData.id,
-                    }, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-token': token
-                        }
-                    });
-                }
-                catch (error) {
-                    errorUsers.push(error);
+        if (user_app.length === 0) {
+            const [updateClient] = await Client.update({
+                businessName,
+                nit,
+                address,
+                email,
+                phone,
+                city,
+                contact
+            }, {
+                where: {
+                    id,
+                },
+                returning: true,
+            });
+            if (updateClient <= 0) {
+                return {
+                    msg: "Actualización no realizada...",
+                    success: false,
+                };
+            }
+            const client = await Client.findOne({ where: { id } });
+            return {
+                msg: "Cliente actualizado con exito...",
+                client,
+                success: true,
+            };
+        }
+        if (user_app.length > 0) {
+            // verificar que el role_name sea diferente de cliente
+            if (user_app[0] && user_app[0].role_name !== "Cliente") {
+                return {
+                    msg: "El nombre del rol que asocias debe ser Cliente...",
+                    success: false,
+                };
+            }
+            const clientData = clientFound.get({ plain: true });
+            const userArray = clientData.user_app;
+            userArray.push(user_app);
+            const [updateClient] = await Client.update({
+                businessName,
+                nit,
+                address,
+                email,
+                phone,
+                user_app: userArray,
+                city,
+                contact
+            }, {
+                where: {
+                    id,
+                },
+                returning: true,
+            });
+            if (updateClient <= 0) {
+                return {
+                    msg: "Actualización no realizada...",
+                    success: false,
+                };
+            }
+            // Actualizacion del usuario llamando al micro de aut
+            if (userArray.length > 0) {
+                for (const { user_id } of userArray) {
+                    try {
+                        // Llamar al end-point que hace el patch de usuarios
+                        await axios_1.default.patch(`${baseUrlPacth}/${user_id}`, {
+                            clientId: clientData.id,
+                        }, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'x-token': token
+                            }
+                        });
+                    }
+                    catch (error) {
+                        errorUsers.push(error);
+                    }
                 }
             }
+            const client = await Client.findOne({ where: { id } });
+            return {
+                msg: "Cliente actualizado con exito...",
+                client,
+                success: true,
+                usersErrors: errorUsers,
+            };
         }
-        const client = await Client.findOne({ where: { id } });
-        return {
-            msg: "Cliente actualizado con exito...",
-            client,
-            success: true,
-            usersErrors: errorUsers,
-        };
     }
     catch (e) {
         throw new Error(e);

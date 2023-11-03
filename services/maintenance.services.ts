@@ -372,7 +372,6 @@ const getMaintenancesServ = async (page?: number, pageSize?: number) => {
       };
     }
   } catch (e) {
-    console.log(e);
     throw new Error(e as string);
   }
 };
