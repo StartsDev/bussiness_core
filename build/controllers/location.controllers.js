@@ -47,18 +47,19 @@ const getLocations = async (req, res) => {
                 totalPages,
             });
         }
-        if (pageSize) {
-            res.status(400).json({
-                msg: "Tiene que haber un número de página...",
-            });
-        }
-        if (page) {
-            res.status(400).json({
-                msg: "Debe indicar el número de items por página...",
-            });
-        }
+        // if (pageSize) {
+        //   res.status(400).json({
+        //     msg: "Tiene que haber un número de página...",
+        //   });
+        // }
+        // if (page) {
+        //   res.status(400).json({
+        //     msg: "Debe indicar el número de items por página...",
+        //   });
+        // }
     }
     catch (error) {
+        console.log('error', error);
         if (error instanceof Error)
             res.status(400).json({ error: error.message });
     }

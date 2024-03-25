@@ -1,5 +1,5 @@
 import { bulkCreatefunction } from "../utils/bulkCreate";
-
+const { Op } = require('sequelize');
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Equipment = require("../models/equipment");
@@ -41,13 +41,10 @@ const newEquipmentServ = async (equip: any) => {
       };
     }
     const findEquipment = await Equipment.findOne({
-      where: { serial: equip.serial },
+      where: { [Op.and]: [{ serial: equip.serial.toUpperCase() }, { locationId: equip.locationId }] },
     });
     if (findEquipment) {
-      return {
-        msg: "Este equipo ya esta registrado",
-        success: false,
-      };
+      throw (`El equipo "${name}" con serial "${serial.toUpperCase()}" ya existe`)
     }
 
     const headId = findLocation.dataValues.headquarterId;
@@ -88,7 +85,7 @@ const newEquipmentServ = async (equip: any) => {
     const newEquipment = await Equipment.create({
       name,
       description,
-      serial,
+      serial: serial.toUpperCase(),
       model,
       type,
       brand,
@@ -114,7 +111,7 @@ const newEquipmentServ = async (equip: any) => {
     }
 
     return {
-      msg: "Equipo registrado satisfactoriamente...",
+      msg: `Equipo "${name}" con serial "${serial.toUpperCase()}", registrado satisfactoriamente.`,
       newEquipment,
       success: true,
     };
@@ -643,9 +640,20 @@ const allEquipmentsLocationServ = async (
 const updateEquipmentServ = async (id: any, equip: any) => {
   try {
     const equipFound = await Equipment.findOne({ where: { id } });
+    const equipWithSameSerialAndLocation = await Equipment.findOne({ 
+      where: { [Op.and]: [{ serial: equip.serial.toUpperCase() }, { locationId: equip.locationId }] }
+    });
+    const isModifiyingSameEquip = equipFound.dataValues.id === equipWithSameSerialAndLocation.dataValues.id;
     if (!equipFound) {
       return {
         msg: "Equipo no válido",
+        success: false,
+      };
+    }
+    if (equipWithSameSerialAndLocation && !isModifiyingSameEquip) {
+      return {
+        msg: `El serial "${equip.serial.toUpperCase()}" ya pertenece a otro equipo en esta misma ubicación` ,
+        success: false,
       };
     }
     const locationFound = await Location.findOne({
@@ -654,23 +662,21 @@ const updateEquipmentServ = async (id: any, equip: any) => {
     if (!locationFound) {
       return {
         msg: "Ubicación no válida",
+        success: false,
       };
     }
-    const [updateEquipment] = await Equipment.update(equip, {
+    const [updateEquipment] = await Equipment.update({...equip, serial: equip.serial.toUpperCase()}, {
       where: {
         id,
       },
       returning: true,
     });
     if (updateEquipment <= 0) {
-      return {
-        msg: "Actualización no realizada...",
-        success: false,
-      };
+      throw (`El equipo "${equip.name}" con serial "${equip.serial} no pudo ser actualizado"`)
     }
     const equipment = await Equipment.findOne({ where: { id } });
     return {
-      msg: "Equipo actualizado con exito...",
+      msg: "Equipo actualizado con exito",
       data: equipment,
       success: true,
     };

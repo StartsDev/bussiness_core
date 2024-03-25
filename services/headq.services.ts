@@ -16,17 +16,15 @@ const createHeadServ = async (head: any) => {
       };
     }
     const findHead = await Headquarter.findOne({
-      where: { [Op.or]: [{ headName: head.headName }, { phone: head.phone }] },
+      where: { [Op.and]: [{ headName: head.headName.toLowerCase() }, { clientId: head.clientId }] },
     });
     if (findHead) {
-      return {
-        msg: "Esta sede ya existe",
-      };
+      throw (`La sede "${head.headName}" ya existe`)
     }
-    const newHead = await Headquarter.create(head);
+    const newHead = await Headquarter.create({...head, headName: head.headName.toLowerCase()});
 
     return {
-      msg: "Sede registrada satisfactoriamente...",
+      msg: `Sede "${head.headName.toLowerCase()}" registrada satisfactoriamente`,
       data: newHead,
     };
   } catch (e) {
@@ -207,6 +205,14 @@ const updateHeadServ = async (id: any, headq: any) => {
         msg: "Cliente no válido",
       };
     }
+
+    const headquarterFoundByName = await Headquarter.findOne({
+      where: { [Op.and]: [{ headName: headq.headName.toLowerCase() }, { clientId: headq.clientId }] },
+    })
+
+    if(headquarterFoundByName) {
+      throw (`La sede "${headq.headName}" ya esta creada en este cliente`)
+    }
     const [updateHead] = await Headquarter.update(headq, {
       where: {
         id,
@@ -215,13 +221,13 @@ const updateHeadServ = async (id: any, headq: any) => {
     });
     if (updateHead <= 0) {
       return {
-        msg: "Actualización no realizada...",
+        msg: "Actualización no realizada",
         success: false,
       };
     }
     const head = await Headquarter.findOne({ where: { id } });
     return {
-      msg: "Sede actualizada con exito...",
+      msg: "Sede actualizada con exito",
       head,
       success: true,
     };

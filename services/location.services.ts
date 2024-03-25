@@ -1,5 +1,5 @@
 import { bulkCreatefunction } from "../utils/bulkCreate";
-
+const { Op } = require('sequelize');
 const Sequelize = require("sequelize");
 const Location = require("../models/location");
 const Headquarter = require("../models/headquarter");
@@ -18,20 +18,19 @@ const createLocationServ = async (location: any) => {
       };
     }
     const findLocation = await Location.findOne({
-      where: { locationName: location.locationName },
-    });
+      where: { [Op.and]: [{ locationName: location.locationName.toLowerCase() }, { headquarterId: location.headquarterId }] },
+    });  
     if (findLocation) {
-      return {
-        msg: "Esta ubicación ya existe",
-      };
+      throw (`La ubicación "${location.locationName}" ya existe`)
     }
-    const newLocation = await Location.create(location);
+    const newLocation = await Location.create({...location, locationName: location.locationName.toLowerCase()});
 
     return {
-      msg: "Ubicación registrada satisfactoriamente...",
+      msg: `Ubicación "${location.locationName.toLowerCase()}" registrada satisfactoriamente.`,
       location: newLocation,
     };
   } catch (e) {
+    console.log('error: ', e)
     throw new Error(e as string);
   }
 };
@@ -555,20 +554,31 @@ const allLocationsHeadServ = async (
 const updateLocationServ = async (id: any, locat: any) => {
   try {
     const locationFound = await Location.findOne({ where: { id } });
+    const locationFoundByName = await Location.findOne(
+      {where: { [Op.and]: [{ locationName: locat.locationName.toLowerCase() }, { headquarterId: locat.headquarterId }] }
+    });
+    const isSameLocation = locationFoundByName
     if (!locationFound) {
       return {
         msg: "Ubicación no válida",
+        success: false,
       };
     }
+
+    if(isSameLocation) {
+      throw (`La ubicación "${locat.locationName}" ya esta siendo utilizada en esta sede`)
+    }
+
     const headFound = await Headquarter.findOne({
       where: { id: locat.headquarterId },
     });
     if (!headFound) {
       return {
         msg: "Sede no válida",
+        success: false,
       };
     }
-    const [updateLocation] = await Location.update(locat, {
+    const [updateLocation] = await Location.update({...locat, locationName: locat.locationName.toLowerCase()}, {
       where: {
         id,
       },

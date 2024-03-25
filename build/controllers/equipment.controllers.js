@@ -36,16 +36,16 @@ const getAllEquipments = async (req, res) => {
                 totalPages,
             });
         }
-        if (pageSize) {
-            res.status(400).json({
-                msg: "Tiene que haber un número de página...",
-            });
-        }
-        if (page) {
-            res.status(400).json({
-                msg: "Debe indicar el número de items por página...",
-            });
-        }
+        // if (pageSize) {
+        //   res.status(400).json({
+        //     msg: "Tiene que haber un número de página...",
+        //   });
+        // }
+        // if (page) {
+        //   res.status(400).json({
+        //     msg: "Debe indicar el número de items por página...",
+        //   });
+        // }
         if (!page && !pageSize) {
             const { equipments, totalCount } = await (0, equipment_services_1.getEquipmentServ)(name, serial, model, type, brand, locationName, headName, businessName);
             res.status(200).json({
