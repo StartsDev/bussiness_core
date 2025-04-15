@@ -33,6 +33,26 @@ const transObjMaintenance = (arr: any[]): any[] => {
   }
   return linearDatap;
 };
+
+const transObjMaintenanceSingle = (maintenance: any): any => {
+  const maintData = maintenance.get({ plain: true });
+  const equipment = maintenance.Equipment;
+  const location = equipment.Location;
+  const headquarter = location.Headquarter;
+  const client = headquarter.Client;
+
+  maintData.equipment = equipment.get({ plain: true });
+  maintData.location = location.get({ plain: true });
+  maintData.headquarter = headquarter.get({ plain: true });
+  maintData.client = client.get({ plain: true });
+
+  delete maintData.Equipment;
+  delete maintData.equipment.Location;
+  delete maintData.location.Headquarter;
+  delete maintData.headquarter.Client;
+
+  return maintData;
+};
 // Create a manteinance
 const createMaintenanceServ = async (maint: any) => {
   let techName_: any;
@@ -189,24 +209,24 @@ const createMaintenanceServ = async (maint: any) => {
       };
     }
 
-/*     const esBase64 = (cadena: string): boolean => {
-      const regex = /^[A-Za-z0-9+/]+={0,2}$/;
-      return regex.test(cadena);
-    }
-
-    if (!esBase64(tech_sign)) {
-      return {
-        msg: "La firma del tecnico debe ser en formato base64...",
-        success: false,
-      }
-    }
-
-    if (!esBase64(customer_sign)) {
-      return {
-        msg: "Ambas firmas se deben subir en formato base64...",
-        success: false,
-      }
-    } */
+    /*     const esBase64 = (cadena: string): boolean => {
+          const regex = /^[A-Za-z0-9+/]+={0,2}$/;
+          return regex.test(cadena);
+        }
+    
+        if (!esBase64(tech_sign)) {
+          return {
+            msg: "La firma del tecnico debe ser en formato base64...",
+            success: false,
+          }
+        }
+    
+        if (!esBase64(customer_sign)) {
+          return {
+            msg: "Ambas firmas se deben subir en formato base64...",
+            success: false,
+          }
+        } */
 
     const maintenance = await Maintenance.create({
       activities,
@@ -261,57 +281,77 @@ const createMaintenanceServ = async (maint: any) => {
   }
 };
 
-// Get maintenances
-const getMaintenancesServ = async (page?: number, pageSize?: number) => {
-  try {
-    let maintenances;
-    let totalPages = 0;
-    if (page && pageSize) {
-      const offset = (page - 1) * pageSize;
-      maintenances = await Maintenance.findAll({
-        offset,
-        limit: pageSize,
-        where: { delete: false },
-        attributes: { exclude: ["updatedAt", "delete"] },
-        order: [["service_date", "DESC"]],
+const getMaintenanceQuery = async (page: number, pageSize: number, ...query: any) => {
+  const offset = (page - 1) * pageSize;
+  console.log({ query });
+  const where = { delete: false };
+
+  if (query[0]?.id) {
+    (where as any).id = query[0].id;
+  }
+  // if (query?.service_date) {
+  //   (where as any).service_date = query.service_date;
+  // }
+
+  const method = query[0]?.id ? 'findOne' : 'findAll';
+  const maintenances = await Maintenance[method]({
+    offset: method === 'findOne' ? undefined : offset,
+    limit: method === 'findOne' ? undefined : pageSize,
+    where,
+    attributes: { exclude: ["updatedAt", "delete"] },
+    order: [["service_date", "DESC"]],
+    include: [
+      {
+        model: Equipment,
+        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
         include: [
           {
-            model: Equipment,
-            attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+            model: Location,
+            attributes: {
+              exclude: ["id", "createdAt", "updatedAt", "status"],
+            },
             include: [
               {
-                model: Location,
+                model: Headquarter,
                 attributes: {
                   exclude: ["id", "createdAt", "updatedAt", "status"],
                 },
                 include: [
                   {
-                    model: Headquarter,
+                    model: Client,
                     attributes: {
                       exclude: ["id", "createdAt", "updatedAt", "status"],
                     },
-                    include: [
-                      {
-                        model: Client,
-                        attributes: {
-                          exclude: ["id", "createdAt", "updatedAt", "status"],
-                        },
-                      },
-                    ],
                   },
                 ],
               },
             ],
           },
         ],
-      });
+      },
+    ],
+  });
+  return maintenances;
+}
+
+// Get maintenances
+const getMaintenancesServ = async (page?: number, pageSize?: number, order?: string) => {
+  try {
+    let maintenances;
+    let totalPages = 0;
+    if (page && pageSize) {
+      const offset = (page - 1) * pageSize;
+      maintenances = await getMaintenanceQuery(offset, pageSize, { delete: false, id: order });
       if (!maintenances) {
         return {
           msg: "No hay mantenimientos registrados...",
           success: false,
         };
       }
-      const maintenancesFormat = transObjMaintenance(maintenances);
+      const maintenancesFormat = Array.isArray(maintenances)
+        ? transObjMaintenance(maintenances)
+        : [transObjMaintenanceSingle(maintenances)];
+
       const totalMaintenances = await Maintenance.count({
         where: { delete: false }
       });

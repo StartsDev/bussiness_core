@@ -25,10 +25,12 @@ const getMaintenances = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || undefined; // Get the requested page from query parameter
     const pageSize = parseInt(req.query.pageSize as string) || undefined; // Get the requested page size from query parameter
+    const order = req.query.order as string;
 
     const { maintenances, totalCount, totalPages } = await getMaintenancesServ(
       page,
-      pageSize
+      pageSize,
+      order,
     );
 
     if (!page && !pageSize) {
@@ -36,8 +38,8 @@ const getMaintenances = async (req: Request, res: Response) => {
         maintenances,
         numItmes: totalCount,
       });
-    }     
-    if(page && pageSize) {
+    }
+    if (page && pageSize) {
       res.status(200).json({
         maintenances,
         numItmes: totalCount,
