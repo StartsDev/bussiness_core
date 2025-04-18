@@ -4,6 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMaintenanceServ = exports.updateMaintenanceServ = exports.getMaintByIdServ = exports.getMainByEquipment = exports.getMaintByUserServ = exports.getMaintenancesServ = exports.createMaintenanceServ = void 0;
+const sequelize_1 = require("sequelize");
+const constanst_1 = require("../utils/constanst");
 const maintenance_interface_1 = require("./../interfaces/maintenance.interface");
 const Equipment = require("../models/equipment");
 const Maintenance = require("../models/maintenance");
@@ -32,6 +34,22 @@ const transObjMaintenance = (arr) => {
         linearDatap.push(maintData);
     }
     return linearDatap;
+};
+const transObjMaintenanceSingle = (maintenance) => {
+    const maintData = maintenance.get({ plain: true });
+    const equipment = maintenance.Equipment;
+    const location = equipment.Location;
+    const headquarter = location.Headquarter;
+    const client = headquarter.Client;
+    maintData.equipment = equipment.get({ plain: true });
+    maintData.location = location.get({ plain: true });
+    maintData.headquarter = headquarter.get({ plain: true });
+    maintData.client = client.get({ plain: true });
+    delete maintData.Equipment;
+    delete maintData.equipment.Location;
+    delete maintData.location.Headquarter;
+    delete maintData.headquarter.Client;
+    return maintData;
 };
 // Create a manteinance
 const createMaintenanceServ = async (maint) => {
@@ -203,57 +221,78 @@ const createMaintenanceServ = async (maint) => {
     }
 };
 exports.createMaintenanceServ = createMaintenanceServ;
-// Get maintenances
-const getMaintenancesServ = async (page, pageSize) => {
-    try {
-        let maintenances;
-        let totalPages = 0;
-        if (page && pageSize) {
-            const offset = (page - 1) * pageSize;
-            maintenances = await Maintenance.findAll({
-                offset,
-                limit: pageSize,
-                where: { delete: false },
-                attributes: { exclude: ["updatedAt", "delete"] },
-                order: [["service_date", "DESC"]],
+const getMaintenanceQuery = async (page, pageSize, query) => {
+    const offset = (page - 1) * pageSize;
+    const method = query[0]?.order ? constanst_1.METHOD_GET_MAINTENANCE.FIND_ONE : constanst_1.METHOD_GET_MAINTENANCE.FIND_ALL;
+    if (method === constanst_1.METHOD_GET_MAINTENANCE.FIND_ONE) {
+        const maintById = await getMaintByIdServ({ id: query[0].order });
+        return maintById.maintenance;
+    }
+    const maintenances = await Maintenance.findAll({
+        limit: pageSize,
+        offset: offset,
+        where: {
+            delete: false,
+            ...(query[0].date && { service_date: query[0].date }),
+        },
+        attributes: { exclude: ["updatedAt", "delete"] },
+        order: [["createdAt", "DESC"]],
+        include: [
+            {
+                model: Equipment,
+                required: true,
+                attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
                 include: [
                     {
-                        model: Equipment,
-                        attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
+                        model: Location,
+                        required: true,
+                        attributes: {
+                            exclude: ["id", "createdAt", "updatedAt", "status"],
+                        },
                         include: [
                             {
-                                model: Location,
+                                model: Headquarter,
+                                required: true,
                                 attributes: {
                                     exclude: ["id", "createdAt", "updatedAt", "status"],
                                 },
                                 include: [
                                     {
-                                        model: Headquarter,
+                                        model: Client,
+                                        required: true,
                                         attributes: {
                                             exclude: ["id", "createdAt", "updatedAt", "status"],
                                         },
-                                        include: [
-                                            {
-                                                model: Client,
-                                                attributes: {
-                                                    exclude: ["id", "createdAt", "updatedAt", "status"],
-                                                },
-                                            },
-                                        ],
+                                        where: query[0].name ? {
+                                            businessName: { [sequelize_1.Op.iLike]: `%${query[0].name}%` }
+                                        } : undefined,
                                     },
                                 ],
                             },
                         ],
                     },
                 ],
-            });
+            },
+        ],
+    });
+    return maintenances;
+};
+// Get maintenances
+const getMaintenancesServ = async (page, pageSize, ...querys) => {
+    try {
+        let maintenances;
+        let totalPages = 0;
+        if (page && pageSize) {
+            maintenances = await getMaintenanceQuery(page, pageSize, querys);
             if (!maintenances) {
                 return {
                     msg: "No hay mantenimientos registrados...",
                     success: false,
                 };
             }
-            const maintenancesFormat = transObjMaintenance(maintenances);
+            const maintenancesFormat = Array.isArray(maintenances)
+                ? transObjMaintenance(maintenances)
+                : [transObjMaintenanceSingle(maintenances)];
             const totalMaintenances = await Maintenance.count({
                 where: { delete: false }
             });
