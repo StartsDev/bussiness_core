@@ -1,3 +1,5 @@
+import { Op } from "sequelize";
+import { METHOD_GET_MAINTENANCE } from "../utils/constanst";
 import {
   StatusOption
 } from "./../interfaces/maintenance.interface";
@@ -281,47 +283,52 @@ const createMaintenanceServ = async (maint: any) => {
   }
 };
 
-const getMaintenanceQuery = async (page: number, pageSize: number, ...query: any) => {
+const getMaintenanceQuery = async (page: number, pageSize: number, query: any) => {
   const offset = (page - 1) * pageSize;
-  console.log({ query });
-  const where = { delete: false };
+  const method = query[0]?.order ? METHOD_GET_MAINTENANCE.FIND_ONE : METHOD_GET_MAINTENANCE.FIND_ALL;
 
-  if (query[0]?.id) {
-    (where as any).id = query[0].id;
+  if (method === METHOD_GET_MAINTENANCE.FIND_ONE) {
+    const maintById = await getMaintByIdServ({ id: query[0].order });
+    return maintById.maintenance;
   }
-  // if (query?.service_date) {
-  //   (where as any).service_date = query.service_date;
-  // }
-
-  const method = query[0]?.id ? 'findOne' : 'findAll';
-  const maintenances = await Maintenance[method]({
-    offset: method === 'findOne' ? undefined : offset,
-    limit: method === 'findOne' ? undefined : pageSize,
-    where,
+  const maintenances = await Maintenance.findAll({
+    limit: pageSize,
+    offset: offset,
+    where: {
+      delete: false,
+      ...(query[0].date && { service_date: query[0].date }),
+    },
     attributes: { exclude: ["updatedAt", "delete"] },
-    order: [["service_date", "DESC"]],
+    order: [["createdAt", "DESC"]],
     include: [
       {
         model: Equipment,
+        required: true,
         attributes: { exclude: ["id", "createdAt", "updatedAt", "status"] },
         include: [
           {
             model: Location,
+            required: true,
             attributes: {
               exclude: ["id", "createdAt", "updatedAt", "status"],
             },
             include: [
               {
                 model: Headquarter,
+                required: true,
                 attributes: {
                   exclude: ["id", "createdAt", "updatedAt", "status"],
                 },
                 include: [
                   {
                     model: Client,
+                    required: true,
                     attributes: {
                       exclude: ["id", "createdAt", "updatedAt", "status"],
                     },
+                    where: query[0].name ? {
+                      businessName: { [Op.iLike]: `%${query[0].name}%` }
+                    } : undefined,
                   },
                 ],
               },
@@ -335,13 +342,12 @@ const getMaintenanceQuery = async (page: number, pageSize: number, ...query: any
 }
 
 // Get maintenances
-const getMaintenancesServ = async (page?: number, pageSize?: number, order?: string) => {
+const getMaintenancesServ = async (page?: number, pageSize?: number, ...querys: any) => {
   try {
     let maintenances;
     let totalPages = 0;
     if (page && pageSize) {
-      const offset = (page - 1) * pageSize;
-      maintenances = await getMaintenanceQuery(offset, pageSize, { delete: false, id: order });
+      maintenances = await getMaintenanceQuery(page, pageSize, querys);
       if (!maintenances) {
         return {
           msg: "No hay mantenimientos registrados...",
